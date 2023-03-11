@@ -248,6 +248,7 @@ use `data1', replace
 append using `data2'
 
 save "$output\final_data_10883", replace
+exit
 
 eststo summ_stats: estpost sum $summ_vars
 
