@@ -6,9 +6,9 @@ global output "D:\Research材料\21. Air Pollution and Accounting\RESULTS"
 }
 
 else if "`c(username)'" == "Huaxi"{
-global maindir "G:\Research材料\21. Air Pollution and Accounting\DATA"
+global maindir "E:\Dropbox\01_Air pollution and accounting manipulation\data"
 
-global output "G:\Research材料\21. Air Pollution and Accounting\RESULTS"
+global output "E:\Dropbox\01_Air pollution and accounting manipulation\results"
 }
 
 else if "`c(username)'" == "86156"{
