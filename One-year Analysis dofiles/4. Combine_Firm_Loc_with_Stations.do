@@ -29,7 +29,7 @@ clear
 	* For each firm, find the weather information in the PAST THREE MONTHS from ALL THREE stations
 	* For each station, only report visibility data during this period: apdedate-90 ~ apdedate
 	drop if mi(apdedate)
-	gen Firm_START_DATE = apdedate - 90
+	gen Firm_START_DATE = apdedate - 365
 	gen Firm_END_DATE = apdedate
 	format Firm_START_DATE Firm_END_DATE %td
 	
@@ -51,5 +51,5 @@ clear
 	gen Num2 = Num_temp if group == 2
 	drop Num_temp
 	
-	save "$maindir\firm_zipcode_date", replace
+	save "$maindir\One-year Analysis\firm_zipcode_date", replace
 
