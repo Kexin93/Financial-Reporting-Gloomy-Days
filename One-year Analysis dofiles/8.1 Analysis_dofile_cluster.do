@@ -6,9 +6,9 @@ global output "D:\Research材料\21. Air Pollution and Accounting\RESULTS"
 }
 
 else if "`c(username)'" == "Huaxi"{
-global maindir "G:\Research材料\21. Air Pollution and Accounting\DATA"
+global maindir "E:\Dropbox\01_Air pollution and accounting manipulation\data"
 
-global output "G:\Research材料\21. Air Pollution and Accounting\RESULTS"
+global output "E:\Dropbox\01_Air pollution and accounting manipulation\results"
 }
 
 else if "`c(username)'" == "86156"{
@@ -184,7 +184,7 @@ label var lev "Leverage"
 label var oa_scale "NOA"
 label var au_years "Auditor Tenure"
 label var firm_age "Firm Age"
-label var rank "Big N" //binary
+label var rank "Big 8" //binary
 label var visib "Visibility"
 label var cover "Analysts Following"
 label var KZ "Financial Constraint"
@@ -247,8 +247,6 @@ restore
 use `data1', replace
 append using `data2'
 
-save "$output\final_data_10883", replace
-
 eststo summ_stats: estpost sum $summ_vars
 
 eststo obs: estpost summarize $summ_vars
@@ -284,7 +282,7 @@ esttab obs Mean std p25 p50 p75 using "$output\summ_stats_firm.tex", fragment  /
 label cells("count(pattern(1 0 0 0 0 0)) mean(pattern(0 1 0 0 0 0) fmt(3)) sd(pattern(0 0 1 0 0 0) fmt(3)) p25(pattern(0 0 0 1 0 0) fmt(3)) p50(pattern(0 0 0 0 1 0) fmt(3)) p75(pattern(0 0 0 0 0 1) fmt(3))") noobs  ///
 nonumbers replace booktabs collabels(none) mtitles("N" "Mean" "Std. Dev." "Bottom 25\%" "Median" "Top 25\%") ///
 prehead("\begin{table}\begin{center}\caption{Summary Statistics of Firm Characteristics}\label{tab: summstats1}\tabcolsep=0.1cm\scalebox{0.67}{\begin{tabular}{lcccccc}\toprule")  ///
-postfoot("\bottomrule\end{tabular}}\end{center}\footnotesize{Notes: This table reports the descriptive statistics of firm-level characteristics for 10,883 firm-year-station observations from 2004 to 2017. Firm characteristics are obtained from Compustat and I/B/E/S data. We restrict the sample to be within 90 days before the actual period end date of each firm's financial report. The characteristics include the following: AEM, signed discretionary accruals (DA), which are computed using the cross-sectional modified Jones model as in Kothari et al.(2005); REM, the aggregate measure of real earnings management, is the sum of $REM_{CFO}$, $REM_{PROD}$, and $REM_{DISX}$, where $REM_{CFO}$ and $REM_{DISX}$ are the negative value of discretionary cash flows and discretionary expenses, respectively; $AEM \ Rank$ denotes the rank of $AEM$ for the year and industry; $REM \ Rank$ represents the rank of $REM$ for the year and industry; $REM \ Variability$ indicates the standard deviation of $REM$ across the five consecutive years prior to the firm's actual period end date; $REM_{CFO}$ denotes abnormal cash flows from operations, which are measured as the deviation of the firm's actual cash flows from the normal level of discretionary cash flows as are predicted using the corresponding industry-year regression; $REM_{PROD}$ denotes abnormal production costs, and is measured as the deviation of the firm's actual production costs from the normal level of production costs as are predicted using the corresponding industry-year regression; $REM_{DISX}$, discretionary expenses, are measured as the deviation of the firm's actual expenses from the normal level of discretionary expenses as are predicted using the corresponding industry-year regression. $Size$, the firm's size, is calculated as the logged value of the firm's total assets in the current fiscal year; $BM$, the book-to-market ratio in the current fiscal year, is calculated as the ratio of the firm's book value of equity and the market value of equity; $ROA$ is the ratio of the firm's income before extraordinary items and total assets; $Leverage$, the leverage ratio in the current fiscal year, is defined as the ratio between the firm's total liabilities and total assets; $Firm \ Age$, the age of the firm, is defined as the number of years starting from the first time when the firm’s stock returns are reported in the monthly stock files of the Center for Research in Security Prices (CRSP); $Big \ 8$ is an indicator that takes 1 if the firm was audited by a Big N CPA firm, and 0 otherwise; $Auditor \ Tenure$ denotes the number of years that the firm was audited by a same auditor; $NOA$ is the ratio between the firm's net operating assets at the beginning of the year and lagged sales during the corresponding industry-year (net operating assets are calculated using shareholders’ equity less cash and marketable securities, plus total debt); Tobin's Q denotes the market value of the firm; $Number \ of \ Analysts \ Following$, the number of analysts following the firm in the current fiscal year, is obtained from I/B/E/S; $Sales$ refers to the sales of the firm in the current fiscal year. Standard deviations are in parentheses. *** p < 1\%, ** p < 5\%, * p < 10\%.}\end{table}") 
+postfoot("\bottomrule\end{tabular}}\end{center}\footnotesize{Notes: This table reports the descriptive statistics of firm-level characteristics for 10,883 firm-year-station observations from 2004 to 2017. Firm characteristics are obtained from Compustat and I/B/E/S data. We restrict the sample to be within 90 days before the actual period end date of each firm's financial report. The characteristics include the following: AEM, signed discretionary accruals (DA), which are computed using the cross-sectional modified Jones model as in Kothari et al.(2005); REM, the aggregate measure of real earnings management, is the sum of $REM_{CFO}$, $REM_{PROD}$, and $REM_{DISX}$, where $REM_{CFO}$ and $REM_{DISX}$ are the negative value of discretionary cash flows and discretionary expenses, respectively; $AEM \ Rank$ denotes the rank of $AEM$ for the year and industry; $REM \ Rank$ represents the rank of $REM$ for the year and industry; $REM \ Variability$ indicates the standard deviation of $REM$ across the five consecutive years prior to the firm's actual period end date; $REM_{CFO}$ denotes abnormal cash flows from operations, which are measured as the deviation of the firm's actual cash flows from the normal level of discretionary cash flows as are predicted using the corresponding industry-year regression; $REM_{PROD}$ denotes abnormal production costs, and is measured as the deviation of the firm's actual production costs from the normal level of production costs as are predicted using the corresponding industry-year regression; $REM_{DISX}$, discretionary expenses, are measured as the deviation of the firm's actual expenses from the normal level of discretionary expenses as are predicted using the corresponding industry-year regression. $Size$, the firm's size, is calculated as the logged value of the firm's total assets in the current fiscal year; $BM$, the book-to-market ratio in the current fiscal year, is calculated as the ratio of the firm's book value of equity and the market value of equity; $ROA$ is the ratio of the firm's income before extraordinary items and total assets; $Leverage$, the leverage ratio in the current fiscal year, is defined as the ratio between the firm's total liabilities and total assets; $Firm \ Age$, the age of the firm, is defined as the number of years starting from the first time when the firm's stock returns are reported in the monthly stock files of the Center for Research in Security Prices (CRSP); $Big \ 8$ is an indicator that takes 1 if the firm was audited by a Big 8 CPA firm, and 0 otherwise; $Auditor \ Tenure$ denotes the number of years that the firm was audited by a same auditor; $NOA$ is the ratio between the firm's net operating assets at the beginning of the year and lagged sales during the corresponding industry-year (net operating assets are calculated using shareholders' equity less cash and marketable securities, plus total debt); Tobin's Q denotes the market value of the firm; $Number \ of \ Analysts \ Following$, the number of analysts following the firm in the current fiscal year, is obtained from I/B/E/S; $Sales$ refers to the sales of the firm in the current fiscal year. Standard deviations are in parentheses. *** p < 1\%, ** p < 5\%, * p < 10\%.}\end{table}") 
 
 
 * .rtf
@@ -292,7 +290,6 @@ esttab obs Mean std p25 p50 p75 using "$output\Word_results.rtf", ///
 label cells("count(pattern(1 0 0 0 0 0)) mean(pattern(0 1 0 0 0 0) fmt(3)) sd(pattern(0 0 1 0 0 0) fmt(3)) p25(pattern(0 0 0 1 0 0) fmt(3)) p50(pattern(0 0 0 0 1 0) fmt(3)) p75(pattern(0 0 0 0 0 1) fmt(3))") noobs  ///
 nonumbers replace collabels(none) mtitles("N" "Mean" "Std. Dev." "Bottom 25%" "Median" "Top 25%") ///
 title("Summary Statistics")
-exit
 * ==============================================================================
 * ============================ Other weather Summary Statistics ==========================
 * ==============================================================================
@@ -666,42 +663,80 @@ stats(yearfe indfe firmcont N ymean ar2, fmt(0 0 0 0 2 2) labels("Year FE" "Indu
 prehead("\begin{table}\begin{center}\caption{The Effect of Visibility on Earnings Management by the Degree of Environmental Performance}\label{tab: table17}\tabcolsep=0.1cm\begin{tabular}{lcccc}\toprule")  ///
 posthead("\midrule") postfoot("\bottomrule\end{tabular}\\\end{center}\footnotesize{Notes: This table reports how the effects of visibility on AEM and REMdiffer by the degree of environmental performance. A description of all variables can be found in Table \ref{tab: variabledescriptions}. The dependent variable in columns (1) and (2) is AEM, and the dependent variable in columns (3) and (4) is REM. Firm controls are the same as in Table \ref{tab: table4}. Year fixed effects and industry fixed effects are included in all regressions. Standard errors are heteroskedastic-robust. *** p < 1\%, ** p < 5\%, * p < 10\%.}\end{table}") 
 
-*======== Table 4: Regression (Signed) =============================
+
+*======== Table A1: Regression (Signed) =============================
 	eststo clear
-eststo regression1: reghdfe dac visib $control_variables, absorb(fyear ff_48) vce(robust)
+eststo regression1: reghdfe dac visib $control_variables, absorb(fyear ff_48) vce(cluster lpermno)
 estadd scalar ar2 = e(r2_a)
 summarize dac
 estadd scalar ymean = r(mean)
 estadd local yearfe "Yes", replace
 estadd local indfe "Yes", replace
+estadd local cluster "Firm", replace
 
-eststo regression2: reghdfe rank_dac visib $control_variables, absorb(fyear ff_48) vce(robust)
+eststo regression5: reghdfe dac visib $control_variables, absorb(fyear ff_48) vce(cluster city)
+estadd scalar ar2 = e(r2_a)
+summarize dac
+estadd scalar ymean = r(mean)
+estadd local yearfe "Yes", replace
+estadd local indfe "Yes", replace
+estadd local cluster "City", replace
+
+eststo regression2: reghdfe rank_dac visib $control_variables, absorb(fyear ff_48) vce(cluster lpermno)
 estadd scalar ar2 = e(r2_a)
 summarize rank_dac
 estadd scalar ymean = r(mean)
 estadd local yearfe "Yes", replace
 estadd local indfe "Yes", replace
+estadd local cluster "Firm", replace
 
-eststo regression3: reghdfe rem visib $control_variables, absorb(fyear ff_48) vce(robust)
+eststo regression6: reghdfe rank_dac visib $control_variables, absorb(fyear ff_48) vce(cluster city)
+estadd scalar ar2 = e(r2_a)
+summarize rank_dac
+estadd scalar ymean = r(mean)
+estadd local yearfe "Yes", replace
+estadd local indfe "Yes", replace
+estadd local cluster "City", replace
+
+eststo regression3: reghdfe rem visib $control_variables, absorb(fyear ff_48) vce(cluster lpermno)
 estadd scalar ar2 = e(r2_a)
 summarize rem
 estadd scalar ymean = r(mean)
 estadd local yearfe "Yes", replace
 estadd local indfe "Yes", replace
+estadd local cluster "Firm", replace
 
-eststo regression4: reghdfe rank_rem visib $control_variables, absorb(fyear ff_48) vce(robust)
+eststo regression7: reghdfe rem visib $control_variables, absorb(fyear ff_48) vce(cluster city)
+estadd scalar ar2 = e(r2_a)
+summarize rem
+estadd scalar ymean = r(mean)
+estadd local yearfe "Yes", replace
+estadd local indfe "Yes", replace
+estadd local cluster "City", replace
+
+eststo regression4: reghdfe rank_rem visib $control_variables, absorb(fyear ff_48) vce(cluster lpermno)
 estadd scalar ar2 = e(r2_a)
 summarize rank_rem
 estadd scalar ymean = r(mean)
 estadd local yearfe "Yes", replace
 estadd local indfe "Yes", replace
+estadd local cluster "Firm", replace
 
-esttab regression1 regression2 regression3 regression4 using "$output\table4.tex", replace ///
-mgroups("Accrual Earnings Management" "Real Earnings Management", pattern(1 0 1 0) prefix(\multicolumn{@span}{c}{) suffix(}) span erepeat(\cmidrule(lr){@span})) ///
-mtitles("AEM" "AEM Rank" "REM" "REM Rank") collabels(none) booktabs label scalar(ymean) ///
-stats(yearfe indfe N ymean ar2, fmt(0 0 0 2 2) labels("Year FE" "Industry FE" "N" "Dep mean" "Adjusted R-sq")) ///
-prehead("\begin{table}\begin{center}\caption{The Effect of Visibility on Earnings Management}\label{tab: table4}\tabcolsep=0.1cm\begin{tabular}{lcccc}\toprule")  ///
-posthead("\midrule") postfoot("\bottomrule\end{tabular}\end{center}\\\footnotesize{Notes: The dependent variables are indicated at the top of each column. A description of all variables can be found in Table \ref{tab: variabledescriptions}. The dependent variables in columns (1)-(2) are: a firm's accrual earnings management, and the rank of the firm's accrual earnings management, respectively. The dependent variables in columns (3)-(4) are: a firm's real earnings management, and the rank of the firm's real earnings management, respectively. Year fixed effects and industry fixed effects are included in all regressions. Standard errors are heteroskedastic-robust. *** p < 1\%, ** p < 5\%, * p < 10\%.}\end{table}") 
+eststo regression8: reghdfe rank_rem visib $control_variables, absorb(fyear ff_48) vce(cluster city)
+estadd scalar ar2 = e(r2_a)
+summarize rank_rem
+estadd scalar ymean = r(mean)
+estadd local yearfe "Yes", replace
+estadd local indfe "Yes", replace
+estadd local cluster "City", replace
+
+esttab regression1 regression2 regression3 regression4 regression5 regression6 regression7 regression8 using "$output\tableA1.tex", replace ///
+mgroups("Accrual Earnings Management" "Real Earnings Management" "Accrual Earnings Management" "Real Earnings Management", pattern(1 0 1 0 1 0 1 0) prefix(\multicolumn{@span}{c}{) suffix(}) span erepeat(\cmidrule(lr){@span})) ///
+mtitles("AEM" "AEM Rank" "REM" "REM Rank" "AEM" "AEM Rank" "REM" "REM Rank") collabels(none) booktabs label scalar(ymean) ///
+stats(yearfe indfe N ymean ar2 cluster, fmt(0 0 0 2 2 0) labels("Year FE" "Industry FE" "N" "Dep mean" "Adjusted R-sq" "Cluster")) ///
+prehead("\begin{table}\begin{center}\caption{The Effect of Visibility on Earnings Management}\label{tab: tablea1}\tabcolsep=0.1cm\scalebox{0.85}{\begin{tabular}{lcccccccc}\toprule")  ///
+posthead("\midrule") postfoot("\bottomrule\end{tabular}}\end{center}\footnotesize{Notes: The dependent variables are indicated at the top of each column. A description of all variables can be found in Table \ref{tab: variabledescriptions}. The dependent variables in columns (1)-(2) are: a firm's accrual earnings management, and the rank of the firm's accrual earnings management, respectively. The dependent variables in columns (3)-(4) are: a firm's real earnings management, and the rank of the firm's real earnings management, respectively. Year fixed effects and industry fixed effects are included in all regressions. Standard errors are clustered at firm level for columns (1)-(4), and are clustered at city level for columns (5)-(8). *** p < 1\%, ** p < 5\%, * p < 10\%.}\end{table}") 
+exit
 
 esttab regression1 regression2 regression3 regression4 using "$output\Word_results.rtf", append ///
 mgroups("Accrual Earnings Management" "Real Earnings Management", pattern(1 0 1 0)) ///
@@ -710,43 +745,46 @@ stats(yearfe indfe N ymean ar2, fmt(0 0 0 2 2) labels("Year FE" "Industry FE" "N
 title("Table 4: The Effect of Visibility on Earnings Management") ///
 note("Notes: The dependent variable in columns (1)-(2) is a firm's accrual earnings management; the dependent variable in columns (3)-(4) is a firm's real earnings management.")
 
-*========== Table 5: Decomposition of REM ========================
-eststo sales1: reghdfe d_cfo_neg visib $control_variables, absorb(fyear ff_48) vce(robust)
+
+****Add city and firm cluster robust checks********
+*========== Table A2: Decomposition of REM ========================
+eststo sales1: reghdfe d_cfo_neg visib $control_variables, absorb(fyear ff_48) vce(cluster lpermno)
+estadd scalar ar2 = e(r2_a)
 estadd scalar ar2 = e(r2_a)
 summarize d_cfo_neg
 estadd scalar ymean = r(mean)
 estadd local yearfe "Yes", replace
 estadd local indfe "Yes", replace
 
-eststo sales2: reghdfe rank_d_cfo_neg visib $control_variables, absorb(fyear ff_48) vce(robust) 
+eststo sales2: reghdfe rank_d_cfo_neg visib $control_variables, absorb(fyear ff_48) vce(cluster lpermno)
 estadd scalar ar2 = e(r2_a)
 summarize rank_d_cfo_neg
 estadd scalar ymean = r(mean)
 estadd local yearfe "Yes", replace
 estadd local indfe "Yes", replace
 
-eststo overprod1: reghdfe d_prod visib $control_variables, absorb(fyear ff_48) vce(robust)
+eststo overprod1: reghdfe d_prod visib $control_variables, absorb(fyear ff_48) vce(cluster lpermno)
 estadd scalar ar2 = e(r2_a)
 summarize d_prod
 estadd scalar ymean = r(mean)
 estadd local yearfe "Yes", replace
 estadd local indfe "Yes", replace
 
-eststo overprod2: reghdfe rank_d_prod visib $control_variables, absorb(fyear ff_48) vce(robust)
+eststo overprod2: reghdfe rank_d_prod visib $control_variables, absorb(fyear ff_48) vce(cluster lpermno)
 estadd scalar ar2 = e(r2_a)
 summarize rank_d_prod
 estadd scalar ymean = r(mean)
 estadd local yearfe "Yes", replace
 estadd local indfe "Yes", replace
 
-eststo expenditure1: reghdfe d_discexp_neg visib $control_variables, absorb(fyear ff_48) vce(robust)
+eststo expenditure1: reghdfe d_discexp_neg visib $control_variables, absorb(fyear ff_48) vce(cluster lpermno)
 estadd scalar ar2 = e(r2_a)
 summarize d_discexp_neg
 estadd scalar ymean = r(mean)
 estadd local yearfe "Yes", replace
 estadd local indfe "Yes", replace
 
-eststo expenditure2: reghdfe rank_d_discexp_neg visib $control_variables, absorb(fyear ff_48) vce(robust)
+eststo expenditure2: reghdfe rank_d_discexp_neg visib $control_variables, absorb(fyear ff_48) vce(cluster lpermno)
 estadd scalar ar2 = e(r2_a)
 summarize rank_d_discexp_neg
 estadd scalar ymean = r(mean)
