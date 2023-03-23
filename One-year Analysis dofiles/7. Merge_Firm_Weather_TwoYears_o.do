@@ -7,7 +7,7 @@ else if "`c(username)'" == "Huaxi"{
 global maindir "E:\Dropbox\Air Pollution and Accounting\Data"
 }
 
-	use "$maindir\firm_zipcode_date", replace
+	use "$maindir\One-year Analysis\firm_zipcode_date", replace
 	
 	keep if Firm_START_YEAR != Firm_END_YEAR
 
@@ -58,10 +58,10 @@ global maindir "E:\Dropbox\Air Pollution and Accounting\Data"
 			keep if _merge == 3
 			collapse (mean) firm_FID Num (mean) temp dewp slp stp visib wdsp (max) mxspd gust max (min) min (mean) prcp (mean) sndp (mean)fog rain snow hail thunder tornado, by(station)
 			local j = Num
-			cd "$maindir\TempFirmStation3"
+			cd "$maindir\One-year Analysis\TempFirmStation3"
 			save "`j'", replace
 		}
 		
 			clear
-		use "$maindir\firm_zipcode_date", replace
+		use "$maindir\One-year Analysis\firm_zipcode_date", replace
 	}
