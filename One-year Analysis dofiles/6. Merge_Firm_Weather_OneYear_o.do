@@ -12,9 +12,9 @@ global maindir "E:\Dropbox\Air Pollution and Accounting\Data"
 	keep if Firm_START_YEAR == Firm_END_YEAR
 
 	global obs = _N
-	forvalues i = 1/$obs{		
+	forvalues i = 14105/$obs{		
 		keep if Num1 == `i'
-		
+
 		* for each firm-station, merge with visibility data just for particular year(s) for that station
 		preserve
 			local start_date = Firm_START_DATE[1]

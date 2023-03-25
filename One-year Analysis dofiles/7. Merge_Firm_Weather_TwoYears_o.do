@@ -1,6 +1,6 @@
 clear
 else if "`c(username)'" == "kexin"{
-global maindir "D:\Research材料\21. Air Pollution and Accounting\DATA"
+global maindir "E:\21. Air Pollution and Accounting\DATA"
 }
 
 else if "`c(username)'" == "Huaxi"{
@@ -12,7 +12,7 @@ global maindir "E:\Dropbox\Air Pollution and Accounting\Data"
 	keep if Firm_START_YEAR != Firm_END_YEAR
 
 	global obs = _N
-	forvalues i = 1/$obs{		
+	forvalues i = 1098/$obs{		
 		keep if Num2 == `i'
 		
 		* for each firm-station, merge with visibility data just for particular year(s) for that station
