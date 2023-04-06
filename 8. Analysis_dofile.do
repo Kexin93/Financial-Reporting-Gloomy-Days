@@ -546,7 +546,7 @@ mtitles("CSR Strength" "CSR Concern" "CSR Strength" "CSR Concern") collabels(non
 stats(yearfe indfe firmcont N ymean ar2, fmt(0 0 0 0 2 2) labels("Year FE" "Industry FE" "Firm Controls" "N" "Dep mean" "Adjusted R-sq")) ///
 prehead("\begin{table}\begin{center}\caption{The Effect of Visibility on Earnings Management by the Degree of CSR Behaviors}\label{tab: table14}\tabcolsep=0.1cm\begin{tabular}{lcccc}\toprule")  ///
 posthead("\midrule") postfoot("\bottomrule\end{tabular}\\\end{center}\footnotesize{Notes: This table reports how the effects of visibility on AEM and REMdiffer by the degree of the corporate social responsibility (CSR). A description of all variables can be found in Table \ref{tab: variabledescriptions}. The dependent variable in columns (1) and (2) is AEM, and the dependent variable in columns (3) and (4) is REM. Firm controls are the same as in Table \ref{tab: table4}. Year fixed effects and industry fixed effects are included in all regressions. Standard errors are heteroskedastic-robust. *** p < 1\%, ** p < 5\%, * p < 10\%.}\end{table}") 
-
+exit
 *========== Table 15: visibility interacts with internal monitoring to REM ======================== 
 	eststo clear
 eststo regression1: reghdfe dac visib CGOV_str_num c.visib#c.CGOV_str_num $control_variables, absorb(fyear ff_48) vce(robust) //c.?
@@ -587,6 +587,50 @@ mtitles("Good CG" "Poor CG" "Good CG" "Poor CG") collabels(none) booktabs label 
 stats(yearfe indfe firmcont N ymean ar2, fmt(0 0 0 0 2 2) labels("Year FE" "Industry FE" "Firm Controls" "N" "Dep mean" "Adjusted R-sq")) ///
 prehead("\begin{table}\begin{center}\caption{The Effect of Visibility on Earnings Management by the Degree of Corporate Governance}\label{tab: table15}\tabcolsep=0.1cm\begin{tabular}{lcccc}\toprule")  ///
 posthead("\midrule") postfoot("\bottomrule\end{tabular}\\\end{center}\footnotesize{Notes: This table reports how the effects of visibility on AEM and REMdiffer by the degree of the corporate social responsibility (CSR). A description of all variables can be found in Table \ref{tab: variabledescriptions}. The dependent variable in columns (1) and (2) is AEM, and the dependent variable in columns (3) and (4) is REM. Firm controls are the same as in Table \ref{tab: table4}. Year fixed effects and industry fixed effects are included in all regressions. Standard errors are heteroskedastic-robust. *** p < 1\%, ** p < 5\%, * p < 10\%.}\end{table}") 
+
+*======== Table 4: Regression (Signed) Subsample where Overall CGOV indicators are not missing =============================
+	eststo clear
+eststo regression1: reghdfe dac visib $control_variables if !mi(CGOV_str_num), absorb(fyear ff_48) vce(robust)
+estadd scalar ar2 = e(r2_a)
+summarize dac
+estadd scalar ymean = r(mean)
+estadd local yearfe "Yes", replace
+estadd local indfe "Yes", replace
+
+eststo regression2: reghdfe rank_dac visib $control_variables if !mi(CGOV_str_num), absorb(fyear ff_48) vce(robust)
+estadd scalar ar2 = e(r2_a)
+summarize rank_dac
+estadd scalar ymean = r(mean)
+estadd local yearfe "Yes", replace
+estadd local indfe "Yes", replace
+
+eststo regression3: reghdfe rem visib $control_variables if !mi(CGOV_str_num), absorb(fyear ff_48) vce(robust)
+estadd scalar ar2 = e(r2_a)
+summarize rem
+estadd scalar ymean = r(mean)
+estadd local yearfe "Yes", replace
+estadd local indfe "Yes", replace
+
+eststo regression4: reghdfe rank_rem visib $control_variables if !mi(CGOV_str_num), absorb(fyear ff_48) vce(robust)
+estadd scalar ar2 = e(r2_a)
+summarize rank_rem
+estadd scalar ymean = r(mean)
+estadd local yearfe "Yes", replace
+estadd local indfe "Yes", replace
+
+esttab regression1 regression2 regression3 regression4 using "$output\table4_CGOVSubsample.tex", replace ///
+mgroups("Accrual Earnings Management" "Real Earnings Management", pattern(1 0 1 0) prefix(\multicolumn{@span}{c}{) suffix(}) span erepeat(\cmidrule(lr){@span})) ///
+mtitles("AEM" "AEM Rank" "REM" "REM Rank") collabels(none) booktabs label scalar(ymean) ///
+stats(yearfe indfe N ymean ar2, fmt(0 0 0 2 2) labels("Year FE" "Industry FE" "N" "Dep mean" "Adjusted R-sq")) ///
+prehead("\begin{table}\begin{center}\caption{The Effect of Visibility on Earnings Management}\label{tab: table4cgovsubsample}\tabcolsep=0.1cm\begin{tabular}{lcccc}\toprule")  ///
+posthead("\midrule") postfoot("\bottomrule\end{tabular}\end{center}\footnotesize{Notes: The dependent variables are indicated at the top of each column. A description of all variables can be found in Table \ref{tab: variabledescriptions}. The dependent variables in columns (1)-(2) are: a firm's accrual earnings management, and the rank of the firm's accrual earnings management, respectively. The dependent variables in columns (3)-(4) are: a firm's real earnings management, and the rank of the firm's real earnings management, respectively. Year fixed effects and industry fixed effects are included in all regressions. Standard errors are heteroskedastic-robust. *** p < 1\%, ** p < 5\%, * p < 10\%.}\end{table}") 
+
+esttab regression1 regression2 regression3 regression4 using "$output\Word_results.rtf", append ///
+mgroups("Accrual Earnings Management" "Real Earnings Management", pattern(1 0 1 0)) ///
+mtitles("AEM" "AEM Rank" "REM" "REM Rank") nonumbers collabels(none) label scalar(ymean`') ///
+stats(yearfe indfe N ymean ar2, fmt(0 0 0 2 2) labels("Year FE" "Industry FE" "N" "Dep mean" "Adjusted R-sq")) ///
+title("Table 4: The Effect of Visibility on Earnings Management") ///
+note("Notes: The dependent variable in columns (1)-(2) is a firm's accrual earnings management; the dependent variable in columns (3)-(4) is a firm's real earnings management.")
 
 *======== Table 16: CSR ENV is affected by Visibility =============================
 gen ENV_overall =  ENV_str_num - ENV_con_num
@@ -1417,7 +1461,7 @@ title("Table 4: The Effect of Visibility on Earnings Management") ///
 note("Notes: The dependent variable in columns (1)-(2) is a firm's accrual earnings management; the dependent variable in columns (3)-(4) is a firm's real earnings management.")
 
 
-* ============================================================================
+/* ============================================================================
 * ====================== Consequences ========================================
 * ============================================================================
 * Second-order outcomes: CEO Compensation
@@ -1703,3 +1747,4 @@ order(rem $control_variables_TQ) ///
 stats(yearfe indfe N ymean ar2 cdf1, fmt(0 0 0 2 2 2) labels("Year FE" "Industry FE" "N" "Dep mean" "Adjusted R-sq" "CD Wald F")) ///
 title("Table 11: The Effect of REM on Labor Market Outcomes") ///
 note("Notes: The dependent variable in the first two columns is CEO's compensation, and is the turnover of CEOs in the last two columns.")
+*/
