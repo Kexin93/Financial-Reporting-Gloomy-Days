@@ -1,8 +1,8 @@
 clear all
 
 else if "`c(username)'" == "kexin"{
-global maindir "D:\Research材料\21. Air Pollution and Accounting\DATA"
-global output "D:\Research材料\21. Air Pollution and Accounting\RESULTS"
+global maindir "E:\21. Air Pollution and Accounting\DATA"
+global output "E:\21. Air Pollution and Accounting\RESULTS"
 }
 
 else if "`c(username)'" == "Huaxi"{
@@ -46,7 +46,7 @@ tempfile KLD_MSCI_cusip8
 save `KLD_MSCI_cusip8', replace
 
 *br tic cusip ncusip ibes_cusip cusip8
-use "$maindir\Firm_Year_Weather", replace
+use "$maindir\One-year Analysis\Firm_Year_Weather_1Yr", replace
 * 23139 firm-year-weather observations
 
 global control_variables size bm roa lev firm_age rank au_years oa_scale /*xrd_int*/
@@ -247,7 +247,7 @@ restore
 use `data1', replace
 append using `data2'
 
-save "$output\final_data_10883", replace
+save "$output\final_data_11283", replace
 
 eststo summ_stats: estpost sum $summ_vars
 
@@ -280,10 +280,10 @@ eststo Median: estpost summarize $summ_vars
 ereturn list 
 
 * .tex
-esttab obs Mean std p25 p50 p75 using "$output\summ_stats_firm.tex", fragment  ///
+esttab obs Mean std p25 p50 p75 using "$output\summ_stats_firm_tablea1.tex", fragment  ///
 label cells("count(pattern(1 0 0 0 0 0)) mean(pattern(0 1 0 0 0 0) fmt(3)) sd(pattern(0 0 1 0 0 0) fmt(3)) p25(pattern(0 0 0 1 0 0) fmt(3)) p50(pattern(0 0 0 0 1 0) fmt(3)) p75(pattern(0 0 0 0 0 1) fmt(3))") noobs  ///
 nonumbers replace booktabs collabels(none) mtitles("N" "Mean" "Std. Dev." "Bottom 25\%" "Median" "Top 25\%") ///
-prehead("\begin{table}\begin{center}\caption{Summary Statistics of Firm Characteristics}\label{tab: summstats1}\tabcolsep=0.1cm\scalebox{0.67}{\begin{tabular}{lcccccc}\toprule")  ///
+prehead("\begin{table}\begin{center}\caption{Summary Statistics of Firm Characteristics}\label{tab: summstats1tablea1}\tabcolsep=0.1cm\scalebox{0.67}{\begin{tabular}{lcccccc}\toprule")  ///
 postfoot("\bottomrule\end{tabular}}\end{center}\footnotesize{Notes: This table reports the descriptive statistics of firm-level characteristics for 10,883 firm-year-station observations from 2004 to 2017. Firm characteristics are obtained from Compustat and I/B/E/S data. We restrict the sample to be within 90 days before the actual period end date of each firm's financial report. The characteristics include the following: AEM, signed discretionary accruals (DA), which are computed using the cross-sectional modified Jones model as in Kothari et al.(2005); REM, the aggregate measure of real earnings management, is the sum of $REM_{CFO}$, $REM_{PROD}$, and $REM_{DISX}$, where $REM_{CFO}$ and $REM_{DISX}$ are the negative value of discretionary cash flows and discretionary expenses, respectively; $AEM \ Rank$ denotes the rank of $AEM$ for the year and industry; $REM \ Rank$ represents the rank of $REM$ for the year and industry; $REM \ Variability$ indicates the standard deviation of $REM$ across the five consecutive years prior to the firm's actual period end date; $REM_{CFO}$ denotes abnormal cash flows from operations, which are measured as the deviation of the firm's actual cash flows from the normal level of discretionary cash flows as are predicted using the corresponding industry-year regression; $REM_{PROD}$ denotes abnormal production costs, and is measured as the deviation of the firm's actual production costs from the normal level of production costs as are predicted using the corresponding industry-year regression; $REM_{DISX}$, discretionary expenses, are measured as the deviation of the firm's actual expenses from the normal level of discretionary expenses as are predicted using the corresponding industry-year regression. $Size$, the firm's size, is calculated as the logged value of the firm's total assets in the current fiscal year; $BM$, the book-to-market ratio in the current fiscal year, is calculated as the ratio of the firm's book value of equity and the market value of equity; $ROA$ is the ratio of the firm's income before extraordinary items and total assets; $Leverage$, the leverage ratio in the current fiscal year, is defined as the ratio between the firm's total liabilities and total assets; $Firm \ Age$, the age of the firm, is defined as the number of years starting from the first time when the firm’s stock returns are reported in the monthly stock files of the Center for Research in Security Prices (CRSP); $Big \ 8$ is an indicator that takes 1 if the firm was audited by a Big N CPA firm, and 0 otherwise; $Auditor \ Tenure$ denotes the number of years that the firm was audited by a same auditor; $NOA$ is the ratio between the firm's net operating assets at the beginning of the year and lagged sales during the corresponding industry-year (net operating assets are calculated using shareholders’ equity less cash and marketable securities, plus total debt); Tobin's Q denotes the market value of the firm; $Number \ of \ Analysts \ Following$, the number of analysts following the firm in the current fiscal year, is obtained from I/B/E/S; $Sales$ refers to the sales of the firm in the current fiscal year. Standard deviations are in parentheses. *** p < 1\%, ** p < 5\%, * p < 10\%.}\end{table}") 
 
 
@@ -292,7 +292,7 @@ esttab obs Mean std p25 p50 p75 using "$output\Word_results.rtf", ///
 label cells("count(pattern(1 0 0 0 0 0)) mean(pattern(0 1 0 0 0 0) fmt(3)) sd(pattern(0 0 1 0 0 0) fmt(3)) p25(pattern(0 0 0 1 0 0) fmt(3)) p50(pattern(0 0 0 0 1 0) fmt(3)) p75(pattern(0 0 0 0 0 1) fmt(3))") noobs  ///
 nonumbers replace collabels(none) mtitles("N" "Mean" "Std. Dev." "Bottom 25%" "Median" "Top 25%") ///
 title("Summary Statistics")
-exit
+
 * ==============================================================================
 * ============================ Other weather Summary Statistics ==========================
 * ==============================================================================
@@ -350,10 +350,10 @@ eststo Median: estpost summarize $summ_vars_weather
 ereturn list 
 
 * .tex
-esttab obs Mean std p25 p50 p75 using "$output\summ_stats_weather.tex", fragment  ///
+esttab obs Mean std p25 p50 p75 using "$output\summ_stats_weather_tablea1.tex", fragment  ///
 label cells("count(pattern(1 0 0 0 0 0)) mean(pattern(0 1 0 0 0 0) fmt(3)) sd(pattern(0 0 1 0 0 0) fmt(3)) p25(pattern(0 0 0 1 0 0) fmt(3)) p50(pattern(0 0 0 0 1 0) fmt(3)) p75(pattern(0 0 0 0 0 1) fmt(3))") noobs  ///
 nonumbers replace booktabs collabels(none) mtitles("N" "Mean" "Std. Dev." "Bottom 25\%" "Median" "Top 25\%") ///
-prehead("\begin{table}\begin{center}\caption{Summary Statistics of Weather-related Characteristics}\label{tab: summstats2}\tabcolsep=0.1cm\scalebox{0.67}{\begin{tabular}{lcccccc}\toprule")  ///
+prehead("\begin{table}\begin{center}\caption{Summary Statistics of Weather-related Characteristics}\label{tab: summstats2tablea2}\tabcolsep=0.1cm\scalebox{0.67}{\begin{tabular}{lcccccc}\toprule")  ///
 postfoot("\bottomrule\end{tabular}}\end{center}\footnotesize{Notes: This table reports the descriptive statistics of weather-related characteristics for 10,883 firm-year-station observations from 2004 to 2017. Weather-related characterstics are: temp, mean temperature for the day in degrees Fahrenheit to tenths; dewp, mean dew point for the day in degrees Fahrenheit to tenths; slp, mean sea level pressure for the day in millibars to tenths; visib, mean visibility for the day in millibars to tenths; wdsp, mean wind speed for the day in knots to tenths; mxspd, maximum sustained wind speed reported for the day in knots to tenths; min, minimum temperature reported during the day in Fahrenheit to tenths; fog, an indicator that takes 1 during the day of fog; rain, an indicator that takes 1 during the day of rain or drizzle; thunder, an indicator that takes 1 during the day of thunder; gust, maximum wind gust reported for the day in knots to tenths; max, maximum temperature reported during the day in Fahrenheit to tenths; prcp, total precipitation (rain and/or melted snow) reported during the day in inches and hundredths; sndp, snow depth in inches to tenths, and will be the last report for the day if reported more than once; snow, an indicator that takes 1 during the day of snow or ice pellets; hail, an indicator during the day of hail; tornado, an indicator that takes 1 during the day of tornado or funnel cloud. Standard deviations are in parentheses. *** p < 1\%, ** p < 5\%, * p < 10\%.}\end{table}") 
 
 * .rtf
@@ -450,7 +450,7 @@ eststo Median: estpost summarize $summ_vars_CSR
 ereturn list 
 
 * .tex
-esttab obs Mean std p25 p50 p75 using "$output\summ_stats_CSR.tex", fragment  ///
+esttab obs Mean std p25 p50 p75 using "$output\summ_stats_CSR_tablea1.tex", fragment  ///
 label cells("count(pattern(1 0 0 0 0 0)) mean(pattern(0 1 0 0 0 0) fmt(3)) sd(pattern(0 0 1 0 0 0) fmt(3)) p25(pattern(0 0 0 1 0 0) fmt(3)) p50(pattern(0 0 0 0 1 0) fmt(3)) p75(pattern(0 0 0 0 0 1) fmt(3))") noobs  ///
 nonumbers replace booktabs collabels(none) mtitles("N" "Mean" "Std. Dev." "Bottom 25\%" "Median" "Top 25\%") ///
 prehead("\begin{table}\begin{center}\caption{Summary Statistics of CSR Measures}\label{tab: summstats1}\tabcolsep=0.1cm\scalebox{0.67}{\begin{tabular}{lcccccc}\toprule")  ///
@@ -696,11 +696,11 @@ estadd scalar ymean = r(mean)
 estadd local yearfe "Yes", replace
 estadd local indfe "Yes", replace
 
-esttab regression1 regression2 regression3 regression4 using "$output\table4.tex", replace ///
+esttab regression1 regression2 regression3 regression4 using "$output\tablea4.tex", replace ///
 mgroups("Accrual Earnings Management" "Real Earnings Management", pattern(1 0 1 0) prefix(\multicolumn{@span}{c}{) suffix(}) span erepeat(\cmidrule(lr){@span})) ///
 mtitles("AEM" "AEM Rank" "REM" "REM Rank") collabels(none) booktabs label scalar(ymean) ///
 stats(yearfe indfe N ymean ar2, fmt(0 0 0 2 2) labels("Year FE" "Industry FE" "N" "Dep mean" "Adjusted R-sq")) ///
-prehead("\begin{table}\begin{center}\caption{The Effect of Visibility on Earnings Management}\label{tab: table4}\tabcolsep=0.1cm\begin{tabular}{lcccc}\toprule")  ///
+prehead("\begin{table}\begin{center}\caption{The Effect of Visibility on Earnings Management}\label{tab: tablea4}\tabcolsep=0.1cm\begin{tabular}{lcccc}\toprule")  ///
 posthead("\midrule") postfoot("\bottomrule\end{tabular}\end{center}\\\footnotesize{Notes: The dependent variables are indicated at the top of each column. A description of all variables can be found in Table \ref{tab: variabledescriptions}. The dependent variables in columns (1)-(2) are: a firm's accrual earnings management, and the rank of the firm's accrual earnings management, respectively. The dependent variables in columns (3)-(4) are: a firm's real earnings management, and the rank of the firm's real earnings management, respectively. Year fixed effects and industry fixed effects are included in all regressions. Standard errors are heteroskedastic-robust. *** p < 1\%, ** p < 5\%, * p < 10\%.}\end{table}") 
 
 esttab regression1 regression2 regression3 regression4 using "$output\Word_results.rtf", append ///
@@ -709,7 +709,7 @@ mtitles("AEM" "AEM Rank" "REM" "REM Rank") nonumbers collabels(none) label scala
 stats(yearfe indfe N ymean ar2, fmt(0 0 0 2 2) labels("Year FE" "Industry FE" "N" "Dep mean" "Adjusted R-sq")) ///
 title("Table 4: The Effect of Visibility on Earnings Management") ///
 note("Notes: The dependent variable in columns (1)-(2) is a firm's accrual earnings management; the dependent variable in columns (3)-(4) is a firm's real earnings management.")
-
+exit
 *========== Table 5: Decomposition of REM ========================
 eststo sales1: reghdfe d_cfo_neg visib $control_variables, absorb(fyear ff_48) vce(robust)
 estadd scalar ar2 = e(r2_a)
@@ -1436,5 +1436,49 @@ order(rem $control_variables_TQ) ///
 stats(yearfe indfe N ymean ar2 cdf1, fmt(0 0 0 2 2 2) labels("Year FE" "Industry FE" "N" "Dep mean" "Adjusted R-sq" "CD Wald F")) ///
 title("Table 11: The Effect of REM on Labor Market Outcomes") ///
 note("Notes: The dependent variable in the first two columns is CEO's compensation, and is the turnover of CEOs in the last two columns.")
+
+*======== Table 4: Regression (Absolute) =============================
+	eststo clear
+eststo regression1: reghdfe absdac  visib $control_variables, absorb(fyear ff_48) vce(robust)
+estadd scalar ar2 = e(r2_a)
+summarize absdac
+estadd scalar ymean = r(mean)
+estadd local yearfe "Yes", replace
+estadd local indfe "Yes", replace
+
+eststo regression2: reghdfe rank_absdac visib $control_variables, absorb(fyear ff_48) vce(robust)
+estadd scalar ar2 = e(r2_a)
+summarize rank_absdac
+estadd scalar ymean = r(mean)
+estadd local yearfe "Yes", replace
+estadd local indfe "Yes", replace
+
+eststo regression3: reghdfe absrem visib $control_variables, absorb(fyear ff_48) vce(robust)
+estadd scalar ar2 = e(r2_a)
+summarize absrem
+estadd scalar ymean = r(mean)
+estadd local yearfe "Yes", replace
+estadd local indfe "Yes", replace
+
+eststo regression4: reghdfe rank_absrem visib $control_variables, absorb(fyear ff_48) vce(robust)
+estadd scalar ar2 = e(r2_a)
+summarize rank_absrem
+estadd scalar ymean = r(mean)
+estadd local yearfe "Yes", replace
+estadd local indfe "Yes", replace
+
+esttab regression1 regression2 regression3 regression4 using "$output\table4_abs_11283.tex", replace ///
+mgroups("Accrual Earnings Management" "Real Earnings Management", pattern(1 0 1 0) prefix(\multicolumn{@span}{c}{) suffix(}) span erepeat(\cmidrule(lr){@span})) ///
+mtitles("abs. AEM" "abs. AEM Rank" "abs. REM" "abs. REM Rank") collabels(none) booktabs label scalar(ymean) ///
+stats(yearfe indfe N ymean ar2, fmt(0 0 0 2 2) labels("Year FE" "Industry FE" "N" "Dep mean" "Adjusted R-sq")) ///
+prehead("\begin{table}\begin{center}\caption{The Effect of Visibility on Earnings Management}\label{tab: table4abs11283}\tabcolsep=0.1cm\begin{tabular}{lcccc}\toprule")  ///
+posthead("\midrule") postfoot("\bottomrule\end{tabular}\end{center}\\\footnotesize{Notes: The dependent variables are indicated at the top of each column. A description of all variables can be found in Table \ref{tab: variabledescriptions}. The dependent variables in columns (1)-(2) are: the absolute value of a firm's accrual earnings management, and the rank of the firm's absolute accrual earnings management, respectively. The dependent variables in columns (3)-(4) are: the absolute value of a firm's real earnings management, and the rank of the firm's absolute real earnings management, respectively. The regressor is the average visiblity a firm is exposed to during the fiscal year prior to its actual period end date. Year fixed effects and industry fixed effects are included in all regressions. Standard errors are heteroskedastic-robust. *** p < 1\%, ** p < 5\%, * p < 10\%.}\end{table}") 
+
+esttab regression1 regression2 regression3 regression4 using "$output\Word_results.rtf", append ///
+mgroups("Accrual Earnings Management" "Real Earnings Management", pattern(1 0 1 0)) ///
+mtitles("abs. AEM" "abs. AEM Rank" "abs. REM" "abs. REM Rank") nonumbers collabels(none) label scalar(ymean`') ///
+stats(yearfe indfe N ymean ar2, fmt(0 0 0 2 2) labels("Year FE" "Industry FE" "N" "Dep mean" "Adjusted R-sq")) ///
+title("Table 4: The Effect of Visibility on Earnings Management") ///
+note("Notes: The dependent variable in columns (1)-(2) is a firm's accrual earnings management; the dependent variable in columns (3)-(4) is a firm's real earnings management.")
 
 

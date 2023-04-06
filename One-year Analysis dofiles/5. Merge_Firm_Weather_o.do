@@ -1,6 +1,6 @@
 clear
 else if "`c(username)'" == "kexin"{
-global maindir "D:\Research材料\21. Air Pollution and Accounting\DATA"
+global maindir "E:\21. Air Pollution and Accounting\DATA"
 }
 
 else if "`c(username)'" == "Huaxi"{
@@ -78,16 +78,16 @@ global maindir "E:\Dropbox\Air Pollution and Accounting\Data"
 		fs "*.dta"
 		append using `r(files)',force
 		sort Num
-		save "$maindir\One-year Analysis\Firm_Multiple_Stations", replace //23170
+		save "$maindir\One-year Analysis\Firm_Multiple_Stations_1Yr", replace //24275
 
 		clear
 		use "$maindir\One-year Analysis\firm_zipcode_date", replace
 			capture drop _merge
-		merge 1:1 Num using "$maindir\One-year Analysis\Firm_Multiple_Stations"
+		merge 1:1 Num using "$maindir\One-year Analysis\Firm_Multiple_Stations_1Yr"
 		keep if _merge == 3
 		
 		collapse (mean) temp dewp slp stp visib wdsp (max) mxspd gust max (min) min (mean) prcp (mean) sndp (mean) fog rain snow hail thunder tornado, by(firm_FID) //or firm_ID
-		save "$maindir\One-year Analysis\Firm_Visibility_Data", replace
+		save "$maindir\One-year Analysis\Firm_Visibility_Data_1Yr", replace
 		// 23139 unique firm year with 1 weather
 		
 		
@@ -95,9 +95,9 @@ global maindir "E:\Dropbox\Air Pollution and Accounting\Data"
 		use "$maindir\One-year Analysis\firm_zipcode", replace
 			capture drop _merge
 		gen firm_FID = firm_ID - 1 //can delete
-		merge 1:1 firm_FID using "$maindir\One-year Analysis\Firm_Visibility_Data"
+		merge 1:1 firm_FID using "$maindir\One-year Analysis\Firm_Visibility_Data_1Yr"
 			keep if _merge == 3
-		save "$maindir\One-year Analysis\Firm_Year_Weather", replace
+		save "$maindir\One-year Analysis\Firm_Year_Weather_1Yr", replace
 		
 		
 		
