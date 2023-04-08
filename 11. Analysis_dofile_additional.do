@@ -346,28 +346,28 @@ posthead("\midrule") postfoot("\bottomrule\end{tabular}\\\end{center}\footnotesi
 
 *======== Table 4: Regression (Signed) Subsample where Overall CSR indicators are not missing =============================
 	eststo clear
-eststo regression1: reghdfe dac visib $control_variables /*if !mi(CSR_Str)*/, absorb(fyear ff_48) vce(robust)
+eststo regression1: reghdfe dac visib $control_variables if !mi(CSR_Str), absorb(fyear ff_48) vce(robust)
 estadd scalar ar2 = e(r2_a)
 summarize dac
 estadd scalar ymean = r(mean)
 estadd local yearfe "Yes", replace
 estadd local indfe "Yes", replace
 
-eststo regression2: reghdfe rank_dac visib $control_variables /*if !mi(CSR_Str)*/, absorb(fyear ff_48) vce(robust)
+eststo regression2: reghdfe rank_dac visib $control_variables if !mi(CSR_Str), absorb(fyear ff_48) vce(robust)
 estadd scalar ar2 = e(r2_a)
 summarize rank_dac
 estadd scalar ymean = r(mean)
 estadd local yearfe "Yes", replace
 estadd local indfe "Yes", replace
 
-eststo regression3: reghdfe rem visib $control_variables /*if !mi(CSR_Str)*/, absorb(fyear ff_48) vce(robust)
+eststo regression3: reghdfe rem visib $control_variables if !mi(CSR_Str), absorb(fyear ff_48) vce(robust)
 estadd scalar ar2 = e(r2_a)
 summarize rem
 estadd scalar ymean = r(mean)
 estadd local yearfe "Yes", replace
 estadd local indfe "Yes", replace
 
-eststo regression4: reghdfe rank_rem visib $control_variables /*if !mi(CSR_Str)*/, absorb(fyear ff_48) vce(robust)
+eststo regression4: reghdfe rank_rem visib $control_variables if !mi(CSR_Str), absorb(fyear ff_48) vce(robust)
 estadd scalar ar2 = e(r2_a)
 summarize rank_rem
 estadd scalar ymean = r(mean)

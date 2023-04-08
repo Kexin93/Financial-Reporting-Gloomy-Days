@@ -418,7 +418,7 @@ gen CGOV_overall =  CGOV_str_num - CGOV_con_num
 	label var CGOV_str_num "Overall CGOV Strength"
 	label var CGOV_con_num "Overall CGOV Concern"
 
-global summ_vars_CSR CSR_Overall CSR_Str CSR_Con CGOV_overall CGOV_str_num CGOV_con_num
+global summ_vars_CSR CGOV_overall CGOV_str_num CGOV_con_num
 eststo summ_stats: estpost sum $summ_vars_CSR
 
 eststo obs: estpost summarize $summ_vars_CSR
@@ -454,7 +454,7 @@ esttab obs Mean std p25 p50 p75 using "$output\summ_stats_CSR.tex", fragment  //
 label cells("count(pattern(1 0 0 0 0 0)) mean(pattern(0 1 0 0 0 0) fmt(3)) sd(pattern(0 0 1 0 0 0) fmt(3)) p25(pattern(0 0 0 1 0 0) fmt(3)) p50(pattern(0 0 0 0 1 0) fmt(3)) p75(pattern(0 0 0 0 0 1) fmt(3))") noobs  ///
 nonumbers replace booktabs collabels(none) mtitles("N" "Mean" "Std. Dev." "Bottom 25\%" "Median" "Top 25\%") ///
 prehead("\begin{table}\begin{center}\caption{Summary Statistics of CSR Measures}\label{tab: summstats1}\tabcolsep=0.1cm\scalebox{0.67}{\begin{tabular}{lcccccc}\toprule")  ///
-postfoot("\bottomrule\end{tabular}}\end{center}\footnotesize{Notes: This table reports the descriptive statistics of CSR measures for 6,234 firm-year observations from 2004 to 2013. CSR measures are obtained from MSCI ESG KLD STATS (previously named KLD). The CSR measures include the following: $Overall \ CSR$, $Overall \ CSR \ Strength$, $Overall \ CSR \ Concern$, $Overall \ CGOV$, $\Overall \ CGOV \ Strength$, and $Overall \ CGOV \ Concern$. A description of all variables can be found in Table \ref{tab: variabledescriptions}. Standard deviations are in parentheses. *** p < 1\%, ** p < 5\%, * p < 10\%.}\end{table}") 
+postfoot("\bottomrule\end{tabular}}\end{center}\footnotesize{Notes: This table reports the descriptive statistics of CSR measures for 6,234 firm-year observations from 2004 to 2013. CSR measures are obtained from MSCI ESG KLD STATS (previously named KLD). The CSR measures we focus on include the following: $Overall \ CGOV$, $\Overall \ CGOV \ Strength$, and $Overall \ CGOV \ Concern$. A description of all variables can be found in Table \ref{tab: variabledescriptions}. Standard deviations are in parentheses. *** p < 1\%, ** p < 5\%, * p < 10\%.}\end{table}") 
 
 *======== Table 13: CSR =============================
 	eststo clear
@@ -1206,6 +1206,73 @@ mgroups("Real Earnings Management" "Rank of Real Earnings Management", pattern(1
 nomtitles collabels(none) label scalar(ymean) drop($control_variables) ///
 stats(yearfe indfe N ymean ar2, fmt(0 0 0 2 2) labels("Year FE" "Industry FE" "N" "Dep mean" "Adjusted R-sq")) ///
 title("Table 9: The Effect of Visibility on Earnings Management (with Additional Controls)") ///
+note("Notes: The dependent variable in columns (1)-(3) is a firm's real earnings management; the dependent variable in columns (4)-(6) is the rank of a firm's real earnings management.")
+
+*========== Table 25: Big N Auditors to proxy for External monitoring ======================== 
+global control_variables size bm roa lev firm_age /*rank*/ au_years oa_scale /*xrd_int*/
+xtset lpermno fyear
+
+	eststo clear
+eststo regression1: reghdfe rem visib $control_variables, absorb(fyear ff_48) vce(robust)
+estadd scalar ar2 = e(r2_a)
+summarize rem
+estadd scalar ymean = r(mean)
+estadd local yearfe "Yes", replace
+estadd local indfe "Yes", replace
+estadd local blcontrols "Yes", replace
+
+eststo regression2: reghdfe rem visib $control_variables rank, absorb(fyear ff_48) vce(robust)
+estadd scalar ar2 = e(r2_a)
+summarize rem
+estadd scalar ymean = r(mean)
+estadd local yearfe "Yes", replace
+estadd local indfe "Yes", replace
+estadd local blcontrols "Yes", replace
+
+eststo regression3: reghdfe rem visib $control_variables rank c.visib#c.rank, absorb(fyear ff_48) vce(robust)
+estadd scalar ar2 = e(r2_a)
+summarize rem
+estadd scalar ymean = r(mean)
+estadd local yearfe "Yes", replace
+estadd local indfe "Yes", replace
+estadd local blcontrols "Yes", replace
+
+eststo regression4: reghdfe rank_rem visib $control_variables, absorb(fyear ff_48) vce(robust)
+estadd scalar ar2 = e(r2_a)
+summarize rem
+estadd scalar ymean = r(mean)
+estadd local yearfe "Yes", replace
+estadd local indfe "Yes", replace
+estadd local blcontrols "Yes", replace
+
+eststo regression5: reghdfe rank_rem visib $control_variables rank, absorb(fyear ff_48) vce(robust)
+estadd scalar ar2 = e(r2_a)
+summarize rem
+estadd scalar ymean = r(mean)
+estadd local yearfe "Yes", replace
+estadd local indfe "Yes", replace
+estadd local blcontrols "Yes", replace
+		
+eststo regression6: reghdfe rank_rem visib $control_variables rank c.visib#c.rank, absorb(fyear ff_48) vce(robust)
+estadd scalar ar2 = e(r2_a)
+summarize rem
+estadd scalar ymean = r(mean)
+estadd local yearfe "Yes", replace
+estadd local indfe "Yes", replace
+estadd local blcontrols "Yes", replace
+
+esttab regression1 regression2 regression3 regression4 regression5 regression6 using "$output\table25.tex", replace ///
+mgroups("Real Earnings Management" "Rank of Real Earnings Management", pattern(1 0 0 1 0 0) prefix(\multicolumn{@span}{c}{) suffix(}) span erepeat(\cmidrule(lr){@span})) ///
+nomtitles collabels(none) booktabs label scalar(ymean) drop($control_variables) ///
+stats(blcontrols yearfe indfe N ymean ar2, fmt(0 0 0 0 2 2) labels("Baseline Controls" "Year FE" "Industry FE" "N" "Dep mean" "Adjusted R-sq")) ///
+prehead("\begin{table}\begin{center}\caption{The Effect of Visibility on Real Earnings Management with Big N Auditors}\label{tab: table25}\tabcolsep=0.1cm\scalebox{0.85}{\begin{tabular}{lcccccc}\toprule")  ///
+posthead("\midrule") postfoot("\bottomrule\end{tabular}}\end{center}\footnotesize{Notes: This table reports the effects of visibility on the aggregate measure of real earnings management (REM) and the rank of REM. A description of all variables can be found in Table \ref{tab: variabledescriptions}. Columns (1)-(3) report the effects of visibility on REM, and columns (4)-(6) report the effects of visibility on the rank of REM. Columns (1) and (4) are the baseline specifications. Columns (2) and (5) include an indicator for Big N Auditors as an additional control. Columns (3) and (6) further include the interaction term of the Big N Auditor indicator and average visibility the firm is exposed to during the three months prior to its actual period end date as an additional control. Firm controls are the same as in Table \ref{tab: table4}. Year fixed effects and industry fixed effects are included in all regressions. Standard errors are heteroskedastic-robust. *** p < 1\%, ** p < 5\%, * p < 10\%.}\end{table}") 
+
+esttab regression1 regression2 regression3 regression4  regression5 regression6 using "$output\Word_results.rtf", append ///
+mgroups("Real Earnings Management" "Rank of Real Earnings Management", pattern(1 0 0 1 0 0)) ///
+nomtitles collabels(none) label scalar(ymean) drop($control_variables) ///
+stats(yearfe indfe N ymean ar2, fmt(0 0 0 2 2) labels("Year FE" "Industry FE" "N" "Dep mean" "Adjusted R-sq")) ///
+title("Table 25: The Effect of Visibility on Earnings Management (with Additional Controls)") ///
 note("Notes: The dependent variable in columns (1)-(3) is a firm's real earnings management; the dependent variable in columns (4)-(6) is the rank of a firm's real earnings management.")
 
 
