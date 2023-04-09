@@ -2,8 +2,8 @@
 clear all
 
 else if "`c(username)'" == "kexin"{
-global maindir "D:\Research材料\21. Air Pollution and Accounting\DATA"
-global output "D:\Research材料\21. Air Pollution and Accounting\RESULTS"
+global maindir "E:\21. Air Pollution and Accounting\DATA"
+global output "E:\21. Air Pollution and Accounting\RESULTS"
 }
 
 else if "`c(username)'" == "Huaxi"{
@@ -206,9 +206,10 @@ sicff sic, ind(48)
 	sum visib, d
 unique lpermno fyear
 bysort lpermno: egen visib_mean = mean(visib)
+bysort lpermno: gen visib_N = _N
 gen visib_diff = visib - visib_mean
 gen visib_diff2 = visib_diff^2
-bysort lpermno: egen visib_var = total(visib_diff2)
+bysort lpermno: egen visib_var = total(visib_diff2)/visib_N
 gen visib_std = visib_var^(1/2)
 
 sort lpermno fyear visib_std
@@ -220,11 +221,10 @@ local x = r(sd)
 	capture drop treat
 gen treat =(visib_std >= `x') if !mi(visib_std)
 label var treat "firms that are exposed to a larger change in weather"
-/*
-bysort lpermno: gen visib_change =visib - visib[_n-1]
+
+bysort lpermno (fyear): gen visib_change =visib - visib[_n-1]
 br lpermno fyear visib treat visib_change
 
-sort lpermno fyear
 bysort lpermno: gen firm_obs = _N
 
 drop if firm_obs == 1
@@ -309,7 +309,7 @@ stats(yearfe indfe N ymean ar2, fmt(0 0 0 2 2) labels("Year FE" "Industry FE" "N
 prehead("\begin{table}\begin{center}\caption{The Effect of Visibility on Earnings Management}\label{tab: table4}\tabcolsep=0.1cm\begin{tabular}{lcccc}\toprule")  ///
 posthead("\midrule") postfoot("\bottomrule\end{tabular}\end{center}\\\footnotesize{Notes: The dependent variables are indicated at the top of each column. A description of all variables can be found in Table \ref{tab: variabledescriptions}. The dependent variables in columns (1)-(2) are: a firm's accrual earnings management, and the rank of the firm's accrual earnings management, respectively. The dependent variables in columns (3)-(4) are: a firm's real earnings management, and the rank of the firm's real earnings management, respectively. Year fixed effects and industry fixed effects are included in all regressions. Standard errors are heteroskedastic-robust. *** p < 1\%, ** p < 5\%, * p < 10\%.}\end{table}") 
 
-/*======== DID regression =============================
+*======== DID regression =============================
 	eststo clear
 eststo regression1: reghdfe dac pleasant unpleasant post c.pleasant#c.post c.unpleasant#c.post /*$control_variables*/, absorb(fyear ff_48) vce(robust)
 estadd scalar ar2 = e(r2_a)
@@ -391,11 +391,3 @@ keep(pleasant unpleasant post c.pleasant#c.post c.unpleasant#c.post) ///
 stats(yearfe indfe N ymean ar2, fmt(0 0 0 2 2) labels("Year FE" "Industry FE" "N" "Dep mean" "Adjusted R-sq")) ///
 prehead("\begin{table}\begin{center}\caption{The Effect of Visibility on Earnings Management}\label{tab: table4}\tabcolsep=0.1cm\begin{tabular}{lcccc}\toprule")  ///
 posthead("\midrule") postfoot("\bottomrule\end{tabular}\end{center}\\\footnotesize{Notes: The dependent variables are indicated at the top of each column. A description of all variables can be found in Table \ref{tab: variabledescriptions}. The dependent variables in columns (1)-(2) are: a firm's accrual earnings management, and the rank of the firm's accrual earnings management, respectively. The dependent variables in columns (3)-(4) are: a firm's real earnings management, and the rank of the firm's real earnings management, respectively. Year fixed effects and industry fixed effects are included in all regressions. Pleasant is an indicator that takes 1 if visibility improves between two adjacent years, and if the variation of visibility is greater than or equal to the overall visibility variation among the sample (1.382), and takes 0 otherwise. Unpleasant is an indicator that takes 1 if visibility decreases between two adjacent years for a firm, and if the variation of visibility for the firm is greater than or equal to the overall visibility variation among the sample (1.382). Post is an indicator that takes 1 for the later year for each pair of observations for a firm. Standard errors are heteroskedastic-robust. *** p < 1\%, ** p < 5\%, * p < 10\%.}\end{table}") 
-
-/*
-eststo regression1: reghdfe dac treat post c.treat#c.post $control_variables, absorb(fyear ff_48) vce(robust)
-eststo regression2: reghdfe rank_dac treat post c.treat#c.post $control_variables, absorb(fyear ff_48) vce(robust)
-eststo regression3: reghdfe rem treat post c.treat#c.post $control_variables, absorb(fyear ff_48) vce(robust)
-eststo regression4: reghdfe rank_rem treat post c.treat#c.post $control_variables, absorb(fyear ff_48) vce(robust)
-*/
-*/
