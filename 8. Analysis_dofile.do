@@ -1491,6 +1491,7 @@ summarize dac
 estadd scalar ymean = r(mean)
 estadd local yearfe "Yes", replace
 estadd local indfe "Yes", replace
+estadd local controls "Yes", replace
 
 eststo regression2: reghdfe rank_dac visib $control_variables xsga_scale /*c.visib#c.xsga_scale*/, absorb(fyear ff_48) vce(robust)
 estadd scalar ar2 = e(r2_a)
@@ -1498,6 +1499,7 @@ summarize rank_dac
 estadd scalar ymean = r(mean)
 estadd local yearfe "Yes", replace
 estadd local indfe "Yes", replace
+estadd local controls "Yes", replace
 
 eststo regression3: reghdfe rem visib $control_variables xsga_scale /*c.visib#c.xsga_scale*/, absorb(fyear ff_48) vce(robust)
 estadd scalar ar2 = e(r2_a)
@@ -1505,6 +1507,7 @@ summarize rem
 estadd scalar ymean = r(mean)
 estadd local yearfe "Yes", replace
 estadd local indfe "Yes", replace
+estadd local controls "Yes", replace
 
 eststo regression4: reghdfe rank_rem visib $control_variables xsga_scale /*c.visib#c.xsga_scale*/, absorb(fyear ff_48) vce(robust)
 estadd scalar ar2 = e(r2_a)
@@ -1512,13 +1515,14 @@ summarize rank_rem
 estadd scalar ymean = r(mean)
 estadd local yearfe "Yes", replace
 estadd local indfe "Yes", replace
+estadd local controls "Yes", replace
 
 esttab regression1 regression2 regression3 regression4 using "$output\table23.tex", replace ///
 mgroups("Accrual Earnings Management" "Real Earnings Management", pattern(1 0 1 0) prefix(\multicolumn{@span}{c}{) suffix(}) span erepeat(\cmidrule(lr){@span})) ///
 mtitles("AEM" "AEM Rank" "REM" "REM Rank") collabels(none) booktabs label scalar(ymean) drop($control_variables) ///
-stats(yearfe indfe N ymean ar2, fmt(0 0 0 2 2) labels("Year FE" "Industry FE" "N" "Dep mean" "Adjusted R-sq")) ///
+stats(controls yearfe indfe N ymean ar2, fmt(0 0 0 0 2 2) labels("Baseline Controls" "Year FE" "Industry FE" "N" "Dep mean" "Adjusted R-sq")) ///
 prehead("\begin{table}\begin{center}\caption{The Effect of Visibility on Earnings Management with Selling, General, and Administrative Expenses}\label{tab: table23}\tabcolsep=0.1cm\begin{tabular}{lcccc}\toprule")  ///
-posthead("\midrule") postfoot("\bottomrule\end{tabular}\end{center}\\\footnotesize{Notes: The dependent variables are indicated at the top of each column. A description of all variables can be found in Table \ref{tab: variabledescriptions}. The dependent variables in columns (1)-(2) are: a firm's accrual earnings management, and the rank of the firm's accrual earnings management, respectively. The dependent variables in columns (3)-(4) are: a firm's real earnings management, and the rank of the firm's real earnings management, respectively. Year fixed effects and industry fixed effects are included in all regressions. Columns (2) and (4) further include the firm's Selling, General, and Administrative Expenses (xsga) as an additional control variable. Standard errors are heteroskedastic-robust. *** p < 1\%, ** p < 5\%, * p < 10\%.}\end{table}") 
+posthead("\midrule") postfoot("\bottomrule\end{tabular}\end{center}\\\footnotesize{Notes: The dependent variables are indicated at the top of each column. A description of all variables can be found in Table \ref{tab: variabledescriptions}. The dependent variables in columns (1)-(2) are: a firm's accrual earnings management, and the rank of the firm's accrual earnings management, respectively. The dependent variables in columns (3)-(4) are: a firm's real earnings management, and the rank of the firm's real earnings management, respectively. Year fixed effects and industry fixed effects are included in all regressions. Columns (2) and (4) further include the firm's Selling, General, and Administrative Expenses (xsga) as an additional control variable. All baseline control variables are included in the model, including firm size, book-to-market ratio, returns on assets (ROA), firm's leverage ratio, firm age, Big N indicator, auditor tenure, and net operating assets. Standard errors are heteroskedastic-robust. *** p < 1\%, ** p < 5\%, * p < 10\%.}\end{table}") 
 
 esttab regression1 regression2 regression3 regression4 using "$output\Word_results.rtf", append ///
 mgroups("Accrual Earnings Management" "Real Earnings Management", pattern(1 0 1 0)) ///

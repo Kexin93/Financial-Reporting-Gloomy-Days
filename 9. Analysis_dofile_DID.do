@@ -247,7 +247,7 @@ bysort lpermno: gen firm_obs = _N
 
 gen pair = (_n +1)/2 if mod(_n,2) == 1 
 replace pair = pair[_n-1] if mi(pair)
-br lpermno fyear visib treat  firm_obs pair visib_change
+br lpermno fyear visib treat firm_obs pair visib_change
 
 bysort pair: gen visib_change_temp = visib_change[_N]
 bysort pair: gen pleasant_temp = (visib_change_temp >= 0) if !mi(visib_change_temp) 
