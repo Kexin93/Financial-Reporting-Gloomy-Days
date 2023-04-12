@@ -202,7 +202,6 @@ sicff sic, ind(48)
 	&  !mi(d_cfo) &  !mi( rank_d_cfo) &  !mi( d_prod ) &  !mi(rank_d_prod ) ///
 	&  !mi(d_discexp ) &  !mi(rank_d_discexp) & !mi(ff_48) & !mi(fyear)
 
-
 	sum visib, d
 unique lpermno fyear
 bysort lpermno: egen visib_mean = mean(visib)
