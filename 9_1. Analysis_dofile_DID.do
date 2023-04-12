@@ -217,13 +217,6 @@ br lpermno fyear visib
 	capture drop visib_change
 bysort lpermno (fyear): gen visib_change = visib - l.visib
 		
-sum visib if !mi(visib_change), d	
-egen visib_std = sd(visib) if !mi(visib_change)
-
-gen drastic = (abs(visib_change) >= visib_std) if !mi(visib_change)
-gen polluted = (visib_change < 0 & drastic == 1) if !mi(visib_change)
-gen clean = (visib > 0 & drastic == 1) if !mi(visib_change)
-
 bysort lpermno: gen post = _n-1 if x == 2
 
 expand 2 if x > 2
