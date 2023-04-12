@@ -261,4 +261,6 @@ br lpermno fyear visib visib_change drastic polluted clean post rem
 
 global control_variables size bm roa lev firm_age rank au_years oa_scale /*xrd_int*/
 
-reghdfe rank_dac polluted clean post i.polluted#i.post i.clean#i.post $control_variables, absorb(fyear ff_48 city) vce(robust)
+reghdfe rank_d_discexp_neg polluted clean post i.polluted#i.post i.clean#i.post $control_variables, absorb(fyear ff_48) vce(robust)
+
+reghdfe rem polluted post i.polluted#i.post $control_variables, absorb(fyear ff_48) vce(robust)
