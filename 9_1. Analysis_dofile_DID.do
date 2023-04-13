@@ -257,10 +257,58 @@ foreach var of varlist visib_change drastic polluted clean{
 	bysort pair: replace `var' = `var'[_n+1] if mi(`var')
 }
 
-br lpermno fyear visib visib_change drastic polluted clean post rem
 
 global control_variables size bm roa lev firm_age rank au_years oa_scale /*xrd_int*/
 
-reghdfe rank_d_discexp_neg polluted clean post i.polluted#i.post i.clean#i.post $control_variables, absorb(fyear ff_48) vce(robust)
+reghdfe rem polluted clean post i.polluted#i.post i.clean#i.post $control_variables, absorb(fyear ff_48) vce(robust)
 
 reghdfe rem polluted post i.polluted#i.post $control_variables, absorb(fyear ff_48) vce(robust)
+
+* tornado
+sort lpermno fyear
+bysort lpermno: gen tornado_shock = tornado - tornado[_n-1]
+replace tornado_shock =. if  post == 0
+br lpermno fyear visib visib_change drastic polluted clean post rem tornado tornado_shock pair
+
+bysort pair: replace tornado_shock = tornado_shock[_n+1] if tornado_shock ==.
+reghdfe rem tornado post c.tornado#i.post $control_variables, absorb(fyear ff_48) vce(robust)
+
+* mxspd - max wind speed
+sort lpermno fyear
+bysort lpermno: gen mxspd_shock = mxspd - mxspd[_n-1]
+
+br lpermno fyear post pair mxspd mxspd_shock
+
+	ta mxspd_shock if post == 0
+replace mxspd_shock =. if post == 0
+egen mxspd_std1 = sd(mxspd) if !mi(mxspd_shock)
+gen drastic_mxspd = (abs(mxspd_shock) >= mxspd_std1) if !mi(mxspd_shock)
+gen mxspd_in = (mxspd_shock > 0 & drastic_mxspd == 1) if !mi(mxspd_shock)
+gen mxspd_de = (mxspd_shock <= 0 & drastic_mxspd == 1) if !mi(mxspd_shock)
+
+* fill values for each pair
+foreach var of varlist mxspd_shock drastic_mxspd mxspd_in mxspd_de{
+	bysort pair: replace `var' = `var'[_n+1] if mi(`var')
+}
+
+reghdfe rem mxspd_in mxspd_de post i.mxspd_in#i.post i.mxspd_de#i.post $control_variables, absorb(fyear ff_48) vce(robust)
+
+*wdsp
+sort lpermno fyear
+bysort lpermno: gen wdsp_shock = wdsp - wdsp[_n-1]
+
+br lpermno fyear post pair wdsp wdsp_shock
+
+	ta wdsp_shock if post == 0
+replace wdsp_shock =. if post == 0
+egen wdsp_std1 = sd(wdsp) if !mi(wdsp_shock)
+gen drastic_wdsp = (abs(wdsp_shock) >= wdsp_std1) if !mi(wdsp_shock)
+gen wdsp_in = (wdsp_shock > 0 & drastic_wdsp == 1) if !mi(wdsp_shock)
+gen wdsp_de = (wdsp_shock <= 0 & drastic_wdsp == 1) if !mi(wdsp_shock)
+
+* fill values for each pair
+foreach var of varlist wdsp_shock drastic_wdsp wdsp_in wdsp_de{
+	bysort pair: replace `var' = `var'[_n+1] if mi(`var')
+}
+
+reghdfe rem wdsp_in wdsp_de post i.wdsp_in#i.post i.wdsp_de#i.post $control_variables, absorb(fyear ff_48) vce(robust)
