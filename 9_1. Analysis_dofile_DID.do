@@ -315,3 +315,68 @@ foreach var of varlist wdsp_shock drastic_wdsp wdsp_in wdsp_de{
 }
 
 reghdfe rem wdsp_in wdsp_de post i.wdsp_in#i.post i.wdsp_de#i.post $control_variables, absorb(fyear ff_48) vce(robust)
+
+use "$maindir\firm_years10883_pollutantvalue.dta", replace
+sort lpermno fyear
+br lpermno fyear	
+	
+bysort lpermno (fyear): gen x = _N
+
+* Drop observations with only one year
+drop if x == 1
+
+xtset lpermno fyear
+br lpermno fyear pollutant_value
+	capture drop pollutant_value_change
+bysort lpermno (fyear): gen pollutant_value_change = pollutant_value - l.pollutant_value
+		
+bysort lpermno: gen post = _n-1 if x == 2
+
+expand 2 if x > 2
+sort lpermno fyear
+
+bysort lpermno (fyear): gen N_max = _N
+bysort lpermno (fyear): gen N = _n
+drop if (N == 1 | N == N_max) & x > 2
+	drop N_max N
+
+	capture drop pollutant_value_change
+bysort lpermno: gen pollutant_value_change = pollutant_value - pollutant_value[_n-1]	
+
+* replace missings for post
+replace post = 1 if mi(post)
+	
+gen obs = _n
+replace post = 0 if post == 1 & mod(obs, 2) == 1
+	drop obs
+
+* replace pollutant_value_change values with missing if post == 0 (pre)
+replace pollutant_value_change =. if pollutant_value_change == 0 & post == 0
+
+	capture drop drastic polluted clean
+
+summarize pollutant_value if !mi(pollutant_value_change), d
+egen pollutant_value_std1 = sd(pollutant_value) if !mi(pollutant_value_change)
+gen pollutant_value_std1_2times = 2*pollutant_value_std1	
+	capture drop drastic
+gen drastic = (abs(pollutant_value_change) >= pollutant_value_std1) if !mi(pollutant_value_change)
+gen polluted = (pollutant_value_change < 0 & drastic == 1) if !mi(pollutant_value_change)
+gen clean = (pollutant_value_change >= 0 & drastic == 1) if !mi(pollutant_value_change)
+	
+* compare pairs that experience drastic changes and those that did not experience that big changes in visibility
+gen pair = _n/2 if post == 1
+replace pair = (_n+1)/2 if post == 0
+
+* fill values for pollutant_value_change, drastic, polluted, clean for each pair
+foreach var of varlist pollutant_value_change drastic polluted clean{
+	bysort pair: replace `var' = `var'[_n+1] if mi(`var')
+}
+
+
+global control_variables size bm roa lev firm_age rank au_years oa_scale /*xrd_int*/
+
+reghdfe rem polluted clean post i.polluted#i.post i.clean#i.post $control_variables, absorb(fyear ff_48) vce(robust)
+reg rem polluted clean post i.polluted#i.post i.clean#i.post $control_variables i.fyear i.ff_48, vce(robust)
+reg rank_rem polluted clean post i.polluted#i.post i.clean#i.post $control_variables i.fyear i.ff_48, vce(robust)
+
+reghdfe rem polluted post i.polluted#i.post $control_variables, absorb(fyear ff_48) vce(robust)

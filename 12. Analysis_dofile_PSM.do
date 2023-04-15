@@ -221,6 +221,7 @@ egen visib_median = median(visib)
 gen visib_binary = (visib < visib_median) if !mi(visib)
 gen visib_binary_neg = -visib_binary
 
+set seed 12345678
 *psmatch2 visib_binary $control_variables, outcome(rem) noreplacement ties radius caliper(0.00001)
 psmatch2 visib_binary $control_variables, outcome(rem) ai(3) ///
                      caliper(0.001) noreplacement descending common odds index logit ties ///
@@ -292,12 +293,13 @@ prehead("\scalebox{0.8}{\begin{tabular}{lcccc}\toprule")  ///
 posthead("\midrule\multicolumn{5}{c}{\textbf{Panel B: PSM Sample Regression}}\\") ///
 postfoot("\bottomrule\end{tabular}}\end{center}\footnotesize{Notes: The dependent variables are indicated at the top of each column. A description of all variables can be found in Table \ref{tab: variabledescriptions}. The dependent variables in columns (1)-(2) are: a firm's accrual earnings management, and the rank of the firm's accrual earnings management, respectively. The dependent variables in columns (3)-(4) are: a firm's real earnings management, and the rank of the firm's real earnings management, respectively. Year fixed effects and industry fixed effects are included in all regressions. Standard errors are heteroskedastic-robust. *** p < 1\%, ** p < 5\%, * p < 10\%.}\end{table}") 
 
-esttab regression1 regression2 regression3 regression4 using "$output\Word_results.rtf", append ///
+esttab regression1 regression2 regression3 regression4 using "$output\Word_results.rtf", replace ///
 mgroups("Accrual Earnings Management" "Real Earnings Management", pattern(1 0 1 0)) ///
 mtitles("AEM" "AEM Rank" "REM" "REM Rank") nonumbers collabels(none) label scalar(ymean`') ///
 stats(yearfe indfe N ymean ar2, fmt(0 0 0 2 2) labels("Year FE" "Industry FE" "N" "Dep mean" "Adjusted R-sq")) ///
 title("Table 4: The Effect of Visibility on Earnings Management") ///
 note("Notes: The dependent variable in columns (1)-(2) is a firm's accrual earnings management; the dependent variable in columns (3)-(4) is a firm's real earnings management.")
+exit 
 
 * ========== DID ==========
 *2466 observations
