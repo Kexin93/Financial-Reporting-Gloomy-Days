@@ -1,4 +1,3 @@
-*=========================== Difference-in-Difference Analysis ===============================
 clear all
 
 else if "`c(username)'" == "kexin"{
@@ -22,7 +21,32 @@ global maindir "E:\Research材料\21. Air Pollution and Accounting\DATA"
 global output "E:\Research材料\21. Air Pollution and Accounting\RESULTS"
 }
 
-use "$maindir\Firm_Year_Weather", replace
+use "$maindir\KLD MSCI", replace
+drop if mi(ENV_str_num) | mi(ENV_con_num) | mi(COM_str_num) | mi(COM_con_num) | ///
+mi(HUM_con_num) | mi(EMP_str_num) | mi(EMP_con_num) | mi(DIV_str_num) | mi(DIV_con_num) ///
+| mi(PRO_str_num) | mi(PRO_con_num) | mi(CGOV_str_num) | mi(CGOV_con_num) | mi(HUM_str_num)
+	rename Ticker tic
+	rename year fyear
+	rename CUSIP cusip8
+	unique tic fyear cusip8
+	duplicates drop tic fyear, force 
+tempfile KLD_MSCI_tic
+save `KLD_MSCI_tic', replace
+
+use "$maindir\KLD MSCI", replace
+drop if mi(ENV_str_num) | mi(ENV_con_num) | mi(COM_str_num) | mi(COM_con_num) | ///
+mi(HUM_con_num) | mi(EMP_str_num) | mi(EMP_con_num) | mi(DIV_str_num) | mi(DIV_con_num) ///
+| mi(PRO_str_num) | mi(PRO_con_num) | mi(CGOV_str_num) | mi(CGOV_con_num) | mi(HUM_str_num)
+	rename Ticker tic
+	rename year fyear
+	rename CUSIP cusip8
+	unique tic fyear cusip8
+	duplicates drop cusip8 fyear, force 
+tempfile KLD_MSCI_cusip8
+save `KLD_MSCI_cusip8', replace
+
+*br tic cusip ncusip ibes_cusip cusip8
+use "$maindir\One-year Analysis\Firm_Year_Weather_1Yr", replace
 * 23139 firm-year-weather observations
 
 global control_variables size bm roa lev firm_age rank au_years oa_scale /*xrd_int*/
@@ -160,14 +184,14 @@ label var lev "Leverage"
 label var oa_scale "NOA"
 label var au_years "Auditor Tenure"
 label var firm_age "Firm Age"
-label var rank "Big 8" //binary
+label var rank "Big N" //binary
 label var visib "Visibility"
 label var cover "Analysts Following"
 label var KZ "Financial Constraint"
 
 * sales  
-label var rank_d_cfo "Disc. CF Rank"
-label var d_cfo "Change in Disc. CF"
+label var rank_d_cfo "Rank($REM_{CFO}$)"
+label var d_cfo "$REM_{CFO}$"
 
 gen d_cfo_neg = - d_cfo
 gen rank_d_cfo_neg = 9- rank_d_cfo
@@ -180,8 +204,8 @@ label var rank_d_cfo_neg " Rank($REM_{CFO}$)"
  label var rank_d_prod "Rank($REM_{PROD}$)"
 
 * expenditure
- label var d_discexp "Disc. Exp."
- label var rank_d_discexp " Rank(Disc. Exp.)"
+ label var d_discexp "$REM_{DISX}$"
+ label var rank_d_discexp " Rank($REM_{DISX}$)"
 
 gen d_discexp_neg = -d_discexp
 gen rank_d_discexp_neg = 9-rank_d_discexp
@@ -201,6 +225,29 @@ sicff sic, ind(48)
 	& !mi(lev) & !mi(firm_age) & !mi(rank) & !mi(au_years) & !mi(oa_scale) ///
 	&  !mi(d_cfo) &  !mi( rank_d_cfo) &  !mi( d_prod ) &  !mi(rank_d_prod ) ///
 	&  !mi(d_discexp ) &  !mi(rank_d_discexp) & !mi(ff_48) & !mi(fyear)
+
+	capture drop _merge
+merge 1:1 tic fyear using `KLD_MSCI_tic'
+
+preserve
+keep if _merge == 3
+tempfile data1
+save `data1'
+restore
+
+preserve
+keep if _merge == 1
+	capture drop _merge
+merge 1:1 cusip8 fyear using `KLD_MSCI_cusip8'
+keep if _merge == 3 | _merge == 1
+tempfile data2
+save `data2'
+restore
+
+use `data1', replace
+append using `data2'
+
+save "$output\final_data_11283", replace
 
 *10883 observations
 
@@ -259,13 +306,16 @@ foreach var of varlist visib_change drastic polluted clean{
 }
 
 
-global control_variables size bm roa lev firm_age rank au_years oa_scale /*xrd_int*/
+global control_variables size bm roa lev /*firm_age rank au_years oa_scale /*xrd_int*/ */
 
 reghdfe rem polluted clean post i.polluted#i.post i.clean#i.post $control_variables, absorb(fyear ff_48) vce(robust)
 reg rem polluted clean post i.polluted#i.post i.clean#i.post $control_variables i.fyear i.ff_48, vce(robust)
 reg rank_rem polluted clean post i.polluted#i.post i.clean#i.post $control_variables i.fyear i.ff_48, vce(robust)
 
+preserve
+drop if clean == 1
 reghdfe rem polluted post i.polluted#i.post $control_variables, absorb(fyear ff_48) vce(robust)
+restore
 
 * tornado
 sort lpermno fyear
