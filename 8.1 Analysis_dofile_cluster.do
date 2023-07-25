@@ -1,8 +1,8 @@
 clear all
 
 else if "`c(username)'" == "kexin"{
-global maindir "D:\Research材料\21. Air Pollution and Accounting\DATA"
-global output "D:\Research材料\21. Air Pollution and Accounting\RESULTS"
+global maindir "E:\21. Air Pollution and Accounting\DATA"
+global output "E:\21. Air Pollution and Accounting\RESULTS"
 }
 
 else if "`c(username)'" == "Huaxi"{
