@@ -134,6 +134,8 @@ gen oa_scale = loa/lsale
 		gen noa = (oa_scale > oa_median_year) if !mi(oa_scale)
 		*/
 
+hhi5 sale, by(ff_48 fyear) //hhi_sale
+		
 /*generate KZ score*/
 *xtset lpermno fyear 
 gen cashflow=dp+ib
@@ -182,6 +184,7 @@ label var bm "BM"
 label var roa "ROA"
 label var lev "Leverage"
 label var oa_scale "NOA"
+label var hhi_sale "HHI"
 label var au_years "Auditor Tenure"
 label var firm_age "Firm Age"
 label var rank "Big N" //binary
@@ -712,28 +715,28 @@ posthead("\midrule") postfoot("\bottomrule\end{tabular}\\\end{center}\footnotesi
 
 *======== Table 4: Regression (Signed) =============================
 	eststo clear
-eststo regression1: reghdfe dac visib $control_variables, absorb(fyear ff_48) vce(robust)
+eststo regression1: reghdfe dac visib $control_variables, absorb(fyear ff_48) vce(cluster i.lpermno#i.fyear)
 estadd scalar ar2 = e(r2_a)
 summarize dac
 estadd scalar ymean = r(mean)
 estadd local yearfe "Yes", replace
 estadd local indfe "Yes", replace
 
-eststo regression2: reghdfe rank_dac visib $control_variables, absorb(fyear ff_48) vce(robust)
+eststo regression2: reghdfe rank_dac visib $control_variables, absorb(fyear ff_48) vce(cluster i.lpermno#i.fyear)
 estadd scalar ar2 = e(r2_a)
 summarize rank_dac
 estadd scalar ymean = r(mean)
 estadd local yearfe "Yes", replace
 estadd local indfe "Yes", replace
 
-eststo regression3: reghdfe rem visib $control_variables, absorb(fyear ff_48) vce(robust)
+eststo regression3: reghdfe rem visib $control_variables, absorb(fyear ff_48) vce(cluster i.lpermno#i.fyear)
 estadd scalar ar2 = e(r2_a)
 summarize rem
 estadd scalar ymean = r(mean)
 estadd local yearfe "Yes", replace
 estadd local indfe "Yes", replace
 
-eststo regression4: reghdfe rank_rem visib $control_variables, absorb(fyear ff_48) vce(robust)
+eststo regression4: reghdfe rank_rem visib $control_variables, absorb(fyear ff_48) vce(cluster i.lpermno#i.fyear)
 estadd scalar ar2 = e(r2_a)
 summarize rank_rem
 estadd scalar ymean = r(mean)
@@ -823,42 +826,42 @@ note("Notes: The dependent variable in columns (1)-(2) is a firm's accrual earni
 restore
 exit
 *========== Table 5: Decomposition of REM ========================
-eststo sales1: reghdfe d_cfo_neg visib $control_variables, absorb(fyear ff_48) vce(robust)
+eststo sales1: reghdfe d_cfo_neg visib $control_variables, absorb(fyear ff_48) vce(cluster i.lpermno#i.fyear)
 estadd scalar ar2 = e(r2_a)
 summarize d_cfo_neg
 estadd scalar ymean = r(mean)
 estadd local yearfe "Yes", replace
 estadd local indfe "Yes", replace
 
-eststo sales2: reghdfe rank_d_cfo_neg visib $control_variables, absorb(fyear ff_48) vce(robust) 
+eststo sales2: reghdfe rank_d_cfo_neg visib $control_variables, absorb(fyear ff_48) vce(cluster i.lpermno#i.fyear) 
 estadd scalar ar2 = e(r2_a)
 summarize rank_d_cfo_neg
 estadd scalar ymean = r(mean)
 estadd local yearfe "Yes", replace
 estadd local indfe "Yes", replace
 
-eststo overprod1: reghdfe d_prod visib $control_variables, absorb(fyear ff_48) vce(robust)
+eststo overprod1: reghdfe d_prod visib $control_variables, absorb(fyear ff_48) vce(cluster i.lpermno#i.fyear)
 estadd scalar ar2 = e(r2_a)
 summarize d_prod
 estadd scalar ymean = r(mean)
 estadd local yearfe "Yes", replace
 estadd local indfe "Yes", replace
 
-eststo overprod2: reghdfe rank_d_prod visib $control_variables, absorb(fyear ff_48) vce(robust)
+eststo overprod2: reghdfe rank_d_prod visib $control_variables, absorb(fyear ff_48) vce(cluster i.lpermno#i.fyear)
 estadd scalar ar2 = e(r2_a)
 summarize rank_d_prod
 estadd scalar ymean = r(mean)
 estadd local yearfe "Yes", replace
 estadd local indfe "Yes", replace
 
-eststo expenditure1: reghdfe d_discexp_neg visib $control_variables, absorb(fyear ff_48) vce(robust)
+eststo expenditure1: reghdfe d_discexp_neg visib $control_variables, absorb(fyear ff_48) vce(cluster i.lpermno#i.fyear)
 estadd scalar ar2 = e(r2_a)
 summarize d_discexp_neg
 estadd scalar ymean = r(mean)
 estadd local yearfe "Yes", replace
 estadd local indfe "Yes", replace
 
-eststo expenditure2: reghdfe rank_d_discexp_neg visib $control_variables, absorb(fyear ff_48) vce(robust)
+eststo expenditure2: reghdfe rank_d_discexp_neg visib $control_variables, absorb(fyear ff_48) vce(cluster i.lpermno#i.fyear)
 estadd scalar ar2 = e(r2_a)
 summarize rank_d_discexp_neg
 estadd scalar ymean = r(mean)

@@ -1,6 +1,6 @@
 clear
 else if "`c(username)'" == "kexin"{
-global maindir "D:\Research材料\21. Air Pollution and Accounting\DATA"
+global maindir "E:\21. Air Pollution and Accounting\DATA"
 }
 
 else if "`c(username)'" == "Huaxi"{
@@ -28,9 +28,19 @@ clear
 
 	* For each firm, find the weather information in the PAST THREE MONTHS from ALL THREE stations
 	* For each station, only report visibility data during this period: apdedate-90 ~ apdedate
-	drop if mi(apdedate)
-	gen Firm_START_DATE = apdedate - 90
-	gen Firm_END_DATE = apdedate
+	drop if mi(fyr)
+	*drop if mi(apdedate)
+	
+	gen fyrday = .
+	replace fyrday = 31 if inlist(fyr, 1, 3, 5, 7, 8, 10, 12)
+	replace fyrday = 30 if inlist(fyr, 4, 6, 9, 11)
+	replace fyrday = 28 if fyr == 2
+	
+	gen fyrdate = mdy(fyr, fyrday, fyear)
+	format fyrdate %td
+	
+	gen Firm_START_DATE = fyrdate - 365
+	gen Firm_END_DATE = fyrdate
 	format Firm_START_DATE Firm_END_DATE %td
 	
 	sort Firm_START_DATE Firm_END_DATE firm_FID
@@ -51,5 +61,5 @@ clear
 	gen Num2 = Num_temp if group == 2
 	drop Num_temp
 	
-	save "$maindir\firm_zipcode_date", replace
+	save "$maindir\Analysis_102148 observations\firm_zipcode_date", replace
 

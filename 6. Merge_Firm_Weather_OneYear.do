@@ -1,13 +1,13 @@
 clear
 else if "`c(username)'" == "kexin"{
-global maindir "D:\Research材料\21. Air Pollution and Accounting\DATA"
+global maindir "E:\21. Air Pollution and Accounting\DATA"
 }
 
 else if "`c(username)'" == "Huaxi"{
 global maindir "E:\Dropbox\Air Pollution and Accounting\Data"
 }
 
-	use "$maindir\firm_zipcode_date", replace
+	use "$maindir\Analysis_102148 observations\firm_zipcode_date", replace
 	
 	keep if Firm_START_YEAR == Firm_END_YEAR
 
@@ -57,12 +57,12 @@ global maindir "E:\Dropbox\Air Pollution and Accounting\Data"
 			collapse (mean) /*firm_ID*/ firm_FID Num (mean) temp dewp slp stp visib wdsp (max) mxspd gust max (min) min (mean) prcp (mean) sndp (mean)fog rain snow hail thunder tornado, by(station)
 			
 			local j = Num
-			cd "$maindir\TempFirmStation3"
+			cd "$maindir\Analysis_102148 observations\TempFirmStation1yr"
 			save "`j'", replace
 		}
 		
 			clear
-		use "$maindir\firm_zipcode_date", replace
+		use "$maindir\Analysis_102148 observations\firm_zipcode_date", replace
 	}
 		
 	

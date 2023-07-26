@@ -1,8 +1,8 @@
 clear
 else if "`c(username)'" == "kexin"{
-global maindir "D:\Research材料\21. Air Pollution and Accounting\DATA"
+global maindir "E:\21. Air Pollution and Accounting\DATA"
 
-global dofile "C:\Users\kexin\Dropbox\000 Air Pollution and Accounting\CODE"
+global dofile "E:\21. Air Pollution and Accounting\CODE"
 }
 
 * 1) Keep US stations: zip code, lat, lon, station names, county, state等, 生成`US_stations_7334'

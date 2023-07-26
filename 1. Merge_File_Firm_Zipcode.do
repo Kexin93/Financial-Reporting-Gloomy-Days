@@ -1,6 +1,6 @@
 clear
 else if "`c(username)'" == "kexin"{
-global maindir "D:\Research材料\21. Air Pollution and Accounting\DATA"
+global maindir "E:\21. Air Pollution and Accounting\DATA"
 }
 
 else if "`c(username)'" == "Huaxi"{
@@ -108,7 +108,8 @@ use "$maindir\Accounting Variables\conv.dta"
 	gen firm_ID = _n
 
 	* Drop all firms with no apdedate
-	keep if !mi(apdedate)
+	keep if !mi(fyr)
+	*keep if !mi(apdedate)
 	
 	* 45065 observations
 	tempfile firm_zipcode
