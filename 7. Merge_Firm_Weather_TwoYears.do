@@ -10,9 +10,9 @@ global maindir "E:\Dropbox\Air Pollution and Accounting\Data"
 	use "$maindir\Analysis_102148 observations\firm_zipcode_date", replace
 	
 	keep if Firm_START_YEAR != Firm_END_YEAR
-
+	*assert Firm_START_YEAR == 1986 if fyear == 1987	
 	global obs = _N
-	forvalues i = 1/$obs{		
+	forvalues i = 1/$obs{	
 		keep if Num2 == `i'
 		
 		* for each firm-station, merge with visibility data just for particular year(s) for that station
@@ -27,11 +27,16 @@ global maindir "E:\Dropbox\Air Pollution and Accounting\Data"
 						
 			cd "$maindir\Visibility Data"
 			clear
+			if(`end_year' > 1987){
 			use `start_year'
 				capture drop month
 			append using `end_year'.dta, gen(append)
 			drop append
+			}
 
+			if(`end_year' == 1987){
+				use `end_year'.dta, replace
+			}
 			keep if station == "`station_id'"
 			gen station_year = substr(yearmoda, 1, 4)
 			gen station_month = substr(yearmoda, 5, 2)
