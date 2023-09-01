@@ -75,9 +75,8 @@ leverage (Teoh et al., 1998; Kim and Park, 2005), and the presence of BIG 4 audi
 1998; Francis et al., 2005) are controlled and expressed as controled */
 
 /*Table 1: Summary Statistics*/
-global summ_vars dacck dac rank_dac rem rank_rem stdz_rem d_cfo rank_d_cfo d_prod rank_d_prod ///
-d_discexp rank_d_discexp size bm roa lev firm_age rank au_years /*<--tenure*/ oa_scale cover sale /*<--noa*/ /*xrd_int */ /*cycle*/
-
+global summ_vars dacck dac rank_dac rem rank_rem stdz_rem d_cfo_neg rank_d_cfo_neg d_prod rank_d_prod ///
+d_discexp_neg rank_d_discexp_neg size bm roa lev firm_age rank au_years /*<--tenure*/ oa_scale cover sale /*<--noa*/ /*xrd_int */ /*cycle*/
 
 *============= Constructing Variables ===================
 gen xrd_int= xrd/ sale
@@ -378,8 +377,8 @@ nonumbers append collabels(none)  nomtitles ///
 title("Summary Statistics")
 
 *========= Table 2: t-test table ========================
-global summ_vars dac rank_dac rem rank_rem stdz_rem d_cfo rank_d_cfo d_prod rank_d_prod ///
-d_discexp rank_d_discexp size bm roa lev firm_age rank au_years /*<--tenure*/ oa_scale cover sale /*<--noa*/ /*xrd_int */ /*cycle*/
+global summ_vars dacck dac rank_dac rem rank_rem stdz_rem d_cfo_neg rank_d_cfo_neg d_prod rank_d_prod ///
+d_discexp_neg rank_d_discexp_neg size bm roa lev firm_age rank au_years /*<--tenure*/ oa_scale cover sale /*<--noa*/ /*xrd_int */ /*cycle*/
 
 summarize visib if !mi(visib), d
 local visib_median = r(p50) 
@@ -414,7 +413,7 @@ global control_variables size bm roa lev firm_age rank au_years oa_scale /*xrd_i
 corrtex $summ_vars, file(CorrTable) replace land sig /*dig(4) star(0.05)*/
 * Notes: This table reports pooled Pearson correlations for the entire sample of 10,883 firm-year observations over the period 2004-2017. *Significant at the 10% level. **Significant at the 5% level. Please see Table \ref{tab: variabledescriptions} for variable descriptions.
  
-*======== Summary Stats CSR =====================================
+/*======== Summary Stats CSR =====================================
 	capture drop CSR_Str
 	capture drop CSR_Con
 	capture drop CSR_Overall
@@ -470,7 +469,7 @@ label cells("count(pattern(1 0 0 0 0 0)) mean(pattern(0 1 0 0 0 0) fmt(3)) sd(pa
 nonumbers replace booktabs collabels(none) mtitles("N" "Mean" "Std. Dev." "Bottom 25\%" "Median" "Top 25\%") ///
 prehead("\begin{table}\begin{center}\caption{Summary Statistics of CSR Measures}\label{tab: summstats1}\tabcolsep=0.1cm\scalebox{0.67}{\begin{tabular}{lcccccc}\toprule")  ///
 postfoot("\bottomrule\end{tabular}}\end{center}\footnotesize{Notes: This table reports the descriptive statistics of CSR measures for 6,234 firm-year observations from 2004 to 2013. CSR measures are obtained from MSCI ESG KLD STATS (previously named KLD). The CSR measures we focus on include the following: $Overall \ CGOV$, $\Overall \ CGOV \ Strength$, and $Overall \ CGOV \ Concern$. A description of all variables can be found in Table \ref{tab: variabledescriptions}. Standard deviations are in parentheses. *** p < 1\%, ** p < 5\%, * p < 10\%.}\end{table}") 
-
+*/
 *======== Table 13: CSR =============================
 	eststo clear
 eststo regression1: reghdfe CSR_Overall visib $control_variables, absorb(fyear ff_48) vce(robust)
