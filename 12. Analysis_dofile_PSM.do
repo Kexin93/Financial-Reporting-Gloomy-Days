@@ -22,7 +22,44 @@ global maindir "E:\21. Air Pollution and Accounting\DATA"
 global output "E:\21. Air Pollution and Accounting\RESULTS"
 }
 
-use "$maindir\Firm_Year_Weather", replace
+
+else if "`c(username)'" == "Kexin Zhang"{
+global maindir "E:\21. Air Pollution and Accounting\DATA"
+global output "E:\21. Air Pollution and Accounting\RESULTS"
+set matsize 11000
+}
+
+use "$maindir\KLD MSCI", replace
+drop if mi(ENV_str_num) | mi(ENV_con_num) | mi(COM_str_num) | mi(COM_con_num) | ///
+mi(HUM_con_num) | mi(EMP_str_num) | mi(EMP_con_num) | mi(DIV_str_num) | mi(DIV_con_num) ///
+| mi(PRO_str_num) | mi(PRO_con_num) | mi(CGOV_str_num) | mi(CGOV_con_num) | mi(HUM_str_num)
+	rename Ticker tic
+	rename year fyear
+	rename CUSIP cusip8
+	unique tic fyear cusip8
+	duplicates drop tic fyear, force 
+tempfile KLD_MSCI_tic
+save `KLD_MSCI_tic', replace
+
+use "$maindir\KLD MSCI", replace
+drop if mi(ENV_str_num) | mi(ENV_con_num) | mi(COM_str_num) | mi(COM_con_num) | ///
+mi(HUM_con_num) | mi(EMP_str_num) | mi(EMP_con_num) | mi(DIV_str_num) | mi(DIV_con_num) ///
+| mi(PRO_str_num) | mi(PRO_con_num) | mi(CGOV_str_num) | mi(CGOV_con_num) | mi(HUM_str_num)
+	rename Ticker tic
+	rename year fyear
+	rename CUSIP cusip8
+	unique tic fyear cusip8
+	duplicates drop cusip8 fyear, force 
+tempfile KLD_MSCI_cusip8
+save `KLD_MSCI_cusip8', replace
+
+use "$output\convk.dta", replace
+keep fyear lpermno dacck
+tempfile convk
+save `convk', replace
+
+*br tic cusip ncusip ibes_cusip cusip8
+use "$maindir\Analysis_102148 observations\Firm_Year_Weather", replace
 * 23139 firm-year-weather observations
 
 global control_variables size bm roa lev firm_age rank au_years oa_scale /*xrd_int*/
@@ -45,9 +82,8 @@ leverage (Teoh et al., 1998; Kim and Park, 2005), and the presence of BIG 4 audi
 1998; Francis et al., 2005) are controlled and expressed as controled */
 
 /*Table 1: Summary Statistics*/
-global summ_vars dac rank_dac rem rank_rem stdz_rem rank_d_cfo d_cfo d_prod rank_d_prod ///
-d_discexp rank_d_discexp size bm roa lev firm_age rank au_years /*<--tenure*/ oa_scale /*<--noa*/ /*xrd_int */ /*cycle*/
-
+global summ_vars dacck dac rank_dac rem rank_rem stdz_rem d_cfo_neg rank_d_cfo_neg d_prod rank_d_prod ///
+d_discexp_neg rank_d_discexp_neg size bm roa lev firm_age rank au_years /*<--tenure*/ oa_scale cover sale /*<--noa*/ /*xrd_int */ /*cycle*/
 
 *============= Constructing Variables ===================
 gen xrd_int= xrd/ sale
@@ -110,6 +146,8 @@ gen oa_scale = loa/lsale
 		gen noa = (oa_scale > oa_median_year) if !mi(oa_scale)
 		*/
 
+*hhi5 sale, by(ff_48 fyear) //hhi_sale
+		
 /*generate KZ score*/
 *xtset lpermno fyear 
 gen cashflow=dp+ib
@@ -144,7 +182,7 @@ gen KZ=-1.002*CF_lscaled- 39.368*DIV_lscaled- 1.315*C_lscaled+ 3.319*BLEV+ 0.283
 * ============ Labeling =================
 label var firm_ID "firm-year ID"
 label var firm_FID "firm FID = firm_ID - 1"
-label var dac "AEM"
+label var dac "AEM (modified Jone's)"
 label var absdac "|AEM|" 
 label var rank_dac "AEM Rank"
 *label var rank_absdac ""
@@ -158,16 +196,17 @@ label var bm "BM"
 label var roa "ROA"
 label var lev "Leverage"
 label var oa_scale "NOA"
+*label var hhi_sale "HHI"
 label var au_years "Auditor Tenure"
 label var firm_age "Firm Age"
-label var rank "Big 8" //binary
+label var rank "Big N" //binary
 label var visib "Visibility"
 label var cover "Analysts Following"
 label var KZ "Financial Constraint"
 
 * sales  
-label var rank_d_cfo "Disc. CF Rank"
-label var d_cfo "Change in Disc. CF"
+label var rank_d_cfo "Rank($REM_{CFO}$)"
+label var d_cfo "$REM_{CFO}$"
 
 gen d_cfo_neg = - d_cfo
 gen rank_d_cfo_neg = 9- rank_d_cfo
@@ -180,8 +219,8 @@ label var rank_d_cfo_neg " Rank($REM_{CFO}$)"
  label var rank_d_prod "Rank($REM_{PROD}$)"
 
 * expenditure
- label var d_discexp "Disc. Exp."
- label var rank_d_discexp " Rank(Disc. Exp.)"
+ label var d_discexp "$REM_{DISX}$"
+ label var rank_d_discexp " Rank($REM_{DISX}$)"
 
 gen d_discexp_neg = -d_discexp
 gen rank_d_discexp_neg = 9-rank_d_discexp
@@ -202,7 +241,34 @@ sicff sic, ind(48)
 	&  !mi(d_cfo) &  !mi( rank_d_cfo) &  !mi( d_prod ) &  !mi(rank_d_prod ) ///
 	&  !mi(d_discexp ) &  !mi(rank_d_discexp) & !mi(ff_48) & !mi(fyear)
 
-*use "$output\final_data_10883.dta", replace	
+	capture drop _merge
+merge 1:1 tic fyear using `KLD_MSCI_tic'
+
+preserve
+keep if _merge == 3
+tempfile data1
+save `data1'
+restore
+
+preserve
+keep if _merge == 1
+	capture drop _merge
+merge 1:1 cusip8 fyear using `KLD_MSCI_cusip8'
+keep if _merge == 3 | _merge == 1
+tempfile data2
+save `data2'
+restore
+
+use `data1', replace
+append using `data2'
+
+	capture drop _merge
+merge 1:1 lpermno fyear using `convk'	
+
+drop if _merge == 2
+label var dacck "AEM (performance-adjusted)"
+	
+*use "$output\final_data_47662", replace
 
 global control_variables size bm roa lev firm_age rank au_years oa_scale /*xrd_int*/
 
@@ -257,49 +323,55 @@ keep if _support == 1 //10846
 
 *======== Table 4: Regression (Signed) =============================
 	eststo clear
-eststo regression1: reghdfe dac visib $control_variables, absorb(fyear ff_48) vce(robust)
+eststo regression1: reghdfe dacck visib $control_variables, absorb(fyear ff_48) vce(cluster i.lpermno#i.fyear) 
+estadd scalar ar2 = e(r2_a)
+summarize dacck
+estadd scalar ymean = r(mean)
+estadd local yearfe "Yes", replace
+estadd local indfe "Yes", replace
+	
+eststo regression2: reghdfe dac visib $control_variables, absorb(fyear ff_48) vce(cluster i.lpermno#i.fyear) 
 estadd scalar ar2 = e(r2_a)
 summarize dac
 estadd scalar ymean = r(mean)
 estadd local yearfe "Yes", replace
 estadd local indfe "Yes", replace
 
-eststo regression2: reghdfe rank_dac visib $control_variables, absorb(fyear ff_48) vce(robust)
+eststo regression3: reghdfe rank_dac visib $control_variables, absorb(fyear ff_48) vce(cluster i.lpermno#i.fyear) 
 estadd scalar ar2 = e(r2_a)
 summarize rank_dac
 estadd scalar ymean = r(mean)
 estadd local yearfe "Yes", replace
 estadd local indfe "Yes", replace
 
-eststo regression3: reghdfe rem visib $control_variables, absorb(fyear ff_48) vce(robust)
+eststo regression4: reghdfe rem visib $control_variables, absorb(fyear ff_48) vce(cluster i.lpermno#i.fyear) 
 estadd scalar ar2 = e(r2_a)
 summarize rem
 estadd scalar ymean = r(mean)
 estadd local yearfe "Yes", replace
 estadd local indfe "Yes", replace
 
-eststo regression4: reghdfe rank_rem visib $control_variables, absorb(fyear ff_48) vce(robust)
+eststo regression5: reghdfe rank_rem visib $control_variables, absorb(fyear ff_48) vce(cluster i.lpermno#i.fyear) 
 estadd scalar ar2 = e(r2_a)
 summarize rank_rem
 estadd scalar ymean = r(mean)
 estadd local yearfe "Yes", replace
 estadd local indfe "Yes", replace
 
-esttab regression1 regression2 regression3 regression4 using "$output\ttest_psm.tex", append ///
-mgroups("Accrual Earnings Management" "Real Earnings Management", pattern(1 0 1 0) prefix(\multicolumn{@span}{c}{) suffix(}) span erepeat(\cmidrule(lr){@span})) ///
-mtitles("AEM" "AEM Rank" "REM" "REM Rank") collabels(none) booktabs label scalar(ymean) ///
+esttab regression1 regression2 regression3 regression4 regression5 using "$output\ttest_psm.tex", append ///
+mgroups("Accrual Earnings Management" "Real Earnings Management", pattern(1 0 0 1 0) prefix(\multicolumn{@span}{c}{) suffix(}) span erepeat(\cmidrule(lr){@span})) ///
+mtitles("AEM (performance-adj.)" "AEM (modified Jone's')" "AEM Rank" "REM" "REM Rank") collabels(none) booktabs label scalar(ymean) ///
 stats(yearfe indfe N ymean ar2, fmt(0 0 0 2 2) labels("Year FE" "Industry FE" "N" "Dep mean" "Adjusted R-sq")) ///
-prehead("\scalebox{0.8}{\begin{tabular}{lcccc}\toprule")  ///
-posthead("\midrule\multicolumn{5}{c}{\textbf{Panel B: PSM Sample Regression}}\\") ///
-postfoot("\bottomrule\end{tabular}}\end{center}\footnotesize{Notes: The analysis is conducted among the obtained sample after PSM. The dependent variables are indicated at the top of each column. A description of all variables can be found in Table \ref{tab: variabledescriptions}. The dependent variables in columns 1-2 are: a firm's accrual earnings management, and the rank of the firm's accrual earnings management, respectively. The dependent variables in columns 3-4 are: a firm's real earnings management, and the rank of the firm's real earnings management, respectively. Year fixed effects and industry fixed effects are included in all regressions. Standard errors are heteroskedastic-robust. *** p < 1\%, ** p < 5\%, * p < 10\%.}\end{table}") 
+prehead("\scalebox{0.8}{\begin{tabular}{lccccc}\toprule")  ///
+posthead("\midrule\multicolumn{6}{c}{\textbf{Panel B: PSM Sample Regression}}\\") ///
+postfoot("\bottomrule\end{tabular}}\end{center}\footnotesize{Notes: The analysis is conducted among the obtained sample after PSM. The dependent variables are indicated at the top of each column. A description of all variables can be found in Table \ref{tab: variabledescriptions}. The dependent variables in columns 1-3 are: a firm's accrual earnings management (AEM) calculated using the performance-adjusted method, a firm's AEM calculated using the modified Jone's model, and the rank of the firm's AEM (modified Jone's), respectively. The dependent variables in columns 4-5 are: a firm's real earnings management (REM), and the rank of the firm's REM, respectively. Year fixed effects and industry fixed effects are included in all regressions. Standard errors are clustered at the level of firm and year. *** p < 1\%, ** p < 5\%, * p < 10\%.}\end{table}") 
 exit
 esttab regression1 regression2 regression3 regression4 using "$output\Word_results.rtf", replace ///
 mgroups("Accrual Earnings Management" "Real Earnings Management", pattern(1 0 1 0)) ///
 mtitles("AEM" "AEM Rank" "REM" "REM Rank") nonumbers collabels(none) label scalar(ymean`') ///
 stats(yearfe indfe N ymean ar2, fmt(0 0 0 2 2) labels("Year FE" "Industry FE" "N" "Dep mean" "Adjusted R-sq")) ///
 title("Table 4: The Effect of Visibility on Earnings Management") ///
-note("Notes: The dependent variable in columns 1-2 is a firm's accrual earnings management; the dependent variable in columns 3-4 is a firm's real earnings management.")
-exit 
+note("Notes: The dependent variable in columns 1-2 is a firm's accrual earnings management; the dependent variable in columns 3-4 is a firm's real earnings management.") 
 
 * ========== DID ==========
 *2466 observations

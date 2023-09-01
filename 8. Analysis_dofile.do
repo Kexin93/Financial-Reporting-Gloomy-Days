@@ -262,6 +262,7 @@ drop if _merge == 2
 label var dacck "AEM (performance-adjusted)"
 
 save "$output\final_data_47662", replace
+exit
 
 eststo summ_stats: estpost sum $summ_vars
 
@@ -299,7 +300,6 @@ label cells("count(pattern(1 0 0 0 0 0)) mean(pattern(0 1 0 0 0 0) fmt(3)) sd(pa
 nonumbers replace booktabs collabels(none) mtitles("N" "Mean" "Std. Dev." "Bottom 25\%" "Median" "Top 25\%") ///
 prehead("\begin{table}\begin{center}\caption{Summary Statistics of Firm Characteristics}\label{tab: summstats1}\tabcolsep=0.1cm\scalebox{0.67}{\begin{tabular}{lcccccc}\toprule")  ///
 postfoot("\bottomrule\end{tabular}}\end{center}\footnotesize{Notes: This table reports the descriptive statistics of firm-level characteristics for 12,191 firm-year-station observations from 2003 to 2017. Firm characteristics are obtained from Compustat and I/B/E/S data. We restrict the sample to be within a year before the actual period end date of each firm's financial report. The characteristics include the following: $AEM$ (performance-adjusted) is computed using the cross-sectional performance-adjusted modified Jones model as in Kothari et al.(2005); $AEM$ (modified Jone's) is calculated following Dechow (1995); $AEM \ Rank$ denotes the rank of $AEM (modified Jone's)$ for the year and industry;  REM, the aggregate measure of real earnings management, is the sum of $REM_{CFO}$, $REM_{PROD}$, and $REM_{DISX}$, where $REM_{CFO}$ and $REM_{DISX}$ are the negative values of discretionary cash flows and discretionary expenses, respectively; $REM \ Rank$ represents the rank of $REM$ for the year and industry;  $REM \ Variability$ indicates the standard deviation of $REM$ across the five consecutive years prior to the firm's actual period end date; $REM_{CFO}$ denotes abnormal cash flows from operations, which are measured as the deviation of the firm's actual cash flows from the normal level of discretionary cash flows as are predicted using the corresponding industry-year regression; $REM_{PROD}$ denotes abnormal production costs, and is measured as the deviation of the firm's actual production costs from the normal level of production costs as are predicted using the corresponding industry-year regression; $REM_{DISX}$, discretionary expenses, are measured as the deviation of the firm's actual expenses from the normal level of discretionary expenses as are predicted using the corresponding industry-year regression. $Size$, the firm's size, is calculated as the logged value of the firm's total assets in the current fiscal year; $BM$, the book-to-market ratio in the current fiscal year, is calculated as the ratio of the firm's book value of equity and the market value of equity; $ROA$ is the ratio of the firm's income before extraordinary items and total assets; $Leverage$, the leverage ratio in the current fiscal year, is defined as the ratio between the firm's total liabilities and total assets;  $Firm \ Age$, the age of the firm, is defined as the number of years starting from the first time when the firm's stock returns are reported in the monthly stock files of the Center for Research in Security Prices (CRSP); $Big \ N$ is an indicator that takes 1 if the firm was audited by a Big N CPA firm, and 0 otherwise;  $Auditor \ Tenure$ denotes the number of years that the firm was audited by a same auditor; $NOA$ is the ratio between the firm's net operating assets at the beginning of the year and lagged sales during the corresponding industry-year (net operating assets are calculated using shareholders' equity less cash and marketable securities, plus total debt); $Number \ of \ Analysts \ Following$, the number of analysts following the firm in the current fiscal year, is obtained from I/B/E/S; $Sales$ refers to the sales of the firm in the current fiscal year. Standard deviations are in parentheses. *** p < 1\%, ** p < 5\%, * p < 10\%.}\end{table}") 
-exit
 
 * .rtf
 esttab obs Mean std p25 p50 p75 using "$output\Word_results.rtf", ///
@@ -560,7 +560,7 @@ mtitles("CSR Strength" "CSR Concern" "CSR Strength" "CSR Concern") collabels(non
 stats(yearfe indfe firmcont N ymean ar2, fmt(0 0 0 0 2 2) labels("Year FE" "Industry FE" "Firm Controls" "N" "Dep mean" "Adjusted R-sq")) ///
 prehead("\begin{table}\begin{center}\caption{The Effect of Visibility on Earnings Management by the Degree of CSR Behaviors}\label{tab: table14}\tabcolsep=0.1cm\begin{tabular}{lcccc}\toprule")  ///
 posthead("\midrule") postfoot("\bottomrule\end{tabular}\\\end{center}\footnotesize{Notes: This table reports how the effects of visibility on AEM and REMdiffer by the degree of the corporate social responsibility (CSR). A description of all variables can be found in Table \ref{tab: variabledescriptions}. The dependent variable in columns (1) and (2) is AEM, and the dependent variable in columns (3) and (4) is REM. Firm controls are the same as in Table \ref{tab: table4}. Year fixed effects and industry fixed effects are included in all regressions. Standard errors are heteroskedastic-robust. *** p < 1\%, ** p < 5\%, * p < 10\%.}\end{table}") 
-exit
+
 *========== Table 15: visibility interacts with internal monitoring to REM ======================== 
 	eststo clear
 eststo regression1: reghdfe dacck visib CGOV_str_num c.visib#c.CGOV_str_num $control_variables, absorb(fyear ff_48) vce(cluster i.lpermno#i.fyear) //c.?
@@ -858,7 +858,7 @@ stats(yearfe indfe N ymean ar2, fmt(0 0 0 2 2) labels("Year FE" "Industry FE" "N
 title("Table 4: The Effect of Visibility on Earnings Management") ///
 note("Notes: The dependent variable in columns (1)-(2) is a firm's accrual earnings management; the dependent variable in columns (3)-(4) is a firm's real earnings management.")
 restore
-exit
+
 *========== Table 5: Decomposition of REM ========================
 eststo sales1: reghdfe d_cfo_neg visib $control_variables, absorb(fyear ff_48) vce(cluster i.lpermno#i.fyear)
 estadd scalar ar2 = e(r2_a)
@@ -1461,7 +1461,7 @@ label var coastal "Coastal Region"
 
 *============== Table 22: External Scrutiny: Auditor's Unqualified Opinion & Coastal ============
 	eststo clear
-eststo regression1: reghdfe rem visib $control_variables, absorb(fyear ff_48) vce(robust)
+eststo regression1: reghdfe rem visib $control_variables, absorb(fyear ff_48) vce(cluster i.lpermno#i.fyear)
 estadd scalar ar2 = e(r2_a)
 summarize rem
 estadd scalar ymean = r(mean)
@@ -1469,7 +1469,7 @@ estadd local yearfe "Yes", replace
 estadd local indfe "Yes", replace
 estadd local blcontrols "Yes", replace
 
-eststo regression2: reghdfe rem visib $control_variables coastal, absorb(fyear ff_48) vce(robust)
+eststo regression2: reghdfe rem visib $control_variables coastal, absorb(fyear ff_48) vce(cluster i.lpermno#i.fyear)
 estadd scalar ar2 = e(r2_a)
 summarize rem
 estadd scalar ymean = r(mean)
@@ -1477,7 +1477,7 @@ estadd local yearfe "Yes", replace
 estadd local indfe "Yes", replace
 estadd local blcontrols "Yes", replace
 
-eststo regression3: reghdfe rem visib $control_variables coastal c.visib#i.coastal, absorb(fyear ff_48) vce(robust)
+eststo regression3: reghdfe rem visib $control_variables coastal c.visib#i.coastal, absorb(fyear ff_48) vce(cluster i.lpermno#i.fyear)
 estadd scalar ar2 = e(r2_a)
 summarize rem
 estadd scalar ymean = r(mean)
@@ -1485,7 +1485,7 @@ estadd local yearfe "Yes", replace
 estadd local indfe "Yes", replace
 estadd local blcontrols "Yes", replace
 
-eststo regression4: reghdfe rank_rem visib $control_variables, absorb(fyear ff_48) vce(robust)
+eststo regression4: reghdfe rank_rem visib $control_variables, absorb(fyear ff_48) vce(cluster i.lpermno#i.fyear)
 estadd scalar ar2 = e(r2_a)
 summarize rem
 estadd scalar ymean = r(mean)
@@ -1493,7 +1493,7 @@ estadd local yearfe "Yes", replace
 estadd local indfe "Yes", replace
 estadd local blcontrols "Yes", replace
 
-eststo regression5: reghdfe rank_rem visib $control_variables coastal, absorb(fyear ff_48) vce(robust)
+eststo regression5: reghdfe rank_rem visib $control_variables coastal, absorb(fyear ff_48) vce(cluster i.lpermno#i.fyear)
 estadd scalar ar2 = e(r2_a)
 summarize rem
 estadd scalar ymean = r(mean)
@@ -1501,7 +1501,7 @@ estadd local yearfe "Yes", replace
 estadd local indfe "Yes", replace
 estadd local blcontrols "Yes", replace
 
-eststo regression6: reghdfe rank_rem visib $control_variables coastal c.visib#i.coastal, absorb(fyear ff_48) vce(robust)
+eststo regression6: reghdfe rank_rem visib $control_variables coastal c.visib#i.coastal, absorb(fyear ff_48) vce(cluster i.lpermno#i.fyear)
 estadd scalar ar2 = e(r2_a)
 summarize rem
 estadd scalar ymean = r(mean)
@@ -1514,7 +1514,8 @@ mgroups("Real Earnings Management" "Rank of Real Earnings Management", pattern(1
 nomtitles collabels(none) booktabs label scalar(ymean) drop($control_variables) ///
 stats(blcontrols yearfe indfe N ymean ar2, fmt(0 0 0 0 2 2) labels("Baseline Controls" "Year FE" "Industry FE" "N" "Dep mean" "Adjusted R-sq")) ///
 prehead("\begin{table}\begin{center}\caption{The Effect of Visibility on Real Earnings Management in Coastal Regions}\label{tab: table22}\tabcolsep=0.1cm\scalebox{0.8}{\begin{tabular}{lcccccc}\toprule")  ///
-posthead("\midrule") postfoot("\bottomrule\end{tabular}}\end{center}\footnotesize{Notes: This table reports the effects of visibility on the aggregate measure of real earnings management (REM) and the rank of REM. A description of all variables can be found in Table \ref{tab: variabledescriptions}. Columns (1)-(3) report the effects of visibility on REM, and columns (4)-(6) report the effects of visibility on the rank of REM. Columns (1) and (4) are the baseline specifications. Columns (2) and (5) include an indicator for whether the state the firm is located in is coastal as an additional control. Columns (3) and (6) further include the interaction term between the coastal indicator variable and visiblity as an additional control. Firm controls are the same as in Table \ref{tab: table4}. Year fixed effects and industry fixed effects are included in all regressions. Standard errors are heteroskedastic-robust. *** p < 1\%, ** p < 5\%, * p < 10\%.}\end{table}") 
+posthead("\midrule") postfoot("\bottomrule\end{tabular}}\end{center}\footnotesize{Notes: This table reports the effects of visibility on the aggregate measure of real earnings management (REM) and the rank of REM. A description of all variables can be found in Table \ref{tab: variabledescriptions}. Columns (1)-(3) report the effects of visibility on REM, and columns (4)-(6) report the effects of visibility on the rank of REM. Columns (1) and (4) are the baseline specifications. Columns (2) and (5) include an indicator for whether the state the firm is located in is coastal as an additional control. Columns (3) and (6) further include the interaction term between the coastal indicator variable and visiblity as an additional control. Firm controls are the same as in Table \ref{tab: table4}. Year fixed effects and industry fixed effects are included in all regressions. Standard errors are clustered at the level of firm and year. *** p < 1\%, ** p < 5\%, * p < 10\%.}\end{table}") 
+exit
 
 esttab regression1 regression2 regression3 regression4  regression5 regression6 using "$output\Word_results.rtf", append ///
 mgroups("Real Earnings Management" "Rank of Real Earnings Management", pattern(1 0 0 1 0 0)) ///
