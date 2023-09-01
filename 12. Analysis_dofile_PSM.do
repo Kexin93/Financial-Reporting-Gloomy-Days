@@ -18,8 +18,8 @@ global output "E:\Research材料\21. Air Pollution and Accounting\RESULTS"
 }
 
 else if "`c(username)'" == "Kexin Zhang"{
-global maindir "F:\21. Air Pollution and Accounting\DATA"
-global output "F:\21. Air Pollution and Accounting\RESULTS"
+global maindir "E:\21. Air Pollution and Accounting\DATA"
+global output "E:\21. Air Pollution and Accounting\RESULTS"
 }
 
 use "$maindir\Firm_Year_Weather", replace
@@ -223,7 +223,7 @@ gen visib_binary_neg = -visib_binary
 
 set seed 12345678
 *psmatch2 visib_binary $control_variables, outcome(rem) noreplacement ties radius caliper(0.00001)
-psmatch2 visib_binary $control_variables, outcome(rem) ai3 ///
+psmatch2 visib_binary $control_variables, outcome(rem) ai(3) ///
                      caliper(0.001) noreplacement descending common odds index logit ties ///
                      warnings quietly ate
 
@@ -292,7 +292,7 @@ stats(yearfe indfe N ymean ar2, fmt(0 0 0 2 2) labels("Year FE" "Industry FE" "N
 prehead("\scalebox{0.8}{\begin{tabular}{lcccc}\toprule")  ///
 posthead("\midrule\multicolumn{5}{c}{\textbf{Panel B: PSM Sample Regression}}\\") ///
 postfoot("\bottomrule\end{tabular}}\end{center}\footnotesize{Notes: The analysis is conducted among the obtained sample after PSM. The dependent variables are indicated at the top of each column. A description of all variables can be found in Table \ref{tab: variabledescriptions}. The dependent variables in columns 1-2 are: a firm's accrual earnings management, and the rank of the firm's accrual earnings management, respectively. The dependent variables in columns 3-4 are: a firm's real earnings management, and the rank of the firm's real earnings management, respectively. Year fixed effects and industry fixed effects are included in all regressions. Standard errors are heteroskedastic-robust. *** p < 1\%, ** p < 5\%, * p < 10\%.}\end{table}") 
-
+exit
 esttab regression1 regression2 regression3 regression4 using "$output\Word_results.rtf", replace ///
 mgroups("Accrual Earnings Management" "Real Earnings Management", pattern(1 0 1 0)) ///
 mtitles("AEM" "AEM Rank" "REM" "REM Rank") nonumbers collabels(none) label scalar(ymean`') ///

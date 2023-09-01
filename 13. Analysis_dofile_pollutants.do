@@ -18,8 +18,8 @@ global output "E:\Research材料\21. Air Pollution and Accounting\RESULTS"
 }
 
 else if "`c(username)'" == "Kexin Zhang"{
-global maindir "F:\21. Air Pollution and Accounting\DATA"
-global output "F:\21. Air Pollution and Accounting\RESULTS"
+global maindir "E:\21. Air Pollution and Accounting\DATA"
+global output "E:\21. Air Pollution and Accounting\RESULTS"
 }
 
 use "$maindir\Firm_Year_Weather", replace
@@ -204,7 +204,11 @@ sicff sic, ind(48)
 
 replace city = "Winston" if city == "Winston-Salem" & state == "NC"
 replace city = "New York" if city == "New York City" & state == "NY"
+
 save "$maindir\firm_years10883.dta", replace
+
+* Starting from here
+use "$output\final_data_47662", replace
 
 clear
 import excel "$maindir\US Pollution Indicators\Anualized pollutants by citycounty.xlsx", firstrow
@@ -268,10 +272,11 @@ keep if Pollutant == "PM2.5" & annulizedmethod == "Weighted Annual Mean"
 save "$maindir\US_PM25_weightedannualmean.dta", replace
 restore
 
-use "$maindir\firm_years10883.dta", replace
+use "$output\final_data_47662.dta", replace
+	capture drop _merge
 merge m:1 state city fyear using "$maindir\US_PM25_weightedannualmean.dta"
 keep if _m == 3 //3583 observations, or 762 state-city-fyears
-save "$maindir\firm_years10883_pollutantvalue.dta", replace
+save "$maindir\firm_years47662_pollutantvalue.dta", replace
 
 global control_variables size bm roa lev firm_age rank au_years oa_scale /*xrd_int*/ 
 
