@@ -563,7 +563,23 @@ posthead("\midrule") postfoot("\bottomrule\end{tabular}\\\end{center}\footnotesi
 exit
 *========== Table 15: visibility interacts with internal monitoring to REM ======================== 
 	eststo clear
-eststo regression1: reghdfe dacck visib CGOV_str_num c.visib#c.CGOV_str_num $control_variables, absorb(fyear ff_48) vce(robust) //c.?
+eststo regression1: reghdfe dacck visib CGOV_str_num c.visib#c.CGOV_str_num $control_variables, absorb(fyear ff_48) vce(cluster i.lpermno#i.fyear) //c.?
+estadd scalar ar2 = e(r2_a)
+summarize dacck
+estadd scalar ymean = r(mean)
+estadd local yearfe "Yes", replace
+estadd local indfe "Yes", replace
+estadd local firmcont "Yes", replace
+
+eststo regression2: reghdfe dacck visib CGOV_con_num c.visib#c.CGOV_con_num $control_variables, absorb(fyear ff_48) vce(cluster i.lpermno#i.fyear) //c.?
+estadd scalar ar2 = e(r2_a)
+summarize dacck
+estadd scalar ymean = r(mean)
+estadd local yearfe "Yes", replace
+estadd local indfe "Yes", replace
+estadd local firmcont "Yes", replace
+	
+eststo regression3: reghdfe dac visib CGOV_str_num c.visib#c.CGOV_str_num $control_variables, absorb(fyear ff_48) vce(cluster i.lpermno#i.fyear) //c.?
 estadd scalar ar2 = e(r2_a)
 summarize dac
 estadd scalar ymean = r(mean)
@@ -571,7 +587,7 @@ estadd local yearfe "Yes", replace
 estadd local indfe "Yes", replace
 estadd local firmcont "Yes", replace
 
-eststo regression2: reghdfe dacck visib CGOV_con_num c.visib#c.CGOV_con_num $control_variables, absorb(fyear ff_48) vce(robust) //c.?
+eststo regression4: reghdfe dac visib CGOV_con_num c.visib#c.CGOV_con_num $control_variables, absorb(fyear ff_48) vce(cluster i.lpermno#i.fyear) //c.?
 estadd scalar ar2 = e(r2_a)
 summarize dac
 estadd scalar ymean = r(mean)
@@ -579,7 +595,7 @@ estadd local yearfe "Yes", replace
 estadd local indfe "Yes", replace
 estadd local firmcont "Yes", replace
 
-eststo regression3: reghdfe rem visib CGOV_str_num c.visib#c.CGOV_str_num $control_variables, absorb(fyear ff_48) vce(robust)
+eststo regression5: reghdfe rem visib CGOV_str_num c.visib#c.CGOV_str_num $control_variables, absorb(fyear ff_48) vce(cluster i.lpermno#i.fyear)
 estadd scalar ar2 = e(r2_a)
 summarize rem
 estadd scalar ymean = r(mean)
@@ -587,7 +603,7 @@ estadd local yearfe "Yes", replace
 estadd local indfe "Yes", replace
 estadd local firmcont "Yes", replace
 
-eststo regression4: reghdfe rem visib CGOV_con_num c.visib#c.CGOV_con_num $control_variables, absorb(fyear ff_48) vce(robust)
+eststo regression6: reghdfe rem visib CGOV_con_num c.visib#c.CGOV_con_num $control_variables, absorb(fyear ff_48) vce(cluster i.lpermno#i.fyear)
 estadd scalar ar2 = e(r2_a)
 summarize rem
 estadd scalar ymean = r(mean)
@@ -595,12 +611,12 @@ estadd local yearfe "Yes", replace
 estadd local indfe "Yes", replace
 estadd local firmcont "Yes", replace
 
-esttab regression1 regression2 regression3 regression4 using "$output\table15.tex", replace ///
-mgroups("Accrual Earnings Management" "Real Earnings Management", pattern(1 0 1 0) prefix(\multicolumn{@span}{c}{) suffix(}) span erepeat(\cmidrule(lr){@span})) drop($control_variables) ///
-mtitles("Good CG" "Poor CG" "Good CG" "Poor CG") collabels(none) booktabs label scalar(ymean) order(visib CGOV_str_num c.visib#c.CGOV_str_num CGOV_con_num c.visib#c.CGOV_con_num) ///
+esttab regression1 regression2 regression3 regression4 regression5 regression6 using "$output\table15.tex", replace ///
+mgroups("Accrual Earnings Management" "Real Earnings Management", pattern(1 0 0 0 1 0) prefix(\multicolumn{@span}{c}{) suffix(}) span erepeat(\cmidrule(lr){@span})) drop($control_variables) ///
+mtitles("Good CG" "Poor CG" "Good CG" "Poor CG" "Good CG" "Poor CG") collabels(none) booktabs label scalar(ymean) order(visib CGOV_str_num c.visib#c.CGOV_str_num CGOV_con_num c.visib#c.CGOV_con_num) ///
 stats(yearfe indfe firmcont N ymean ar2, fmt(0 0 0 0 2 2) labels("Year FE" "Industry FE" "Firm Controls" "N" "Dep mean" "Adjusted R-sq")) ///
-prehead("\begin{table}\begin{center}\caption{The Effect of Visibility on Earnings Management by the Degree of Corporate Governance}\label{tab: table15}\tabcolsep=0.1cm\scalebox{0.9}{\begin{tabular}{lcccc}\toprule")  ///
-posthead("\midrule") postfoot("\bottomrule\end{tabular}}\end{center}\footnotesize{Notes: This table reports how the effects of visibility on AEM and REMdiffer by the degree of the internal corporate governance. A description of all variables can be found in Table \ref{tab: variabledescriptions}. The dependent variable in columns (1) and (2) is AEM, and the dependent variable in columns (3) and (4) is REM. Firm controls are the same as in Table \ref{tab: table4}. Year fixed effects and industry fixed effects are included in all regressions. Standard errors are heteroskedastic-robust. *** p < 1\%, ** p < 5\%, * p < 10\%.}\end{table}") 
+prehead("\begin{table}\begin{center}\caption{The Effect of Visibility on Earnings Management by the Degree of Corporate Governance}\label{tab: table15}\tabcolsep=0.1cm\scalebox{0.9}{\begin{tabular}{lcccccc}\toprule")  ///
+posthead("\midrule") postfoot("\bottomrule\end{tabular}}\end{center}\footnotesize{Notes: This table reports how the effects of visibility on AEM and REM differ by the degree of the internal corporate governance. A description of all variables can be found in Table \ref{tab: variabledescriptions}. The dependent variable in columns (1)-(4) is AEM, and the dependent variable in columns (5) and (6) is REM. The AEM measure in columns (1) and (2) is calculated using the performance-adjusted model, and the AEM measure in columns (3) and (4) is calculated using the modified Jone's model. Firm controls are the same as in Table \ref{tab: table4}. Year fixed effects and industry fixed effects are included in all regressions. Standard errors are clustered at the level of firm and year. *** p < 1\%, ** p < 5\%, * p < 10\%.}\end{table}") 
 
 *======== Table 4: Regression (Signed) Subsample where Overall CGOV indicators are not missing =============================
 	eststo clear
@@ -890,7 +906,7 @@ esttab sales1 sales2 overprod1 overprod2 expenditure1 expenditure2 using "$outpu
 depvars collabels(none) booktabs label scalar(ymean) ///
 stats(yearfe indfe N ymean ar2, fmt(0 0 0 2 2) labels("Year FE" "Industry FE" "N" "Dep mean" "Adjusted R-sq")) ///
 prehead("\begin{table}\begin{center}\caption{The Effects of Visibility on Individual REM Measures}\label{tab: table5}\tabcolsep=0.1cm\scalebox{0.78}{\begin{tabular}{lcccccc}\toprule")  ///
-posthead("\midrule") postfoot("\bottomrule\end{tabular}}\end{center}\footnotesize{Notes: The table reports the effects of visibility on each component of the aggregate measure of real earnings management (REM). A description of all variables can be found in Table \ref{tab: variabledescriptions}. The dependent variables are indicated at the top of each column. The dependent variables in columns (1)-(2) are: the discretionary cash flow component of a firm's REM, and the rank of this component. To be consistent with the sign of the aggregate measure of REM, we take the negative value of discretionary cash flows. The dependent variables in columns (3)-(4) are: the production cost component of a firm's REM, and the rank of this component. The dependent variables in columns (5)-(6) are: the discretionary expense component of a firm's REM, and the rank of this component. To be consistent with the sign of the aggregate measure of REM, we take the negative value of discretionary expenses. Year fixed effects and industry fixed effects are included in all regressions. Standard errors are heteroskedastic-robust.  *** p < 1\%, ** p < 5\%, * p < 10\%.}\end{table}") 
+posthead("\midrule") postfoot("\bottomrule\end{tabular}}\end{center}\footnotesize{Notes: The table reports the effects of visibility on each component of the aggregate measure of real earnings management (REM). A description of all variables can be found in Table \ref{tab: variabledescriptions}. The dependent variables are indicated at the top of each column. The dependent variables in columns (1)-(2) are: the discretionary cash flow component of a firm's REM, and the rank of this component. To be consistent with the sign of the aggregate measure of REM, we take the negative value of discretionary cash flows. The dependent variables in columns (3)-(4) are: the production cost component of a firm's REM, and the rank of this component. The dependent variables in columns (5)-(6) are: the discretionary expense component of a firm's REM, and the rank of this component. To be consistent with the sign of the aggregate measure of REM, we take the negative value of discretionary expenses. Year fixed effects and industry fixed effects are included in all regressions. Standard errors are clustered at the level of firm and year.  *** p < 1\%, ** p < 5\%, * p < 10\%.}\end{table}") 
 
 esttab sales1 sales2 overprod1 overprod2 expenditure1 expenditure2 using "$output\Word_results.rtf", replace ///
 depvars nonumbers collabels(none) label scalar(ymean)  ///
@@ -1050,7 +1066,15 @@ title("Table 7: The Effect of Visibility on Earnings Management") drop($control_
 
 *========== Table 8: External Monitoring? Analyst ======================== Yes, add cover (#of analysts following) as a mechanism
 	eststo clear
-eststo regression1: reghdfe dac visib cover c.visib#c.cover $control_variables, absorb(fyear ff_48) vce(robust) //c.?
+eststo regression1: reghdfe dacck visib cover c.visib#c.cover $control_variables, absorb(fyear ff_48) vce(cluster i.lpermno#i.fyear) //c.?
+estadd scalar ar2 = e(r2_a)
+summarize dacck
+estadd scalar ymean = r(mean)
+estadd local yearfe "Yes", replace
+estadd local indfe "Yes", replace
+estadd local firmcont "Yes", replace	
+
+eststo regression2: reghdfe dac visib cover c.visib#c.cover $control_variables, absorb(fyear ff_48) vce(cluster i.lpermno#i.fyear) //c.?
 estadd scalar ar2 = e(r2_a)
 summarize dac
 estadd scalar ymean = r(mean)
@@ -1058,7 +1082,7 @@ estadd local yearfe "Yes", replace
 estadd local indfe "Yes", replace
 estadd local firmcont "Yes", replace
 
-eststo regression2: reghdfe rank_dac visib cover c.visib#c.cover $control_variables, absorb(fyear ff_48) vce(robust) //c.?
+eststo regression3: reghdfe rank_dac visib cover c.visib#c.cover $control_variables, absorb(fyear ff_48) vce(cluster i.lpermno#i.fyear) //c.?
 estadd scalar ar2 = e(r2_a)
 summarize dac
 estadd scalar ymean = r(mean)
@@ -1066,7 +1090,7 @@ estadd local yearfe "Yes", replace
 estadd local indfe "Yes", replace
 estadd local firmcont "Yes", replace
 
-eststo regression3: reghdfe rem visib cover c.visib#c.cover $control_variables, absorb(fyear ff_48) vce(robust)
+eststo regression4: reghdfe rem visib cover c.visib#c.cover $control_variables, absorb(fyear ff_48) vce(cluster i.lpermno#i.fyear)
 estadd scalar ar2 = e(r2_a)
 summarize rem
 estadd scalar ymean = r(mean)
@@ -1074,7 +1098,7 @@ estadd local yearfe "Yes", replace
 estadd local indfe "Yes", replace
 estadd local firmcont "Yes", replace
 
-eststo regression4: reghdfe rank_rem visib cover c.visib#c.cover $control_variables, absorb(fyear ff_48) vce(robust)
+eststo regression5: reghdfe rank_rem visib cover c.visib#c.cover $control_variables, absorb(fyear ff_48) vce(cluster i.lpermno#i.fyear)
 estadd scalar ar2 = e(r2_a)
 summarize rem
 estadd scalar ymean = r(mean)
@@ -1082,12 +1106,12 @@ estadd local yearfe "Yes", replace
 estadd local indfe "Yes", replace
 estadd local firmcont "Yes", replace
 
-esttab regression1 regression2 regression3 regression4 using "$output\table8.tex", replace ///
-mgroups("Accrual Earnings Management" "Real Earnings Management", pattern(1 0 1 0) prefix(\multicolumn{@span}{c}{) suffix(}) span erepeat(\cmidrule(lr){@span})) drop($control_variables) ///
-mtitles("AEM" "AEM Rank" "REM" "REM Rank") collabels(none) booktabs label scalar(ymean) order(visib cover c.visib#c.cover) ///
+esttab regression1 regression2 regression3 regression4 regression5 using "$output\table8.tex", replace ///
+mgroups("Accrual Earnings Management" "Real Earnings Management", pattern(1 0 0 1 0) prefix(\multicolumn{@span}{c}{) suffix(}) span erepeat(\cmidrule(lr){@span})) drop($control_variables) ///
+mtitles("AEM (performance-adj.)" "AEM (modified Jone's)" "AEM Rank" "REM" "REM Rank") collabels(none) booktabs label scalar(ymean) order(visib cover c.visib#c.cover) ///
 stats(yearfe indfe firmcont N ymean ar2, fmt(0 0 0 0 2 2) labels("Year FE" "Industry FE" "Firm Controls" "N" "Dep mean" "Adjusted R-sq")) ///
-prehead("\begin{table}\begin{center}\caption{The Effect of Visibility on Earnings Management by the Degree of External Control}\label{tab: table8}\tabcolsep=0.1cm\scalebox{0.9}{\begin{tabular}{lcccccc}\toprule")  ///
-posthead("\midrule") postfoot("\bottomrule\end{tabular}}\end{center}\footnotesize{Notes: This table reports how the effects of visibility on AEM, the rank of AEM, REM, and the rank of REM differ by the degree of external monitoring. A description of all variables can be found in Table \ref{tab: variabledescriptions}. The dependent variable in column (1) is AEM, the dependent variable in column (2) is the rank of AEM, the dependent variable in column (3) is REM, and the dependent variable in column (4) is the rank of REM. Firm controls are the same as in Table \ref{tab: table4}.  Year fixed effects and industry fixed effects are included in all regressions. Standard errors are heteroskedastic-robust. *** p < 1\%, ** p < 5\%, * p < 10\%.}\end{table}") 
+prehead("\begin{table}\begin{center}\caption{The Effect of Visibility on Earnings Management by the Degree of External Control}\label{tab: table8}\tabcolsep=0.1cm\scalebox{0.9}{\begin{tabular}{lccccc}\toprule")  ///
+posthead("\midrule") postfoot("\bottomrule\end{tabular}}\end{center}\footnotesize{Notes: This table reports how the effects of visibility on AEM, the rank of AEM, REM, and the rank of REM differ by the degree of external monitoring. A description of all variables can be found in Table \ref{tab: variabledescriptions}. The dependent variable in column (1) is the performance-adjusted measure of AEM, the dependent variable in column (2) is AEM calculated using the modified Jone's method, the dependent variable in column (3) is the rank of AEM (modified Jone's), the dependent variable in column (4) is REM, and the dependent variable in column (5) is the rank of REM. Firm controls are the same as in Table \ref{tab: table4}.  Year fixed effects and industry fixed effects are included in all regressions. Standard errors are clustered at the level of firm and year. *** p < 1\%, ** p < 5\%, * p < 10\%.}\end{table}") 
 
 esttab regression1 regression2 regression3 regression4 using "$output\Word_results.rtf", replace ///
 mgroups("Accrual Earnings Management" "Real Earnings Management", pattern(1 0 1 0)) ///
@@ -1234,7 +1258,7 @@ global control_variables size bm roa lev firm_age /*rank*/ au_years oa_scale /*x
 xtset lpermno fyear
 
 	eststo clear
-eststo regression1: reghdfe rem visib $control_variables, absorb(fyear ff_48) vce(robust)
+eststo regression1: reghdfe rem visib $control_variables, absorb(fyear ff_48) vce(cluster i.lpermno#i.fyear)
 estadd scalar ar2 = e(r2_a)
 summarize rem
 estadd scalar ymean = r(mean)
@@ -1242,7 +1266,7 @@ estadd local yearfe "Yes", replace
 estadd local indfe "Yes", replace
 estadd local blcontrols "Yes", replace
 
-eststo regression2: reghdfe rem visib $control_variables rank, absorb(fyear ff_48) vce(robust)
+eststo regression2: reghdfe rem visib $control_variables rank, absorb(fyear ff_48) vce(cluster i.lpermno#i.fyear)
 estadd scalar ar2 = e(r2_a)
 summarize rem
 estadd scalar ymean = r(mean)
@@ -1250,7 +1274,7 @@ estadd local yearfe "Yes", replace
 estadd local indfe "Yes", replace
 estadd local blcontrols "Yes", replace
 
-eststo regression3: reghdfe rem visib $control_variables rank c.visib#c.rank, absorb(fyear ff_48) vce(robust)
+eststo regression3: reghdfe rem visib $control_variables rank c.visib#c.rank, absorb(fyear ff_48) vce(cluster i.lpermno#i.fyear)
 estadd scalar ar2 = e(r2_a)
 summarize rem
 estadd scalar ymean = r(mean)
@@ -1258,7 +1282,7 @@ estadd local yearfe "Yes", replace
 estadd local indfe "Yes", replace
 estadd local blcontrols "Yes", replace
 
-eststo regression4: reghdfe rank_rem visib $control_variables, absorb(fyear ff_48) vce(robust)
+eststo regression4: reghdfe rank_rem visib $control_variables, absorb(fyear ff_48) vce(cluster i.lpermno#i.fyear)
 estadd scalar ar2 = e(r2_a)
 summarize rem
 estadd scalar ymean = r(mean)
@@ -1266,7 +1290,7 @@ estadd local yearfe "Yes", replace
 estadd local indfe "Yes", replace
 estadd local blcontrols "Yes", replace
 
-eststo regression5: reghdfe rank_rem visib $control_variables rank, absorb(fyear ff_48) vce(robust)
+eststo regression5: reghdfe rank_rem visib $control_variables rank, absorb(fyear ff_48) vce(cluster i.lpermno#i.fyear)
 estadd scalar ar2 = e(r2_a)
 summarize rem
 estadd scalar ymean = r(mean)
@@ -1274,7 +1298,7 @@ estadd local yearfe "Yes", replace
 estadd local indfe "Yes", replace
 estadd local blcontrols "Yes", replace
 		
-eststo regression6: reghdfe rank_rem visib $control_variables rank c.visib#c.rank, absorb(fyear ff_48) vce(robust)
+eststo regression6: reghdfe rank_rem visib $control_variables rank c.visib#c.rank, absorb(fyear ff_48) vce(cluster i.lpermno#i.fyear)
 estadd scalar ar2 = e(r2_a)
 summarize rem
 estadd scalar ymean = r(mean)
@@ -1287,7 +1311,7 @@ mgroups("Real Earnings Management" "Rank of Real Earnings Management", pattern(1
 nomtitles collabels(none) booktabs label scalar(ymean) drop($control_variables) ///
 stats(blcontrols yearfe indfe N ymean ar2, fmt(0 0 0 0 2 2) labels("Baseline Controls" "Year FE" "Industry FE" "N" "Dep mean" "Adjusted R-sq")) ///
 prehead("\begin{table}\begin{center}\caption{The Effect of Visibility on Real Earnings Management with Big N Auditors}\label{tab: table25}\tabcolsep=0.1cm\scalebox{0.85}{\begin{tabular}{lcccccc}\toprule")  ///
-posthead("\midrule") postfoot("\bottomrule\end{tabular}}\end{center}\footnotesize{Notes: This table reports the effects of visibility on the aggregate measure of real earnings management (REM) and the rank of REM. A description of all variables can be found in Table \ref{tab: variabledescriptions}. Columns (1)-(3) report the effects of visibility on REM, and columns (4)-(6) report the effects of visibility on the rank of REM. Columns (1) and (4) are the baseline specifications. Columns (2) and (5) include an indicator for Big N Auditors as an additional control. Columns (3) and (6) further include the interaction term of the Big N Auditor indicator and average visibility the firm is exposed to during the three months prior to its actual period end date as an additional control. Firm controls are the same as in Table \ref{tab: table4}. Year fixed effects and industry fixed effects are included in all regressions. Standard errors are heteroskedastic-robust. *** p < 1\%, ** p < 5\%, * p < 10\%.}\end{table}") 
+posthead("\midrule") postfoot("\bottomrule\end{tabular}}\end{center}\footnotesize{Notes: This table reports the effects of visibility on the aggregate measure of real earnings management (REM) and the rank of REM. A description of all variables can be found in Table \ref{tab: variabledescriptions}. Columns (1)-(3) report the effects of visibility on REM, and columns (4)-(6) report the effects of visibility on the rank of REM. Columns (1) and (4) are the baseline specifications. Columns (2) and (5) include an indicator for Big N Auditors as an additional control. Columns (3) and (6) further include the interaction term of the Big N Auditor indicator and average visibility the firm is exposed to during the three months prior to its actual period end date as an additional control. Firm controls are the same as in Table \ref{tab: table4}. Year fixed effects and industry fixed effects are included in all regressions. Standard errors are clustered at the level of firm and year. *** p < 1\%, ** p < 5\%, * p < 10\%.}\end{table}") 
 
 esttab regression1 regression2 regression3 regression4  regression5 regression6 using "$output\Word_results.rtf", append ///
 mgroups("Real Earnings Management" "Rank of Real Earnings Management", pattern(1 0 0 1 0 0)) ///
