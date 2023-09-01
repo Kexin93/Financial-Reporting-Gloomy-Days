@@ -75,8 +75,8 @@ leverage (Teoh et al., 1998; Kim and Park, 2005), and the presence of BIG 4 audi
 1998; Francis et al., 2005) are controlled and expressed as controled */
 
 /*Table 1: Summary Statistics*/
-global summ_vars dac rank_dac rem rank_rem stdz_rem rank_d_cfo d_cfo d_prod rank_d_prod ///
-d_discexp rank_d_discexp size bm roa lev firm_age rank au_years /*<--tenure*/ oa_scale /*<--noa*/ /*xrd_int */ /*cycle*/
+global summ_vars dacck dac rank_dac rem rank_rem stdz_rem d_cfo rank_d_cfo d_prod rank_d_prod ///
+d_discexp rank_d_discexp size bm roa lev firm_age rank au_years /*<--tenure*/ oa_scale cover sale /*<--noa*/ /*xrd_int */ /*cycle*/
 
 
 *============= Constructing Variables ===================
@@ -176,7 +176,7 @@ gen KZ=-1.002*CF_lscaled- 39.368*DIV_lscaled- 1.315*C_lscaled+ 3.319*BLEV+ 0.283
 * ============ Labeling =================
 label var firm_ID "firm-year ID"
 label var firm_FID "firm FID = firm_ID - 1"
-label var dac "AEM"
+label var dac "AEM (modified Jone's)"
 label var absdac "|AEM|" 
 label var rank_dac "AEM Rank"
 *label var rank_absdac ""
@@ -260,6 +260,7 @@ append using `data2'
 merge 1:1 lpermno fyear using `convk'	
 
 drop if _merge == 2
+label var dacck "AEM (performance-adjusted)"
 
 save "$output\final_data_47662", replace
 
@@ -298,8 +299,8 @@ esttab obs Mean std p25 p50 p75 using "$output\summ_stats_firm.tex", fragment  /
 label cells("count(pattern(1 0 0 0 0 0)) mean(pattern(0 1 0 0 0 0) fmt(3)) sd(pattern(0 0 1 0 0 0) fmt(3)) p25(pattern(0 0 0 1 0 0) fmt(3)) p50(pattern(0 0 0 0 1 0) fmt(3)) p75(pattern(0 0 0 0 0 1) fmt(3))") noobs  ///
 nonumbers replace booktabs collabels(none) mtitles("N" "Mean" "Std. Dev." "Bottom 25\%" "Median" "Top 25\%") ///
 prehead("\begin{table}\begin{center}\caption{Summary Statistics of Firm Characteristics}\label{tab: summstats1}\tabcolsep=0.1cm\scalebox{0.67}{\begin{tabular}{lcccccc}\toprule")  ///
-postfoot("\bottomrule\end{tabular}}\end{center}\footnotesize{Notes: This table reports the descriptive statistics of firm-level characteristics for 12,191 firm-year-station observations from 2003 to 2017. Firm characteristics are obtained from Compustat and I/B/E/S data. We restrict the sample to be within 90 days before the actual period end date of each firm's financial report. The characteristics include the following: AEM, signed discretionary accruals (DA), which are computed using the cross-sectional modified Jones model as in Kothari et al.(2005); REM, the aggregate measure of real earnings management, is the sum of $REM_{CFO}$, $REM_{PROD}$, and $REM_{DISX}$, where $REM_{CFO}$ and $REM_{DISX}$ are the negative value of discretionary cash flows and discretionary expenses, respectively; $AEM \ Rank$ denotes the rank of $AEM$ for the year and industry; $REM \ Rank$ represents the rank of $REM$ for the year and industry; $REM \ Variability$ indicates the standard deviation of $REM$ across the five consecutive years prior to the firm's actual period end date; $REM_{CFO}$ denotes abnormal cash flows from operations, which are measured as the deviation of the firm's actual cash flows from the normal level of discretionary cash flows as are predicted using the corresponding industry-year regression; $REM_{PROD}$ denotes abnormal production costs, and is measured as the deviation of the firm's actual production costs from the normal level of production costs as are predicted using the corresponding industry-year regression; $REM_{DISX}$, discretionary expenses, are measured as the deviation of the firm's actual expenses from the normal level of discretionary expenses as are predicted using the corresponding industry-year regression. $Size$, the firm's size, is calculated as the logged value of the firm's total assets in the current fiscal year; $BM$, the book-to-market ratio in the current fiscal year, is calculated as the ratio of the firm's book value of equity and the market value of equity; $ROA$ is the ratio of the firm's income before extraordinary items and total assets; $Leverage$, the leverage ratio in the current fiscal year, is defined as the ratio between the firm's total liabilities and total assets; $Firm \ Age$, the age of the firm, is defined as the number of years starting from the first time when the firm’s stock returns are reported in the monthly stock files of the Center for Research in Security Prices (CRSP); $Big \ N$ is an indicator that takes 1 if the firm was audited by a Big N CPA firm, and 0 otherwise; $Auditor \ Tenure$ denotes the number of years that the firm was audited by a same auditor; $NOA$ is the ratio between the firm's net operating assets at the beginning of the year and lagged sales during the corresponding industry-year (net operating assets are calculated using shareholders’ equity less cash and marketable securities, plus total debt); Tobin's Q denotes the market value of the firm; $Number \ of \ Analysts \ Following$, the number of analysts following the firm in the current fiscal year, is obtained from I/B/E/S; $Sales$ refers to the sales of the firm in the current fiscal year. Standard deviations are in parentheses. *** p < 1\%, ** p < 5\%, * p < 10\%.}\end{table}") 
-
+postfoot("\bottomrule\end{tabular}}\end{center}\footnotesize{Notes: This table reports the descriptive statistics of firm-level characteristics for 12,191 firm-year-station observations from 2003 to 2017. Firm characteristics are obtained from Compustat and I/B/E/S data. We restrict the sample to be within a year before the actual period end date of each firm's financial report. The characteristics include the following: $AEM$ (performance-adjusted) is computed using the cross-sectional performance-adjusted modified Jones model as in Kothari et al.(2005); $AEM$ (modified Jone's) is calculated following Dechow (1995); $AEM \ Rank$ denotes the rank of $AEM (modified Jone's)$ for the year and industry;  REM, the aggregate measure of real earnings management, is the sum of $REM_{CFO}$, $REM_{PROD}$, and $REM_{DISX}$, where $REM_{CFO}$ and $REM_{DISX}$ are the negative values of discretionary cash flows and discretionary expenses, respectively; $REM \ Rank$ represents the rank of $REM$ for the year and industry;  $REM \ Variability$ indicates the standard deviation of $REM$ across the five consecutive years prior to the firm's actual period end date; $REM_{CFO}$ denotes abnormal cash flows from operations, which are measured as the deviation of the firm's actual cash flows from the normal level of discretionary cash flows as are predicted using the corresponding industry-year regression; $REM_{PROD}$ denotes abnormal production costs, and is measured as the deviation of the firm's actual production costs from the normal level of production costs as are predicted using the corresponding industry-year regression; $REM_{DISX}$, discretionary expenses, are measured as the deviation of the firm's actual expenses from the normal level of discretionary expenses as are predicted using the corresponding industry-year regression. $Size$, the firm's size, is calculated as the logged value of the firm's total assets in the current fiscal year; $BM$, the book-to-market ratio in the current fiscal year, is calculated as the ratio of the firm's book value of equity and the market value of equity; $ROA$ is the ratio of the firm's income before extraordinary items and total assets; $Leverage$, the leverage ratio in the current fiscal year, is defined as the ratio between the firm's total liabilities and total assets;  $Firm \ Age$, the age of the firm, is defined as the number of years starting from the first time when the firm's stock returns are reported in the monthly stock files of the Center for Research in Security Prices (CRSP); $Big \ N$ is an indicator that takes 1 if the firm was audited by a Big N CPA firm, and 0 otherwise;  $Auditor \ Tenure$ denotes the number of years that the firm was audited by a same auditor; $NOA$ is the ratio between the firm's net operating assets at the beginning of the year and lagged sales during the corresponding industry-year (net operating assets are calculated using shareholders' equity less cash and marketable securities, plus total debt); $Number \ of \ Analysts \ Following$, the number of analysts following the firm in the current fiscal year, is obtained from I/B/E/S; $Sales$ refers to the sales of the firm in the current fiscal year. Standard deviations are in parentheses. *** p < 1\%, ** p < 5\%, * p < 10\%.}\end{table}") 
+exit
 
 * .rtf
 esttab obs Mean std p25 p50 p75 using "$output\Word_results.rtf", ///
@@ -378,7 +379,7 @@ title("Summary Statistics")
 
 *========= Table 2: t-test table ========================
 global summ_vars dac rank_dac rem rank_rem stdz_rem d_cfo rank_d_cfo d_prod rank_d_prod ///
-d_discexp rank_d_discexp size bm roa lev firm_age rank au_years /*<--tenure*/ oa_scale /*<--noa*/ /*xrd_int */ /*cycle*/
+d_discexp rank_d_discexp size bm roa lev firm_age rank au_years /*<--tenure*/ oa_scale cover sale /*<--noa*/ /*xrd_int */ /*cycle*/
 
 summarize visib if !mi(visib), d
 local visib_median = r(p50) 
