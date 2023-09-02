@@ -267,6 +267,9 @@ merge 1:1 lpermno fyear using `convk'
 
 drop if _merge == 2
 label var dacck "AEM (performance-adjusted)"
+
+hhi5 sale, by(ff_48 fyear) //hhi_sale
+label var hhi_sale "HHI index"		
 	
 *use "$output\final_data_47662", replace
 
@@ -281,28 +284,34 @@ label var au_years "Auditor Tenure"
 label var firm_age "Firm Age"
 label var rank "Big N" //binary
 
+global control_variables_aem size bm roa lev firm_age rank au_years oa_scale /*xrd_int*/
+global control_variables_rem size bm roa lev firm_age rank au_years hhi_sale /*xrd_int*/
+
+*use "$output\final_data_47662", replace
+
 	capture drop visib_median
 	capture drop visib_binary
+	capture drop visib_binary_neg
 egen visib_median = median(visib)
 gen visib_binary = (visib < visib_median) if !mi(visib)
 gen visib_binary_neg = -visib_binary
 
 set seed 12345678
 *psmatch2 visib_binary $control_variables, outcome(rem) noreplacement ties radius caliper(0.00001)
-psmatch2 visib_binary $control_variables, outcome(rem) ai(3) ///
+psmatch2 visib_binary $control_variables_rem, outcome(rem) ai(3) ///
                      caliper(0.001) noreplacement descending common odds index logit ties ///
                      warnings quietly ate
 
 
 psgraph
-pstest $control_variables
+pstest $control_variables_rem
 
-eststo treatall: estpost sum $control_variables if visib < visib_median
-eststo controlall: estpost sum $control_variables if visib >= visib_median
-eststo diffall: estpost ttest $control_variables, by(visib_binary_neg) 
-eststo treatpsm: estpost sum $control_variables if visib < visib_median & _support == 1
-eststo controlpsm: estpost sum $control_variables if visib >= visib_median  & _support == 1
-eststo diffpsm: estpost ttest $control_variables if _support == 1, by(visib_binary_neg) 
+eststo treatall: estpost sum $control_variables_rem if visib < visib_median
+eststo controlall: estpost sum $control_variables_rem if visib >= visib_median
+eststo diffall: estpost ttest $control_variables_rem, by(visib_binary_neg) 
+eststo treatpsm: estpost sum $control_variables_rem if visib < visib_median & _support == 1
+eststo controlpsm: estpost sum $control_variables_rem if visib >= visib_median  & _support == 1
+eststo diffpsm: estpost ttest $control_variables_rem if _support == 1, by(visib_binary_neg) 
 
 esttab treatall controlall diffall treatpsm controlpsm diffpsm using "$output\ttest_psm.tex", ///
 replace cells("mean(pattern(1 1 0 1 1 0)  fmt(3)) b(star pattern(0 0 1 0 0 1) fmt(3)) ") ///
@@ -323,35 +332,35 @@ keep if _support == 1 //10846
 
 *======== Table 4: Regression (Signed) =============================
 	eststo clear
-eststo regression1: reghdfe dacck visib $control_variables, absorb(fyear ff_48) vce(cluster i.lpermno#i.fyear) 
+eststo regression1: reghdfe dacck visib $control_variables_aem, absorb(fyear ff_48) vce(cluster i.lpermno#i.fyear) 
 estadd scalar ar2 = e(r2_a)
 summarize dacck
 estadd scalar ymean = r(mean)
 estadd local yearfe "Yes", replace
 estadd local indfe "Yes", replace
 	
-eststo regression2: reghdfe dac visib $control_variables, absorb(fyear ff_48) vce(cluster i.lpermno#i.fyear) 
+eststo regression2: reghdfe dac visib $control_variables_aem, absorb(fyear ff_48) vce(cluster i.lpermno#i.fyear) 
 estadd scalar ar2 = e(r2_a)
 summarize dac
 estadd scalar ymean = r(mean)
 estadd local yearfe "Yes", replace
 estadd local indfe "Yes", replace
 
-eststo regression3: reghdfe rank_dac visib $control_variables, absorb(fyear ff_48) vce(cluster i.lpermno#i.fyear) 
+eststo regression3: reghdfe rank_dac visib $control_variables_aem, absorb(fyear ff_48) vce(cluster i.lpermno#i.fyear) 
 estadd scalar ar2 = e(r2_a)
 summarize rank_dac
 estadd scalar ymean = r(mean)
 estadd local yearfe "Yes", replace
 estadd local indfe "Yes", replace
 
-eststo regression4: reghdfe rem visib $control_variables, absorb(fyear ff_48) vce(cluster i.lpermno#i.fyear) 
+eststo regression4: reghdfe rem visib $control_variables_rem, absorb(fyear ff_48) vce(cluster i.lpermno#i.fyear) 
 estadd scalar ar2 = e(r2_a)
 summarize rem
 estadd scalar ymean = r(mean)
 estadd local yearfe "Yes", replace
 estadd local indfe "Yes", replace
 
-eststo regression5: reghdfe rank_rem visib $control_variables, absorb(fyear ff_48) vce(cluster i.lpermno#i.fyear) 
+eststo regression5: reghdfe rank_rem visib $control_variables_rem, absorb(fyear ff_48) vce(cluster i.lpermno#i.fyear) 
 estadd scalar ar2 = e(r2_a)
 summarize rank_rem
 estadd scalar ymean = r(mean)
@@ -364,7 +373,7 @@ mtitles("AEM (performance-adj.)" "AEM (modified Jone's')" "AEM Rank" "REM" "REM 
 stats(yearfe indfe N ymean ar2, fmt(0 0 0 2 2) labels("Year FE" "Industry FE" "N" "Dep mean" "Adjusted R-sq")) ///
 prehead("\scalebox{0.8}{\begin{tabular}{lccccc}\toprule")  ///
 posthead("\midrule\multicolumn{6}{c}{\textbf{Panel B: PSM Sample Regression}}\\") ///
-postfoot("\bottomrule\end{tabular}}\end{center}\footnotesize{Notes: The analysis is conducted among the obtained sample after PSM. The dependent variables are indicated at the top of each column. A description of all variables can be found in Table \ref{tab: variabledescriptions}. The dependent variables in columns 1-3 are: a firm's accrual earnings management (AEM) calculated using the performance-adjusted method, a firm's AEM calculated using the modified Jone's model, and the rank of the firm's AEM (modified Jone's), respectively. The dependent variables in columns 4-5 are: a firm's real earnings management (REM), and the rank of the firm's REM, respectively. Year fixed effects and industry fixed effects are included in all regressions. Standard errors are clustered at the level of firm and year. *** p < 1\%, ** p < 5\%, * p < 10\%.}\end{table}") 
+postfoot("\bottomrule\end{tabular}}\end{center}\footnotesize{Notes: The analysis is conducted among the obtained sample after PSM. The dependent variables are indicated at the top of each column. A description of all variables can be found in Table \ref{tab: variabledescriptions}. The dependent variables in columns 1-3 are: a firm's accrual earnings management (AEM) calculated using the performance-adjusted model, a firm's AEM calculated using the modified Jone's model, and the rank of the firm's AEM (modified Jone's), respectively. The dependent variables in columns 4-5 are: a firm's real earnings management (REM), and the rank of the firm's REM, respectively. Year fixed effects and industry fixed effects are included in all regressions. Standard errors are clustered at the level of firm and year. *** p < 1\%, ** p < 5\%, * p < 10\%.}\end{table}") 
 exit
 esttab regression1 regression2 regression3 regression4 using "$output\Word_results.rtf", replace ///
 mgroups("Accrual Earnings Management" "Real Earnings Management", pattern(1 0 1 0)) ///
