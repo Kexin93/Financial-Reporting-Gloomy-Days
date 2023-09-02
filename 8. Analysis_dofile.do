@@ -979,7 +979,7 @@ note("Notes: The dependent variable in columns (1)-(2) is the rank of a firm's a
 * ============================ Other weather controls ==========================
 * ==============================================================================
 	eststo clear
-eststo regression1: reghdfe rem visib $control_variables, absorb(fyear ff_48) vce(cluster i.lpermno#i.fyear)
+eststo regression1: reghdfe rem visib $control_variables_rem, absorb(fyear ff_48) vce(cluster i.lpermno#i.fyear)
 estadd scalar ar2 = e(r2_a)
 summarize rem
 estadd scalar ymean = r(mean)
@@ -987,7 +987,7 @@ estadd local yearfe "Yes", replace
 estadd local indfe "Yes", replace
 estadd local firmcont "Yes", replace
 
-eststo regression2: reghdfe rem visib $control_variables  temp, absorb(fyear ff_48) vce(cluster i.lpermno#i.fyear)
+eststo regression2: reghdfe rem visib $control_variables_rem  temp, absorb(fyear ff_48) vce(cluster i.lpermno#i.fyear)
 estadd scalar ar2 = e(r2_a)
 summarize rem
 estadd scalar ymean = r(mean)
@@ -995,7 +995,7 @@ estadd local yearfe "Yes", replace
 estadd local indfe "Yes", replace
 estadd local firmcont "Yes", replace
 
-eststo regression3: reghdfe rem visib $control_variables  dewp, absorb(fyear ff_48) vce(cluster i.lpermno#i.fyear)
+eststo regression3: reghdfe rem visib $control_variables_rem  dewp, absorb(fyear ff_48) vce(cluster i.lpermno#i.fyear)
 estadd scalar ar2 = e(r2_a)
 summarize rem
 estadd scalar ymean = r(mean)
@@ -1003,7 +1003,7 @@ estadd local yearfe "Yes", replace
 estadd local indfe "Yes", replace
 estadd local firmcont "Yes", replace
 
-eststo regression4: reghdfe rem visib $control_variables slp, absorb(fyear ff_48) vce(cluster i.lpermno#i.fyear)
+eststo regression4: reghdfe rem visib $control_variables_rem slp, absorb(fyear ff_48) vce(cluster i.lpermno#i.fyear)
 estadd scalar ar2 = e(r2_a)
 summarize rem
 estadd scalar ymean = r(mean)
@@ -1011,7 +1011,7 @@ estadd local yearfe "Yes", replace
 estadd local indfe "Yes", replace
 estadd local firmcont "Yes", replace
 
-eststo regression5: reghdfe rem visib $control_variables wdsp, absorb(fyear ff_48) vce(cluster i.lpermno#i.fyear)
+eststo regression5: reghdfe rem visib $control_variables_rem wdsp, absorb(fyear ff_48) vce(cluster i.lpermno#i.fyear)
 estadd scalar ar2 = e(r2_a)
 summarize rem
 estadd scalar ymean = r(mean)
@@ -1019,7 +1019,7 @@ estadd local yearfe "Yes", replace
 estadd local indfe "Yes", replace
 estadd local firmcont "Yes", replace
 
-eststo regression6: reghdfe rem visib $control_variables mxspd , absorb(fyear ff_48) vce(cluster i.lpermno#i.fyear)
+eststo regression6: reghdfe rem visib $control_variables_rem mxspd , absorb(fyear ff_48) vce(cluster i.lpermno#i.fyear)
 estadd scalar ar2 = e(r2_a)
 summarize rem
 estadd scalar ymean = r(mean)
@@ -1027,7 +1027,7 @@ estadd local yearfe "Yes", replace
 estadd local indfe "Yes", replace
 estadd local firmcont "Yes", replace
 
-eststo regression7: reghdfe rem visib $control_variables min, absorb(fyear ff_48) vce(cluster i.lpermno#i.fyear)
+eststo regression7: reghdfe rem visib $control_variables_rem min, absorb(fyear ff_48) vce(cluster i.lpermno#i.fyear)
 estadd scalar ar2 = e(r2_a)
 summarize rem
 estadd scalar ymean = r(mean)
@@ -1035,7 +1035,7 @@ estadd local yearfe "Yes", replace
 estadd local indfe "Yes", replace
 estadd local firmcont "Yes", replace
 
-eststo regression8: reghdfe rem visib $control_variables fog, absorb(fyear ff_48) vce(cluster i.lpermno#i.fyear)
+eststo regression8: reghdfe rem visib $control_variables_rem fog, absorb(fyear ff_48) vce(cluster i.lpermno#i.fyear)
 estadd scalar ar2 = e(r2_a)
 summarize rem
 estadd scalar ymean = r(mean)
@@ -1043,7 +1043,7 @@ estadd local yearfe "Yes", replace
 estadd local indfe "Yes", replace
 estadd local firmcont "Yes", replace
 
-eststo regression9: reghdfe rem visib $control_variables rain, absorb(fyear ff_48) vce(cluster i.lpermno#i.fyear)
+eststo regression9: reghdfe rem visib $control_variables_rem rain, absorb(fyear ff_48) vce(cluster i.lpermno#i.fyear)
 estadd scalar ar2 = e(r2_a)
 summarize rem
 estadd scalar ymean = r(mean)
@@ -1051,7 +1051,7 @@ estadd local yearfe "Yes", replace
 estadd local indfe "Yes", replace
 estadd local firmcont "Yes", replace
 
-eststo regression10: reghdfe rem visib $control_variables temp dewp slp wdsp mxspd min fog rain, absorb(fyear ff_48) vce(cluster i.lpermno#i.fyear)
+eststo regression10: reghdfe rem visib $control_variables_rem temp dewp slp wdsp mxspd min fog rain, absorb(fyear ff_48) vce(cluster i.lpermno#i.fyear)
 estadd scalar ar2 = e(r2_a)
 summarize rem
 estadd scalar ymean = r(mean)
@@ -1059,10 +1059,10 @@ estadd local yearfe "Yes", replace
 estadd local indfe "Yes", replace
 estadd local firmcont "Yes", replace
 
-esttab regression1 regression2 regression3 regression4  regression5 regression6 regression7 regression8 regression9 regression10 using "$output\table7.tex", replace  drop($control_variables) ///
+esttab regression1 regression2 regression3 regression4  regression5 regression6 regression7 regression8 regression9 regression10 using "$output\table7.tex", replace  drop($control_variables_rem) ///
 nomtitles collabels(none) booktabs label scalar(ymean) stats(yearfe indfe firmcont N ymean ar2, fmt(0 0 0 0 2 2) labels("Year FE" "Industry FE" "Firm Controls" "N" "Dep mean" "Adjusted R-sq")) ///
-prehead("\begin{table}\begin{center}\caption{The Effects of Alternative Measures of Unpleasant Weather on Earnings Management}\label{tab: table7}\tabcolsep=0.1cm\scalebox{0.8}{\begin{tabular}{lcccccccccc}\toprule")  ///
-posthead("\midrule") postfoot("\bottomrule\end{tabular}}\\\end{center}\\\footnotesize{Notes: This table reports the effects of visibility on the aggregate measure of real earnings management (REM) with a series of additional weather control variables from NOAA. A description of all variables can be found in Table \ref{tab: variabledescriptions}. Column (1) is the baseline regression with no other weather controls. Column (2) includes the mean temperature reported by the firm's nearest station over the one-year period. Column (3) includes the mean dew point reported by the firm's nearest station over the one-year period. Column (4) includes the mean sea level pressure reported by the firm's nearest station over the one-year period. Column (5) includes the mean wind speed reported by the firm's nearest station over the one-year period. Column (6) includes the maximum wind speed reported by the firm's nearest station over the one-year period. Column (7) includes the minimum temprature reported by the firm's nearest station over the one-year period. Column (8) includes the mean probability of fog occurrence reported by the firm's nearest station over the one-year period. Column (9) includes the mean rain occurrence reported by the firm's nearest station over the one-year period. Column (10) includes all the above-mentioned weather controls. Firm controls are the same as in Table \ref{tab: table13}. Year fixed effects and industry fixed effects are included in all regressions. Standard errors are clustered at the level of firm-year. *** p < 1\%, ** p < 5\%, * p < 10\% }\end{table}")
+prehead("\begin{table}\begin{center}\caption{The Effects of Alternative Measures of Unpleasant Weather on Earnings Management}\label{tab: table7}\tabcolsep=0.1cm\scalebox{0.65}{\begin{tabular}{lcccccccccc}\toprule")  ///
+posthead("\midrule") postfoot("\bottomrule\end{tabular}}\\\end{center}\\\footnotesize{Notes: This table reports the effects of visibility on the aggregate measure of real earnings management (REM) with a series of additional weather control variables from NOAA. Column (1) is the baseline regression with no other weather controls. Column (2) includes the mean temperature reported by the firm's nearest station over the one-year period. Column (3) includes the mean dew point reported by the firm's nearest station over the one-year period. Column (4) includes the mean sea level pressure reported by the firm's nearest station over the one-year period. Column (5) includes the mean wind speed reported by the firm's nearest station over the one-year period. Column (6) includes the maximum wind speed reported by the firm's nearest station over the one-year period. Column (7) includes the minimum temprature reported by the firm's nearest station over the one-year period. Column (8) includes the mean probability of fog occurrence reported by the firm's nearest station over the one-year period. Column (9) includes the mean rain occurrence reported by the firm's nearest station over the one-year period. Column (10) includes all the above-mentioned weather controls. Firm controls are the same as in Table \ref{tab: table4}. A description of all variables can be found in Table \ref{tab: variabledescriptions}. Year fixed effects and industry fixed effects are included in all regressions. Standard errors are clustered at the level of firm-year. *** p < 1\%, ** p < 5\%, * p < 10\% }\end{table}")
 
 esttab regression1 regression2 regression3 regression4  regression5 regression6 regression7 regression8 regression9 using "$output\Word_results.rtf", append ///
 nomtitles collabels(none) label scalar(ymean)  ///

@@ -371,7 +371,7 @@ esttab regression1 regression2 regression3 regression4 regression5 using "$outpu
 mgroups("Accrual Earnings Management" "Real Earnings Management", pattern(1 0 0 1 0) prefix(\multicolumn{@span}{c}{) suffix(}) span erepeat(\cmidrule(lr){@span})) ///
 mtitles("AEM (performance-adj.)" "AEM (modified Jone's')" "AEM Rank" "REM" "REM Rank") collabels(none) booktabs label scalar(ymean) ///
 stats(yearfe indfe N ymean ar2, fmt(0 0 0 2 2) labels("Year FE" "Industry FE" "N" "Dep mean" "Adjusted R-sq")) ///
-prehead("\scalebox{0.8}{\begin{tabular}{lccccc}\toprule")  ///
+prehead("\scalebox{0.65}{\begin{tabular}{lccccc}\toprule")  ///
 posthead("\midrule\multicolumn{6}{c}{\textbf{Panel B: PSM Sample Regression}}\\") ///
 postfoot("\bottomrule\end{tabular}}\end{center}\footnotesize{Notes: The analysis is conducted among the obtained sample after PSM. The dependent variables are indicated at the top of each column. A description of all variables can be found in Table \ref{tab: variabledescriptions}. The dependent variables in columns 1-3 are: a firm's accrual earnings management (AEM) calculated using the performance-adjusted model, a firm's AEM calculated using the modified Jone's model, and the rank of the firm's AEM (modified Jone's), respectively. The dependent variables in columns 4-5 are: a firm's real earnings management (REM), and the rank of the firm's REM, respectively. Year fixed effects and industry fixed effects are included in all regressions. Standard errors are clustered at the level of firm and year. *** p < 1\%, ** p < 5\%, * p < 10\%.}\end{table}") 
 exit
