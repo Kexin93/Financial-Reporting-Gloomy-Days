@@ -55,7 +55,8 @@ save `convk', replace
 use "$maindir\Analysis_102148 observations\Firm_Year_Weather", replace
 * 23139 firm-year-weather observations
 
-global control_variables size bm roa lev firm_age rank au_years oa_scale /*xrd_int*/
+global control_variables_aem size bm roa lev firm_age rank au_years oa_scale /*xrd_int*/
+global control_variables_rem size bm roa lev firm_age rank au_years hhi_sale /*xrd_int*/
 
 sort firm_FID fyear
 
@@ -139,8 +140,6 @@ gen oa_scale = loa/lsale
 		gen noa = (oa_scale > oa_median_year) if !mi(oa_scale)
 		*/
 
-*hhi5 sale, by(ff_48 fyear) //hhi_sale
-		
 /*generate KZ score*/
 *xtset lpermno fyear 
 gen cashflow=dp+ib
@@ -233,6 +232,9 @@ sicff sic, ind(48)
 	& !mi(lev) & !mi(firm_age) & !mi(rank) & !mi(au_years) & !mi(oa_scale) ///
 	&  !mi(d_cfo) &  !mi( rank_d_cfo) &  !mi( d_prod ) &  !mi(rank_d_prod ) ///
 	&  !mi(d_discexp ) &  !mi(rank_d_discexp) & !mi(ff_48) & !mi(fyear)
+	
+hhi5 sale, by(ff_48 fyear) //hhi_sale
+label var hhi_sale "HHI index"		
 
 	capture drop _merge
 merge 1:1 tic fyear using `KLD_MSCI_tic'
@@ -262,7 +264,6 @@ drop if _merge == 2
 label var dacck "AEM (performance-adjusted)"
 
 save "$output\final_data_47662", replace
-exit
 
 eststo summ_stats: estpost sum $summ_vars
 
@@ -405,7 +406,9 @@ label mtitles("All" "Polluted" "Unpolluted" "Polluted-Unpolluted") collabels(non
 title("Uni-variate Test") ///
 note("Notes: The independent variable polluted takes the value of 1 if visibility is below the median of visibility over years (2003-2017).")
 
-global control_variables size bm roa lev firm_age rank au_years oa_scale /*xrd_int*/
+*global control_variables size bm roa lev firm_age rank au_years oa_scale /*xrd_int*/
+global control_variables_aem size bm roa lev firm_age rank au_years oa_scale /*xrd_int*/
+global control_variables_rem size bm roa lev firm_age rank au_years hhi_sale /*xrd_int*/
 
 *======== Table 3: Correlation Table ==============================
 *ssc install corrtex
@@ -742,35 +745,35 @@ posthead("\midrule") postfoot("\bottomrule\end{tabular}\\\end{center}\footnotesi
 
 *======== Table 4: Regression (Signed) =============================
 	eststo clear
-eststo regression1: reghdfe dacck visib $control_variables, absorb(fyear ff_48) vce(cluster i.lpermno#i.fyear)
+eststo regression1: reghdfe dacck visib $control_variables_aem, absorb(fyear ff_48) vce(cluster i.lpermno#i.fyear)
 estadd scalar ar2 = e(r2_a)
 summarize dacck
 estadd scalar ymean = r(mean)
 estadd local yearfe "Yes", replace
 estadd local indfe "Yes", replace
 	
-eststo regression2: reghdfe dac visib $control_variables, absorb(fyear ff_48) vce(cluster i.lpermno#i.fyear)
+eststo regression2: reghdfe dac visib $control_variables_aem, absorb(fyear ff_48) vce(cluster i.lpermno#i.fyear)
 estadd scalar ar2 = e(r2_a)
 summarize dac
 estadd scalar ymean = r(mean)
 estadd local yearfe "Yes", replace
 estadd local indfe "Yes", replace
 
-eststo regression3: reghdfe rank_dac visib $control_variables, absorb(fyear ff_48) vce(cluster i.lpermno#i.fyear)
+eststo regression3: reghdfe rank_dac visib $control_variables_aem, absorb(fyear ff_48) vce(cluster i.lpermno#i.fyear)
 estadd scalar ar2 = e(r2_a)
 summarize rank_dac
 estadd scalar ymean = r(mean)
 estadd local yearfe "Yes", replace
 estadd local indfe "Yes", replace
 
-eststo regression4: reghdfe rem visib $control_variables, absorb(fyear ff_48) vce(cluster i.lpermno#i.fyear)
+eststo regression4: reghdfe rem visib $control_variables_rem, absorb(fyear ff_48) vce(cluster i.lpermno#i.fyear)
 estadd scalar ar2 = e(r2_a)
 summarize rem
 estadd scalar ymean = r(mean)
 estadd local yearfe "Yes", replace
 estadd local indfe "Yes", replace
 
-eststo regression5: reghdfe rank_rem visib $control_variables, absorb(fyear ff_48) vce(cluster i.lpermno#i.fyear)
+eststo regression5: reghdfe rank_rem visib $control_variables_rem, absorb(fyear ff_48) vce(cluster i.lpermno#i.fyear)
 estadd scalar ar2 = e(r2_a)
 summarize rank_rem
 estadd scalar ymean = r(mean)
@@ -779,11 +782,11 @@ estadd local indfe "Yes", replace
 
 esttab regression1 regression2 regression3 regression4 regression5 using "$output\table4.tex", replace ///
 mgroups("Accrual Earnings Management" "Real Earnings Management", pattern(1 0 0 1 0) prefix(\multicolumn{@span}{c}{) suffix(}) span erepeat(\cmidrule(lr){@span})) ///
-mtitles("AEM (performance-adj.)" "AEM (modified Jone's')" "AEM Rank" "REM" "REM Rank") collabels(none) booktabs label scalar(ymean) ///
+mtitles("\makecell{AEM \\ (performance-adj.)}" "\makecell{AEM \\ (modified Jone's')}" "\makecell{AEM \\ Rank}" "REM" "\makecell{REM \\ Rank}") collabels(none) booktabs label scalar(ymean) ///
 stats(yearfe indfe N ymean ar2, fmt(0 0 0 2 2) labels("Year FE" "Industry FE" "N" "Dep mean" "Adjusted R-sq")) ///
 prehead("\begin{table}\begin{center}\caption{The Effect of Visibility on Earnings Management}\label{tab: table4}\tabcolsep=0.1cm\scalebox{0.9}{\begin{tabular}{lccccc}\toprule")  ///
-posthead("\midrule") postfoot("\bottomrule\end{tabular}}\end{center}\\\footnotesize{Notes: The dependent variables are indicated at the top of each column. A description of all variables can be found in Table \ref{tab: variabledescriptions}. The dependent variables in columns (1)-(3) are: a firms' accrual earnings management calculated using the performance-adjusted method, a firm's accrual earnings management calculated using the modified Jone's method, and the rank of the firm's accrual earnings management (modified Jone's), respectively. The dependent variables in columns (4)-(5) are: a firm's real earnings management, and the rank of the firm's real earnings management, respectively. Year fixed effects and industry fixed effects are included in all regressions. Standard errors are clustered at the level of firm-year. *** p < 1\%, ** p < 5\%, * p < 10\%.}\end{table}") 
-
+posthead("\midrule") postfoot("\bottomrule\end{tabular}}\end{center}\footnotesize{Notes: The dependent variables are indicated at the top of each column. A description of all variables can be found in Table \ref{tab: variabledescriptions}. The dependent variables in columns (1)-(3) are: a firms' accrual earnings management calculated using the performance-adjusted method, a firm's accrual earnings management calculated using the modified Jone's method, and the rank of the firm's accrual earnings management (modified Jone's), respectively. The dependent variables in columns (4)-(5) are: a firm's real earnings management, and the rank of the firm's real earnings management, respectively. Year fixed effects and industry fixed effects are included in all regressions. Standard errors are clustered at the level of firm-year. *** p < 1\%, ** p < 5\%, * p < 10\%.}\end{table}") 
+exit
 esttab regression1 regression2 regression3 regression4 using "$output\Word_results.rtf", append ///
 mgroups("Accrual Earnings Management" "Real Earnings Management", pattern(1 0 1 0)) ///
 mtitles("AEM" "AEM Rank" "REM" "REM Rank") nonumbers collabels(none) label scalar(ymean`') ///
@@ -860,42 +863,42 @@ note("Notes: The dependent variable in columns (1)-(2) is a firm's accrual earni
 restore
 
 *========== Table 5: Decomposition of REM ========================
-eststo sales1: reghdfe d_cfo_neg visib $control_variables, absorb(fyear ff_48) vce(cluster i.lpermno#i.fyear)
+eststo sales1: reghdfe d_cfo_neg visib $control_variables_rem, absorb(fyear ff_48) vce(cluster i.lpermno#i.fyear)
 estadd scalar ar2 = e(r2_a)
 summarize d_cfo_neg
 estadd scalar ymean = r(mean)
 estadd local yearfe "Yes", replace
 estadd local indfe "Yes", replace
 
-eststo sales2: reghdfe rank_d_cfo_neg visib $control_variables, absorb(fyear ff_48) vce(cluster i.lpermno#i.fyear) 
+eststo sales2: reghdfe rank_d_cfo_neg visib $control_variables_rem, absorb(fyear ff_48) vce(cluster i.lpermno#i.fyear) 
 estadd scalar ar2 = e(r2_a)
 summarize rank_d_cfo_neg
 estadd scalar ymean = r(mean)
 estadd local yearfe "Yes", replace
 estadd local indfe "Yes", replace
 
-eststo overprod1: reghdfe d_prod visib $control_variables, absorb(fyear ff_48) vce(cluster i.lpermno#i.fyear)
+eststo overprod1: reghdfe d_prod visib $control_variables_rem, absorb(fyear ff_48) vce(cluster i.lpermno#i.fyear)
 estadd scalar ar2 = e(r2_a)
 summarize d_prod
 estadd scalar ymean = r(mean)
 estadd local yearfe "Yes", replace
 estadd local indfe "Yes", replace
 
-eststo overprod2: reghdfe rank_d_prod visib $control_variables, absorb(fyear ff_48) vce(cluster i.lpermno#i.fyear)
+eststo overprod2: reghdfe rank_d_prod visib $control_variables_rem, absorb(fyear ff_48) vce(cluster i.lpermno#i.fyear)
 estadd scalar ar2 = e(r2_a)
 summarize rank_d_prod
 estadd scalar ymean = r(mean)
 estadd local yearfe "Yes", replace
 estadd local indfe "Yes", replace
 
-eststo expenditure1: reghdfe d_discexp_neg visib $control_variables, absorb(fyear ff_48) vce(cluster i.lpermno#i.fyear)
+eststo expenditure1: reghdfe d_discexp_neg visib $control_variables_rem, absorb(fyear ff_48) vce(cluster i.lpermno#i.fyear)
 estadd scalar ar2 = e(r2_a)
 summarize d_discexp_neg
 estadd scalar ymean = r(mean)
 estadd local yearfe "Yes", replace
 estadd local indfe "Yes", replace
 
-eststo expenditure2: reghdfe rank_d_discexp_neg visib $control_variables, absorb(fyear ff_48) vce(cluster i.lpermno#i.fyear)
+eststo expenditure2: reghdfe rank_d_discexp_neg visib $control_variables_rem, absorb(fyear ff_48) vce(cluster i.lpermno#i.fyear)
 estadd scalar ar2 = e(r2_a)
 summarize rank_d_discexp_neg
 estadd scalar ymean = r(mean)
