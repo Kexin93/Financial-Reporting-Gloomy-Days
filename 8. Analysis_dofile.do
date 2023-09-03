@@ -53,7 +53,6 @@ save `convk', replace
 
 *br tic cusip ncusip ibes_cusip cusip8
 use "$maindir\Analysis_102148 observations\Firm_Year_Weather", replace
-* 23139 firm-year-weather observations
 
 global control_variables_aem size bm roa lev firm_age rank au_years oa_scale /*xrd_int*/
 global control_variables_rem size bm roa lev firm_age rank au_years hhi_sale /*xrd_int*/
@@ -111,18 +110,6 @@ sort lpermno fyear
 bysort lpermno au: gen au_years = _n if !mi(au) //number of years firm has been audited by the same auditor
 *bysort lpermno: gen num_years = _N //number of years with data per firm
 
-	/*
-	preserve
-	* generate a unique firm data set
-	bysort lpermno: gen num = _n
-		keep if num == 1
-		summarize num_years, d
-		local median = r(p50)
-	restore
-	*/
-
-	*gen tenure = (au_years > `median') if !mi(au_years)
-
 * oa
 gen oa = ceq- che -dlc- dltt // shareholders' equity - cash and marketale securities + total debt
 xtset lpermno fyear
@@ -130,24 +117,11 @@ gen lsale = l1.sale
 gen loa = l1.oa
 gen oa_scale = loa/lsale
 
-		/*
-		gen oa_median_year =.
-		forvalues x = 2003/2017{
-			summarize oa_scale if fyear == `x' & !mi(oa_scale),d
-			replace oa_median_year = r(p50) if fyear == `x'
-		}
-
-		gen noa = (oa_scale > oa_median_year) if !mi(oa_scale)
-		*/
-
 /*generate KZ score*/
 *xtset lpermno fyear 
 gen cashflow=dp+ib
 gen CF_lscaled=cashflow/l1.at
 	label variable CF_lscaled "cashflow/l1.at"
-
-/*Cash Reserve Ratio*/
-/*label variable Cash_scaled "che/at Cash Reserve Ratio"*/
 
 gen cash_dividends=dvc+dvp
 gen Dividends_scaled=cash_dividends/at
@@ -224,7 +198,7 @@ gen rank_d_discexp_neg = 9-rank_d_discexp
 * generate 48 industries based on the 4-digit sic code: sic
 destring sic, replace
 sicff sic, ind(48)
-
+exit
 	* ==================================================================
 	* ==================== Choose Sample ===============================
 	* ==================================================================
