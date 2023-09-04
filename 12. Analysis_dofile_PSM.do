@@ -381,7 +381,7 @@ mtitles("AEM" "AEM Rank" "REM" "REM Rank") nonumbers collabels(none) label scala
 stats(yearfe indfe N ymean ar2, fmt(0 0 0 2 2) labels("Year FE" "Industry FE" "N" "Dep mean" "Adjusted R-sq")) ///
 title("Table 4: The Effect of Visibility on Earnings Management") ///
 note("Notes: The dependent variable in columns 1-2 is a firm's accrual earnings management; the dependent variable in columns 3-4 is a firm's real earnings management.") 
-
+exit
 * ========== DID ==========
 *2466 observations
 
