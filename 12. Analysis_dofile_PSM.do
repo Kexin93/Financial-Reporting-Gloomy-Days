@@ -273,8 +273,6 @@ label var hhi_sale "HHI index"
 	
 *use "$output\final_data_47662", replace
 
-global control_variables size bm roa lev firm_age rank au_years oa_scale /*xrd_int*/
-
 label var size "Size"
 label var bm "BM"
 label var roa "ROA"
@@ -299,7 +297,7 @@ gen visib_binary_neg = -visib_binary
 set seed 12345678
 *psmatch2 visib_binary $control_variables, outcome(rem) noreplacement ties radius caliper(0.00001)
 psmatch2 visib_binary $control_variables_rem, outcome(rem) ai(3) ///
-                     caliper(0.001) noreplacement descending common odds index logit ties ///
+                     caliper(0.03) noreplacement descending common odds index logit ties ///
                      warnings quietly ate
 
 
@@ -381,7 +379,7 @@ mtitles("AEM" "AEM Rank" "REM" "REM Rank") nonumbers collabels(none) label scala
 stats(yearfe indfe N ymean ar2, fmt(0 0 0 2 2) labels("Year FE" "Industry FE" "N" "Dep mean" "Adjusted R-sq")) ///
 title("Table 4: The Effect of Visibility on Earnings Management") ///
 note("Notes: The dependent variable in columns 1-2 is a firm's accrual earnings management; the dependent variable in columns 3-4 is a firm's real earnings management.") 
-exit
+
 * ========== DID ==========
 *2466 observations
 

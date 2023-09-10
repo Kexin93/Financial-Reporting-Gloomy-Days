@@ -198,7 +198,7 @@ gen rank_d_discexp_neg = 9-rank_d_discexp
 * generate 48 industries based on the 4-digit sic code: sic
 destring sic, replace
 sicff sic, ind(48)
-exit
+
 	* ==================================================================
 	* ==================== Choose Sample ===============================
 	* ==================================================================
@@ -237,7 +237,9 @@ merge 1:1 lpermno fyear using `convk'
 drop if _merge == 2
 label var dacck "AEM (performance-adjusted)"
 
-save "$output\final_data_47662", replace
+*save "$output\final_data_47662", replace
+
+use "$output\final_data_47662", replace
 
 eststo summ_stats: estpost sum $summ_vars
 

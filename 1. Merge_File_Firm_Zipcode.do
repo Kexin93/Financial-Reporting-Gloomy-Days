@@ -10,10 +10,9 @@ global maindir "E:\Dropbox\Air Pollution and Accounting\Data"
 
 * firm data
 use "$maindir\Accounting Variables\conv.dta"
-	count if loc == "USA" & mi(addzip) //all USA firms have zip codes!
-	
+	count if loc == "USA" & mi(addzip) //all USA firms have zip codes! 114,365
+		count
 	drop if loc != "USA" // only keep USA firms: 102,193
-
 	gen addzip2 = substr(addzip, 1, 5)
 	
 	
