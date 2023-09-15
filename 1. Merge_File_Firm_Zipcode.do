@@ -11,8 +11,9 @@ global maindir "E:\Dropbox\Air Pollution and Accounting\Data"
 * firm data
 use "$maindir\Accounting Variables\conv.dta"
 	count if loc == "USA" & mi(addzip) //all USA firms have zip codes! 114,365
-		count
-	drop if loc != "USA" // only keep USA firms: 102,193
+		keep if fyear >= 2003
+		count //52593
+	drop if loc != "USA" // only keep USA firms: 102,193, 7287
 	gen addzip2 = substr(addzip, 1, 5)
 	
 	
@@ -99,7 +100,7 @@ use "$maindir\Accounting Variables\conv.dta"
 		sort add1 addzip2
 	edit addzip2 add1 city county incorp if _merge == 1 //45 firms do not match to any zipcodes
 	
-	drop if _merge == 1 //45 dropped
+	drop if _merge == 1 //45 dropped, 13
 	
 	drop if _merge == 2 // 38,308 dropped, unused zipcodes in the USA
 

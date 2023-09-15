@@ -271,7 +271,7 @@ label var dacck "AEM (performance-adjusted)"
 hhi5 sale, by(ff_48 fyear) //hhi_sale
 label var hhi_sale "HHI index"		
 	
-*use "$output\final_data_47662", replace
+use "$output\final_data_47662", replace
 
 label var size "Size"
 label var bm "BM"
@@ -285,7 +285,7 @@ label var rank "Big N" //binary
 global control_variables_aem size bm roa lev firm_age rank au_years oa_scale /*xrd_int*/
 global control_variables_rem size bm roa lev firm_age rank au_years hhi_sale /*xrd_int*/
 
-*use "$output\final_data_47662", replace
+use "$output\final_data_47662", replace
 
 	capture drop visib_median
 	capture drop visib_binary
