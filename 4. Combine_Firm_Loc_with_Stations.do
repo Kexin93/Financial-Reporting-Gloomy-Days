@@ -39,8 +39,8 @@ clear
 	gen fyrdate = mdy(fyr, fyrday, fyear)
 	format fyrdate %td
 	
-	gen Firm_START_DATE = fyrdate - 365
-	gen Firm_END_DATE = fyrdate
+	gen Firm_START_DATE = fyrdate
+	gen Firm_END_DATE = fyrdate + 90
 	format Firm_START_DATE Firm_END_DATE %td
 	
 	sort Firm_START_DATE Firm_END_DATE firm_FID
@@ -50,16 +50,17 @@ clear
 	gen Firm_START_YEAR = year(Firm_START_DATE)
 	gen Firm_END_YEAR = year(Firm_END_DATE)
 
+	sort lpermno fyear station Firm_START_DATE Firm_END_DATE
+	unique lpermno fyear station Firm_START_DATE Firm_END_DATE
 	gen Num = _n
 	
 	gen group = 1 if Firm_START_YEAR == Firm_END_YEAR
 	replace group = 2 if Firm_START_YEAR != Firm_END_YEAR
 
-	sort Num group
 	bysort group (Num): gen Num_temp = _n
 	gen Num1 = Num_temp if group == 1
 	gen Num2 = Num_temp if group == 2
 	drop Num_temp
 	
-	save "$maindir\Analysis_102148 observations\firm_zipcode_date", replace
+	save "$maindir\Analysis Future 3 months\firm_zipcode_date", replace
 
