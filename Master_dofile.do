@@ -5,6 +5,12 @@ global maindir "E:\21. Air Pollution and Accounting\DATA"
 global dofile "E:\21. Air Pollution and Accounting\CODE"
 }
 
+else if "`c(username)'" == "Kexin Zhang"{
+global maindir "E:\21. Air Pollution and Accounting\DATA"
+
+global dofile "E:\21. Air Pollution and Accounting\GitHub\Financial-Reporting-Gloomy-Days"
+}
+
 * 1) Keep US stations: zip code, lat, lon, station names, county, state等, 生成`US_stations_7334'
 do "$dofile\2. Station_Zipcode.do"
 
