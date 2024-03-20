@@ -322,11 +322,3 @@ stats(yearfe indfe N ymean ar2, fmt(0 0 0 2 2) labels("Year FE" "Industry FE" "N
 prehead("\begin{table}\begin{center}\caption{The Effect of Weighted Annual Mean of PM 2.5 on Earnings Management}\label{tab: table26}\tabcolsep=0.1cm\scalebox{0.8}{\begin{tabular}{lccccc}\toprule")  ///
 posthead("\midrule\\") ///
 postfoot("\bottomrule\end{tabular}}\end{center}\footnotesize{Notes: The dependent variables are indicated at the top of each column. The dependent variable in column (1) is a firm's accrual earnings management (AEM) calculated using the performance-adjusted modified Jone's model. The dependent variable in column (2) is AEM that is calculated using the modified Jone's model. The dependent variable in column (3) is the rank of the firm's AEM (modified Jone's). The dependent variables in columns (4)-(5) are a firm's real earnings management (REM) and the rank of the firm's REM, respectively. The regressor is the weighted average level of annual PM 2.5 for each city and year. A description of all variables can be found in Table \ref{tab: variabledescriptions}. Year fixed effects and industry fixed effects are included in all regressions. The same firm control variables are included as in Table \ref{tab: table4}. Standard errors are clustered at the level of firm and year. *** p < 1\%, ** p < 5\%, * p < 10\%.}\end{table}") 
-
-esttab regression1 regression2 regression3 regression4 using "$output\Word_results.rtf", replace ///
-mgroups("Accrual Earnings Management" "Real Earnings Management", pattern(1 0 1 0)) ///
-mtitles("AEM" "AEM Rank" "REM" "REM Rank") nonumbers collabels(none) label scalar(ymean`') ///
-stats(yearfe indfe N ymean ar2, fmt(0 0 0 2 2) labels("Year FE" "Industry FE" "N" "Dep mean" "Adjusted R-sq")) ///
-title("Table 4: The Effect of Visibility on Earnings Management") ///
-note("Notes: The dependent variable in columns (1)-(2) is a firm's accrual earnings management; the dependent variable in columns (3)-(4) is a firm's real earnings management.")
-
