@@ -73,21 +73,21 @@ global maindir "E:\Dropbox\Air Pollution and Accounting\Data"
 	*/
 	
 		* For each firm, collapse weather data by firm
-		cd "$maindir\Analysis_102148 observations\TempFirmStation1yr"
+		cd "$maindir\Analysis Future 3 months\TempFirmStation1yr"
 		clear 
 		fs "*.dta"
 		append using `r(files)',force
 		sort Num
-		save "$maindir\Analysis_102148 observations\Firm_Multiple_Stations", replace //23170
+		save "$maindir\Analysis Future 3 months\Firm_Multiple_Stations", replace //23170
 
 		clear
-		use "$maindir\Analysis_102148 observations\firm_zipcode_date", replace
+		use "$maindir\Analysis Future 3 months\firm_zipcode_date", replace
 			capture drop _merge
-		merge 1:1 Num using "$maindir\Analysis_102148 observations\Firm_Multiple_Stations"
+		merge 1:1 Num using "$maindir\Analysis Future 3 months\Firm_Multiple_Stations"
 		keep if _merge == 3
 		
 		collapse (mean) temp dewp slp stp visib wdsp (max) mxspd gust max (min) min (mean) prcp (mean) sndp (mean) fog rain snow hail thunder tornado, by(firm_FID) //or firm_ID
-		save "$maindir\Analysis_102148 observations\Firm_Visibility_Data", replace
+		save "$maindir\Analysis Future 3 months\Firm_Visibility_Data", replace
 		// 23139 unique firm year with 1 weather
 		
 		
@@ -95,9 +95,9 @@ global maindir "E:\Dropbox\Air Pollution and Accounting\Data"
 		use "$maindir\firm_zipcode", replace
 			capture drop _merge
 		gen firm_FID = firm_ID - 1 //can delete
-		merge 1:1 firm_FID using "$maindir\Analysis_102148 observations\Firm_Visibility_Data"
+		merge 1:1 firm_FID using "$maindir\Analysis Future 3 months\Firm_Visibility_Data"
 			keep if _merge == 3
-		save "$maindir\Analysis_102148 observations\Firm_Year_Weather", replace
+		save "$maindir\Analysis Future 3 months\Firm_Year_Weather", replace
 		
 		
 		
