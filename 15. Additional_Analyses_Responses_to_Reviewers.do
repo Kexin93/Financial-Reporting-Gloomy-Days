@@ -280,7 +280,7 @@ esttab regressionT1_1 regressionT1_2 regressionT1_3 regressionT1_4 regressionT1_
 mgroups("Accrual Earnings Management" "Real Earnings Management", pattern(1 0 0 1 0) prefix(\multicolumn{@span}{c}{) suffix(}) span erepeat(\cmidrule(lr){@span})) keep(visib fog) ///
 mtitles("\makecell{AEM \\ (performance- \\ adj.)}" "\makecell{AEM \\ (modified \\ Jone's')}" "\makecell{AEM \\ Rank}" "REM" "\makecell{REM \\ Rank}") collabels(none) booktabs ///
 stats(yearfe indfe N ymean ar2, fmt(0 0 0 2 2) labels("Year FE" "Industry FE" "N" "Dep mean" "Adjusted R-sq")) ///
-prehead("\begin{table}\begin{center}\caption{The Effect of Visibility on Earnings Management}\label{tab: fogTercile}\tabcolsep=0.1cm\scalebox{0.8}{\begin{tabular}{lccccc}\toprule") ///
+prehead("\begin{table}\begin{center}\caption{The Effect of Visibility on Earnings Management by Terciles of Fog}\label{tab: fogTercile}\tabcolsep=0.1cm\scalebox{0.8}{\begin{tabular}{lccccc}\toprule") ///
 posthead("\midrule\multicolumn{6}{c}{\textbf{First Tercile}}\\") 
 
 esttab regressionT2_1 regressionT2_2 regressionT2_3 regressionT2_4 regressionT2_5 using "$output\table_fogTercile.tex", append fragment label nolines ///
@@ -353,7 +353,7 @@ esttab regression1 regression2 regression3 regression4 regression5 using "$outpu
 mgroups("Accrual Earnings Management" "Real Earnings Management", pattern(1 0 0 1 0) prefix(\multicolumn{@span}{c}{) suffix(}) span erepeat(\cmidrule(lr){@span})) ///
 mtitles("\makecell{AEM \\ (performance \\ -adj.)}" "\makecell{AEM \\ (modified \\ Jone's)}" "\makecell{AEM \\ Rank}" "REM" "\makecell{REM \\ Rank}") collabels(none) fragment nolines booktabs label keep(visib_PM2_5) ///
 stats(yearfe indfe N ymean ar2, fmt(0 0 0 2 2) labels("Year FE" "Industry FE" "N" "Dep mean" "Adjusted R-sq")) ///
-prehead("\begin{table}\begin{center}\caption{The Effect of Weighted Annual Mean of PM 2.5 on Earnings Management}\label{tab: visib_fitted_res}\tabcolsep=0.3cm\scalebox{0.8}{\begin{tabular}{lccccc}\toprule")  ///
+prehead("\begin{table}\begin{center}\caption{The Effect of Fitted and Residual Values of Visibility on Earnings Management}\label{tab: visib_fitted_res}\tabcolsep=0.3cm\scalebox{0.8}{\begin{tabular}{lccccc}\toprule")  ///
 posthead("\midrule \multicolumn{6}{c}{\textbf{Panel A: Fitted value of Regressing Visibility on PM 2.5}} \\")
 
 gen visib_res_aem = visib - visib_PM2_5_aem
