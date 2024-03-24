@@ -7,6 +7,9 @@ else if "`c(username)'" == "Huaxi"{
 global maindir "E:\Dropbox\Air Pollution and Accounting\Data"
 }
 
+else if "`c(username)'" == "Kexin Zhang"{
+global maindir "E:\21. Air Pollution and Accounting\DATA"
+}
 
 * firm data
 use "$maindir\Accounting Variables\conv.dta"
