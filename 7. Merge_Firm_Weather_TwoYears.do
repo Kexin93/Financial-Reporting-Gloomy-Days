@@ -7,6 +7,10 @@ else if "`c(username)'" == "Huaxi"{
 global maindir "E:\Dropbox\Air Pollution and Accounting\Data"
 }
 
+else if "`c(username)'" == "Kexin Zhang"{
+global maindir "E:\21. Air Pollution and Accounting\DATA"
+}
+
 	use "$maindir\Analysis Future 3 months\firm_zipcode_date", replace
 	
 	keep if Firm_START_YEAR != Firm_END_YEAR
