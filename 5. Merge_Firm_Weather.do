@@ -7,6 +7,10 @@ else if "`c(username)'" == "Huaxi"{
 global maindir "E:\Dropbox\Air Pollution and Accounting\Data"
 }
 
+else if "`c(username)'" == "Kexin Zhang"{
+global maindir "E:\21. Air Pollution and Accounting\DATA"
+}
+
 /*
 	use "$maindir\firm_zipcode_date", replace
 
@@ -73,12 +77,12 @@ global maindir "E:\Dropbox\Air Pollution and Accounting\Data"
 	*/
 	
 		* For each firm, collapse weather data by firm
-		cd "$maindir\Analysis Future 3 months\TempFirmStation1yr"
+		cd "$maindir\Analysis Future 3 months\TempFirmStation"
 		clear 
 		fs "*.dta"
 		append using `r(files)',force
 		sort Num
-		save "$maindir\Analysis Future 3 months\Firm_Multiple_Stations", replace //23170
+		save "$maindir\Analysis Future 3 months\Firm_Multiple_Stations", replace //22590
 
 		clear
 		use "$maindir\Analysis Future 3 months\firm_zipcode_date", replace
