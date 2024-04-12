@@ -233,6 +233,7 @@ global control_variables_rem size bm roa lev firm_age rank au_years hhi_sale /*x
 
 use "$output\final_data_47662", replace
 
+**# Reviewer 1 Comment 4: Future 3 months (in do-file 16)
 **# Reviewer 1 Comment 2: Fog
 sort fog
 xtile fog_tercile = fog, nq(3)
@@ -404,3 +405,370 @@ booktabs label scalar(ymean) nomtitles nonumbers fragment nolines keep(visib_res
 posthead("\midrule \multicolumn{6}{c}{\textbf{Panel B: Residual value of Regressing Visibility on PM 2.5}} \\") ///
 stats(yearfe indfe N ymean ar2, fmt(0 0 0 2 2) labels("Year FE" "Industry FE" "N" "Dep mean" "Adjusted R-sq")) ///
 postfoot("\bottomrule\end{tabular}}\end{center}\footnotesize{Notes: The dependent variables are indicated at the top of each column. The dependent variable in column (1) is a firm's accrual earnings management (AEM) calculated using the performance-adjusted modified Jone's model. The dependent variable in column (2) is AEM that is calculated using the modified Jone's model. The dependent variable in column (3) is the rank of the firm's AEM (modified Jone's). The dependent variables in columns (4)-(5) are a firm's real earnings management (REM) and the rank of the firm's REM, respectively. In Panel A, the main regressor is the fitted value of visibility from the regression where we regress visibility on annual PM 2.5 for each city and year and control variables including firm size, book-to-market ratio, returns on assets, leverage, firm age, the auditor being from Big N CPA firms, the number of years of being audited by the same auditor, the firm's operation assets, and Herfindahl–Hirschman Index. In Panel B, the main regressor is the residual value of visibility from the regression where we regress visibility on the variables above. In both panels, the same set of control variables are included as in Table \ref{tab: table4}. A description of all variables can be found in Table \ref{tab: variabledescriptions}. Year fixed effects and industry fixed effects are included in all regressions. The same firm control variables are included as in Table \ref{tab: table4}. Standard errors are clustered at the level of firm and year. *** p < 1\%, ** p < 5\%, * p < 10\%.}\end{table}") 
+
+**# Reviewer 2 Comment 4: Add controls
+**1) add TICKER
+use "E:\21. Air Pollution and Accounting\DATA\R&R\board independence(1).dta", replace
+
+gen year = year(Date)
+rename TICKER tic
+
+drop if mi(tic)
+bysort tic year: egen G29_mean = mean(G_2_9)
+bysort tic year: gen diff = (G29_mean != G_2_9) if !mi(G_2_9)
+unique tic year if diff == 1
+
+unique tic year G29_mean //163
+duplicates drop tic year G29_mean, force
+rename year fyear
+save "$output\board_independence_x.dta", replace
+
+** 2) female board% (across the US)
+use "E:\21. Air Pollution and Accounting\DATA\R&R\BoardEx - Organization Summary - Analytics.dta", replace
+gen fyear = year(annualreportdate)
+unique ticker fyear //95964
+duplicates drop ticker fyear, force
+rename ticker tic
+save "$output\female_board_x.dta", replace
+
+** 3) dual role
+use "E:\21. Air Pollution and Accounting\DATA\R&R\CEO duality.dta", replace
+drop if mi(PERMCO) & mi(GVKEY)
+drop if mi(datestartrole) & mi(dateendrole)
+drop if mi(datestartrole) & !mi(dateendrole)
+
+gen startyear = year(datestartrole)
+gen endyear = year(dateendrole)
+replace endyear = 2018 if mi(endyear)
+drop if endyear < 2002
+gen year1= startyear if startyear >= 2002
+replace year1 = 2002 if startyear < 2002
+gen gap = endyear - year1 // 0-16
+
+forvalues i = 2/17{
+	gen year`i' =.
+}
+
+forvalues i = 1/16{
+	local j = `i' + 1
+	replace year`j' = year1 + `i' if gap >= `i'
+}
+
+drop datestartrole dateendrole score startyear endyear
+
+gen ID = _n
+reshape long year, i(ID) j(obs)
+drop if mi(year)
+
+bysort PERMCO year: egen dual_max = max(dual)
+
+unique PERMCO year
+duplicates drop PERMCO year, force
+
+rename PERMCO lpermco
+rename year fyear
+
+save "$output\CEO_duality_x.dta", replace
+
+** Institutional Ownership
+use "E:\21. Air Pollution and Accounting\DATA\R&R\institutional_ownership.dta", replace
+
+gen fyear = year(rdate)
+keep rdate cusip fyear ticker Top5InstOwn Top10InstOwn InstOwn InstOwn_HHI
+
+count if mi(fyear) | mi(Top5InstOwn) | mi(Top10InstOwn) | mi(InstOwn) | mi(InstOwn_HHI)
+
+count if mi(cusip)
+
+count if mi(ticker)
+drop ticker
+
+foreach var of varlist Top5InstOwn Top10InstOwn InstOwn InstOwn_HHI{
+	bysort cusip fyear: egen `var'_mean = mean(`var')
+	gen diff_`var' = (`var'_mean != `var')
+	tab diff_`var'
+}
+
+br cusip rdate fyear Top5InstOwn Top5InstOwn_mean if diff_Top5InstOwn == 1
+br cusip rdate fyear Top10InstOwn Top10InstOwn_mean if diff_Top10InstOwn == 1
+br cusip rdate fyear InstOwn InstOwn_mean if diff_InstOwn == 1
+br cusip rdate fyear InstOwn_HHI InstOwn_HHI_mean if diff_InstOwn_HHI == 1
+
+sort cusip fyear rdate
+br cusip fyear rdate Top5InstOwn Top5InstOwn_mean if diff_Top5InstOwn == 1
+
+drop rdate
+
+collapse (mean)Top5InstOwn (mean)Top10InstOwn (mean)InstOwn (mean)InstOwn_HHI, by(cusip fyear)
+
+rename cusip cusip8
+
+save "$output\institutional_ownership_x.dta", replace
+
+** Knowledge Intensive Industries
+import excel using "E:\21. Air Pollution and Accounting\DATA\R&R\knowledge intensive industry.xlsx", firstrow clear
+rename SIC sic
+
+bysort sic: gen dup = _n
+drop if dup > 1
+save "$output\knowledge_intensive_industry.dta", replace
+
+use "$output\final_data_47662", replace
+	capture drop _merge
+merge m:1 tic fyear using "$output\board_independence_x.dta"
+
+	capture drop _merge
+merge m:1 tic fyear using "$output\female_board_x.dta"
+	keep if _merge == 1 | _merge == 3
+
+	capture drop _merge
+merge 1:1 lpermco fyear using "$output\CEO_duality_x.dta"
+	keep if _merge == 3
+	
+	capture drop _merge
+merge 1:1 cusip8 fyear using "$output\instituional_ownership_x.dta"
+	keep if _merge == 1 | _merge == 3
+	
+	capture drop _merge
+merge m:1 sic using "$output\knowledge_intensive_industry.dta"
+	keep if _merge == 1 | _merge == 3
+	gen knowledge_intense = (_merge == 3)
+	drop _merge
+
+erase "$output\board_independence_x.dta"
+erase "$output\female_board_x.dta"
+erase "$output\CEO_duality_x.dta"
+erase "$output\institutional_ownership_x.dta"
+erase "$output\knowledge_intensive_industry.dta"
+
+* G29_mean, gender_ratio, dual, loss, grow, institutional_ownership (4个: institutional_ownership, HHI, 5, 10)
+
+**# Reviewer 2 Comment 2: Knowledge-intensive v.s. Labor-intensive
+** Knowledge Intensive Industries
+import excel using "E:\21. Air Pollution and Accounting\DATA\R&R\knowledge intensive industry.xlsx", firstrow clear
+rename SIC sic
+
+bysort sic: gen dup = _n
+drop if dup > 1
+save "$output\knowledge_intensive_industry.dta", replace
+
+use "$output\final_data_47662", replace
+	capture drop _merge
+merge m:1 sic using "$output\knowledge_intensive_industry.dta"
+	keep if _merge == 1 | _merge == 3
+	gen knowledge_intense = (_merge == 3)
+	drop _merge
+
+*==================== Regression (Signed) =============================
+preserve
+keep if knowledge_intense == 1
+	eststo clear
+eststo regression1: reghdfe dacck visib $control_variables_aem, absorb(fyear ff_48) vce(cluster i.lpermno#i.fyear)
+estadd scalar ar2 = e(r2_a)
+summarize dacck
+estadd scalar ymean = r(mean)
+estadd local yearfe "Yes", replace
+estadd local indfe "Yes", replace
+	
+eststo regression2: reghdfe dac visib $control_variables_aem, absorb(fyear ff_48) vce(cluster i.lpermno#i.fyear)
+estadd scalar ar2 = e(r2_a)
+summarize dac
+estadd scalar ymean = r(mean)
+estadd local yearfe "Yes", replace
+estadd local indfe "Yes", replace
+
+eststo regression3: reghdfe rank_dac visib $control_variables_aem, absorb(fyear ff_48) vce(cluster i.lpermno#i.fyear)
+estadd scalar ar2 = e(r2_a)
+summarize rank_dac
+estadd scalar ymean = r(mean)
+estadd local yearfe "Yes", replace
+estadd local indfe "Yes", replace
+
+eststo regression4: reghdfe rem visib $control_variables_rem, absorb(fyear ff_48) vce(cluster i.lpermno#i.fyear)
+estadd scalar ar2 = e(r2_a)
+summarize rem
+estadd scalar ymean = r(mean)
+estadd local yearfe "Yes", replace
+estadd local indfe "Yes", replace
+
+eststo regression5: reghdfe rank_rem visib $control_variables_rem, absorb(fyear ff_48) vce(cluster i.lpermno#i.fyear)
+estadd scalar ar2 = e(r2_a)
+summarize rank_rem
+estadd scalar ymean = r(mean)
+estadd local yearfe "Yes", replace
+estadd local indfe "Yes", replace
+
+esttab regression1 regression2 regression3 regression4 regression5 using "$output\results_knowledge_intensive.tex", replace ///
+mgroups("Accrual Earnings Management" "Real Earnings Management", pattern(1 0 0 1 0) prefix(\multicolumn{@span}{c}{) suffix(}) span erepeat(\cmidrule(lr){@span})) ///
+mtitles("\makecell{AEM \\ (performance-adj.)}" "\makecell{AEM \\ (modified Jone's')}" "\makecell{AEM \\ Rank}" "REM" "\makecell{REM \\ Rank}") collabels(none) booktabs label scalar(ymean) ///
+stats(yearfe indfe N ymean ar2, fmt(0 0 0 2 2) labels("Year FE" "Industry FE" "N" "Dep mean" "Adjusted R-sq")) ///
+prehead("\begin{table}\begin{center}\caption{The Effect of Visibility on Earnings Management, among Knowledge-intensive Industries}\label{tab: table4}\tabcolsep=0.1cm\scalebox{0.9}{\begin{tabular}{lccccc}\toprule")  ///
+posthead("\midrule") postfoot("\bottomrule\end{tabular}}\end{center}\footnotesize{Notes: The dependent variables are indicated at the top of each column. A description of all variables can be found in Table \ref{tab: variabledescriptions}. The dependent variables in columns (1)-(3) are: a firms' accrual earnings management calculated using the performance-adjusted method, a firm's accrual earnings management calculated using the modified Jone's method, and the rank of the firm's accrual earnings management (modified Jone's), respectively. The dependent variables in columns (4)-(5) are: a firm's real earnings management, and the rank of the firm's real earnings management, respectively. Year fixed effects and industry fixed effects are included in all regressions. Standard errors are clustered at the level of firm-year. *** p < 1\%, ** p < 5\%, * p < 10\%.}\end{table}") 
+restore
+
+preserve
+keep if knowledge_intense == 0
+	eststo clear
+eststo regression1: reghdfe dacck visib $control_variables_aem, absorb(fyear ff_48) vce(cluster i.lpermno#i.fyear)
+estadd scalar ar2 = e(r2_a)
+summarize dacck
+estadd scalar ymean = r(mean)
+estadd local yearfe "Yes", replace
+estadd local indfe "Yes", replace
+	
+eststo regression2: reghdfe dac visib $control_variables_aem, absorb(fyear ff_48) vce(cluster i.lpermno#i.fyear)
+estadd scalar ar2 = e(r2_a)
+summarize dac
+estadd scalar ymean = r(mean)
+estadd local yearfe "Yes", replace
+estadd local indfe "Yes", replace
+
+eststo regression3: reghdfe rank_dac visib $control_variables_aem, absorb(fyear ff_48) vce(cluster i.lpermno#i.fyear)
+estadd scalar ar2 = e(r2_a)
+summarize rank_dac
+estadd scalar ymean = r(mean)
+estadd local yearfe "Yes", replace
+estadd local indfe "Yes", replace
+
+eststo regression4: reghdfe rem visib $control_variables_rem, absorb(fyear ff_48) vce(cluster i.lpermno#i.fyear)
+estadd scalar ar2 = e(r2_a)
+summarize rem
+estadd scalar ymean = r(mean)
+estadd local yearfe "Yes", replace
+estadd local indfe "Yes", replace
+
+eststo regression5: reghdfe rank_rem visib $control_variables_rem, absorb(fyear ff_48) vce(cluster i.lpermno#i.fyear)
+estadd scalar ar2 = e(r2_a)
+summarize rank_rem
+estadd scalar ymean = r(mean)
+estadd local yearfe "Yes", replace
+estadd local indfe "Yes", replace
+
+esttab regression1 regression2 regression3 regression4 regression5 using "$output\results_non_knowledge_intensive.tex", replace ///
+mgroups("Accrual Earnings Management" "Real Earnings Management", pattern(1 0 0 1 0) prefix(\multicolumn{@span}{c}{) suffix(}) span erepeat(\cmidrule(lr){@span})) ///
+mtitles("\makecell{AEM \\ (performance-adj.)}" "\makecell{AEM \\ (modified Jone's')}" "\makecell{AEM \\ Rank}" "REM" "\makecell{REM \\ Rank}") collabels(none) booktabs label scalar(ymean) ///
+stats(yearfe indfe N ymean ar2, fmt(0 0 0 2 2) labels("Year FE" "Industry FE" "N" "Dep mean" "Adjusted R-sq")) ///
+prehead("\begin{table}\begin{center}\caption{The Effect of Visibility on Earnings Management, among Non-knowledge-intensive Industries}\label{tab: table4}\tabcolsep=0.1cm\scalebox{0.9}{\begin{tabular}{lccccc}\toprule")  ///
+posthead("\midrule") postfoot("\bottomrule\end{tabular}}\end{center}\footnotesize{Notes: The dependent variables are indicated at the top of each column. A description of all variables can be found in Table \ref{tab: variabledescriptions}. The dependent variables in columns (1)-(3) are: a firms' accrual earnings management calculated using the performance-adjusted method, a firm's accrual earnings management calculated using the modified Jone's method, and the rank of the firm's accrual earnings management (modified Jone's), respectively. The dependent variables in columns (4)-(5) are: a firm's real earnings management, and the rank of the firm's real earnings management, respectively. Year fixed effects and industry fixed effects are included in all regressions. Standard errors are clustered at the level of firm-year. *** p < 1\%, ** p < 5\%, * p < 10\%.}\end{table}") 
+restore
+
+**# Reviewer Comment 6: Corporate Governance - female board%
+** female board% (across the US)
+use "E:\21. Air Pollution and Accounting\DATA\R&R\BoardEx - Organization Summary - Analytics.dta", replace
+gen fyear = year(annualreportdate)
+unique ticker fyear //95964
+duplicates drop ticker fyear, force
+rename ticker tic
+save "$output\female_board_x.dta", replace
+
+** 3) dual role
+use "E:\21. Air Pollution and Accounting\DATA\R&R\CEO duality.dta", replace
+drop if mi(PERMCO) & mi(GVKEY)
+drop if mi(datestartrole) & mi(dateendrole)
+drop if mi(datestartrole) & !mi(dateendrole)
+
+gen startyear = year(datestartrole)
+gen endyear = year(dateendrole)
+replace endyear = 2018 if mi(endyear)
+drop if endyear < 2002
+gen year1= startyear if startyear >= 2002
+replace year1 = 2002 if startyear < 2002
+gen gap = endyear - year1 // 0-16
+
+forvalues i = 2/17{
+	gen year`i' =.
+}
+
+forvalues i = 1/16{
+	local j = `i' + 1
+	replace year`j' = year1 + `i' if gap >= `i'
+}
+
+drop datestartrole dateendrole score startyear endyear
+
+gen ID = _n
+reshape long year, i(ID) j(obs)
+drop if mi(year)
+
+bysort PERMCO year: egen dual_max = max(dual)
+
+unique PERMCO year
+duplicates drop PERMCO year, force
+
+rename PERMCO lpermco
+rename year fyear
+
+save "$output\CEO_duality_x.dta", replace
+
+use "$output\final_data_47662", replace
+	capture drop _merge
+merge m:1 tic fyear using "$output\female_board_x.dta"
+	keep if _merge == 1 | _merge == 3
+	
+	capture drop _merge
+merge 1:1 lpermco fyear using "$output\CEO_duality_x.dta"
+	keep if _merge == 1 | _merge == 3
+	
+* genderratio, median = 0.9
+label var genderratio "Gender ratio"
+* dual_max, 0/1
+label var dual_max "CEO duality"
+
+	eststo clear
+eststo regression1: reghdfe dacck visib genderratio c.visib#c.genderratio $control_variables_aem, absorb(fyear ff_48) vce(cluster i.lpermno#i.fyear) //c.?
+estadd scalar ar2 = e(r2_a)
+summarize dacck
+estadd scalar ymean = r(mean)
+estadd local yearfe "Yes", replace
+estadd local indfe "Yes", replace
+estadd local firmcont "Yes", replace
+
+eststo regression2: reghdfe dacck visib dual_max c.visib#c.dual_max $control_variables_aem, absorb(fyear ff_48) vce(cluster i.lpermno#i.fyear) //c.?
+estadd scalar ar2 = e(r2_a)
+summarize dacck
+estadd scalar ymean = r(mean)
+estadd local yearfe "Yes", replace
+estadd local indfe "Yes", replace
+estadd local firmcont "Yes", replace
+
+	
+eststo regression3: reghdfe dac visib genderratio c.visib#c.genderratio $control_variables_aem, absorb(fyear ff_48) vce(cluster i.lpermno#i.fyear) //c.?
+estadd scalar ar2 = e(r2_a)
+summarize dac
+estadd scalar ymean = r(mean)
+estadd local yearfe "Yes", replace
+estadd local indfe "Yes", replace
+estadd local firmcont "Yes", replace
+
+eststo regression4: reghdfe dac visib dual_max c.visib#c.dual_max $control_variables_aem, absorb(fyear ff_48) vce(cluster i.lpermno#i.fyear) //c.?
+estadd scalar ar2 = e(r2_a)
+summarize dac
+estadd scalar ymean = r(mean)
+estadd local yearfe "Yes", replace
+estadd local indfe "Yes", replace
+estadd local firmcont "Yes", replace
+
+eststo regression5: reghdfe rem visib genderratio c.visib#c.genderratio $control_variables_rem, absorb(fyear ff_48) vce(cluster i.lpermno#i.fyear)
+estadd scalar ar2 = e(r2_a)
+summarize rem
+estadd scalar ymean = r(mean)
+estadd local yearfe "Yes", replace
+estadd local indfe "Yes", replace
+estadd local firmcont "Yes", replace
+
+eststo regression6: reghdfe rem visib dual_max c.visib#c.dual_max $control_variables_rem, absorb(fyear ff_48) vce(cluster i.lpermno#i.fyear)
+estadd scalar ar2 = e(r2_a)
+summarize rem
+estadd scalar ymean = r(mean)
+estadd local yearfe "Yes", replace
+estadd local indfe "Yes", replace
+estadd local firmcont "Yes", replace
+
+esttab regression1 regression2 regression3 regression4 regression5 regression6 using "$output\results_governance.tex", replace ///
+mgroups("Accrual Earnings Management" "Real Earnings Management", pattern(1 0 0 0 1 0) prefix(\multicolumn{@span}{c}{) suffix(}) span erepeat(\cmidrule(lr){@span})) drop($control_variables_rem $control_variables_aem) ///
+mtitles("Gender ratio" "Duality" "Gender ratio" "Duality" "Gender ratio" "Duality") collabels(none) booktabs label scalar(ymean) order(visib genderratio c.visib#c.genderratio dual_max c.visib#c.dual_max) ///
+stats(yearfe indfe firmcont N ymean ar2, fmt(0 0 0 0 2 2) labels("Year FE" "Industry FE" "Firm Controls" "N" "Dep mean" "Adjusted R-sq")) ///
+prehead("\begin{table}\begin{center}\caption{The Effect of Visibility on Earnings Management by the Degree of Corporate Governance (Alternative Measures)}\label{tab: table15}\tabcolsep=0.1cm\scalebox{0.85}{\begin{tabular}{lcccccc}\toprule")  ///
+posthead("\midrule") postfoot("\bottomrule\end{tabular}}\end{center}\footnotesize{Notes: This table reports how the effects of visibility on AEM and REM differ by the degree of the internal corporate governance. We use gender ratio in the board and an indicator for whether the CEO has dual role in the board as two measures for the level of corporate governance. The dependent variable in columns (1)-(4) is AEM, and the dependent variable in columns (5) and (6) is REM. The AEM measure in columns (1) and (2) is calculated using the performance-adjusted model, and the AEM measure in columns (3) and (4) is calculated using the modified Jone's model. Firm controls are the same as in Table \ref{tab: table4}. A description of all variables can be found in Table \ref{tab: variabledescriptions}. Year fixed effects and industry fixed effects are included in all regressions. Standard errors are clustered at the level of firm and year. *** p < 1\%, ** p < 5\%, * p < 10\%.}\end{table}") 
+
+

@@ -237,7 +237,7 @@ merge 1:1 lpermno fyear using `convk'
 drop if _merge == 2
 label var dacck "AEM (performance-adjusted)"
 
-**# Table 5
+**# Table 5, Exercise 1
 *==================== Regression (Signed) =============================
 	eststo clear
 eststo regression1: reghdfe dacck visib $control_variables_aem, absorb(fyear ff_48) vce(cluster i.lpermno#i.fyear)
