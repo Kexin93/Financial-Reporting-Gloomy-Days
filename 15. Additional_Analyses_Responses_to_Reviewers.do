@@ -234,7 +234,10 @@ global control_variables_rem size bm roa lev firm_age rank au_years hhi_sale /*x
 use "$output\final_data_47662", replace
 
 **# Reviewer 1 Comment 4: Future 3 months (in do-file 16)
-**# Reviewer 1 Comment 2: Fog
+**# Reviewer 1 Comment 2: Fog with OLD CONTROLS
+global control_variables_aem size bm roa lev firm_age rank au_years oa_scale /*xrd_int*/
+global control_variables_rem size bm roa lev firm_age rank au_years hhi_sale /*xrd_int*/
+
 sort fog
 xtile fog_tercile = fog, nq(3)
 label var fog "Fog"
@@ -291,9 +294,160 @@ posthead("\midrule\multicolumn{6}{c}{\textbf{Second Tercile}} \\") keep(visib fo
 esttab regressionT3_1 regressionT3_2 regressionT3_3 regressionT3_4 regressionT3_5 using "$output\table_fogTercile.tex", append fragment label nolines ///
 posthead("\midrule \multicolumn{6}{c}{\textbf{Third Tercile}} \\") keep(visib fog) nonumbers nomtitles ///
 stats(yearfe indfe N ymean ar2, fmt(0 0 0 2 2) labels("Year FE" "Industry FE" "N" "Dep mean" "Adjusted R-sq")) ///
-postfoot("\bottomrule\end{tabular}}\end{center}\footnotesize{Notes: The sample is divided into three subsamples by the magnitude of fog, namely, the first tercile, second tercile, and the third tercile. The dependent variables are indicated at the top of each column. The same set of control variables are included as in Table \ref{tab: table4}. A description of all variables can be found in Table \ref{tab: variabledescriptions}. The dependent variables in columns (1)-(3) are: a firms' accrual earnings management calculated using the performance-adjusted method, a firm's accrual earnings management calculated using the modified Jone's method, and the rank of the firm's accrual earnings management (modified Jone's), respectively. The dependent variables in columns (4)-(5) are: a firm's real earnings management, and the rank of the firm's real earnings management, respectively. Year fixed effects and industry fixed effects are included in all regressions. Standard errors are clustered at the level of firm-year. *** p < 1\%, ** p < 5\%, * p < 10\%.}\end{table}") 
+postfoot("\bottomrule\end{tabular}}\end{center}\footnotesize{Notes: The sample is divided into three subsamples by the magnitude of fog, namely, the first tercile, second tercile, and the third tercile. The dependent variables are indicated at the top of each column. The same set of control variables are included as in Table \ref{tab: table4}. A description of all variables can be found in Table \ref{tab: variabledescriptions}. The dependent variables in columns (1)-(3) are: a firms' accrual earnings management calculated using the performance-adjusted method, a firm's accrual earnings management calculated using the modified Jone's method, and the rank of the firm's accrual earnings management (modified Jone's), respectively. The dependent variables in columns (4)-(5) are: a firm's real earnings management, and the rank of the firm's real earnings management, respectively. Year fixed effects and industry fixed effects are included in all regressions. The control variables include: firm size, book-to-market ratio, return on assets, leverage ratio, firm age, Big N auditor, number of years that a firm was audited by the same auditor, net operating assets (with dependent variable being $AEM$, and Herfindahl–Hirschman index (with dependent variable being $REM$. Standard errors are clustered at the level of firm-year. *** p < 1\%, ** p < 5\%, * p < 10\%.}\end{table}") 
 
-**# Reviewer 1 Comment 4: PM2.5
+use "$output\final_data_47662", replace
+
+**# Reviewer 1 Comment 4: Future 3 months (in do-file 16)
+**# Reviewer 1 Comment 2: Fog with OLD CONTROLS
+global control_variables_aem size bm roa lev firm_age rank au_years oa_scale /*xrd_int*/
+global control_variables_rem size bm roa lev firm_age rank au_years hhi_sale /*xrd_int*/
+
+sort fog
+xtile fog_tercile = fog, nq(3)
+label var fog "Fog"
+*==================== Regression (Signed) =============================
+	eststo clear
+forvalues i = 1/3{
+eststo regressionT`i'_1: reghdfe dacck visib fog $control_variables_aem if fog_tercile == `i', absorb(fyear ff_48) vce(cluster i.lpermno#i.fyear)
+estadd scalar ar2 = e(r2_a)
+summarize dacck if fog_tercile == `i'
+estadd scalar ymean = r(mean)
+estadd local yearfe "Yes", replace
+estadd local indfe "Yes", replace
+	
+eststo regressionT`i'_2: reghdfe dac visib fog $control_variables_aem if fog_tercile == `i', absorb(fyear ff_48) vce(cluster i.lpermno#i.fyear)
+estadd scalar ar2 = e(r2_a)
+summarize dac if fog_tercile == `i'
+estadd scalar ymean = r(mean)
+estadd local yearfe "Yes", replace
+estadd local indfe "Yes", replace
+
+eststo regressionT`i'_3: reghdfe rank_dac visib fog $control_variables_aem if fog_tercile == `i', absorb(fyear ff_48) vce(cluster i.lpermno#i.fyear)
+estadd scalar ar2 = e(r2_a)
+summarize rank_dac if fog_tercile == `i'
+estadd scalar ymean = r(mean)
+estadd local yearfe "Yes", replace
+estadd local indfe "Yes", replace
+
+eststo regressionT`i'_4: reghdfe rem visib fog $control_variables_rem if fog_tercile == `i', absorb(fyear ff_48) vce(cluster i.lpermno#i.fyear)
+estadd scalar ar2 = e(r2_a)
+summarize rem if fog_tercile == `i'
+estadd scalar ymean = r(mean)
+estadd local yearfe "Yes", replace
+estadd local indfe "Yes", replace
+
+eststo regressionT`i'_5: reghdfe rank_rem visib fog $control_variables_rem if fog_tercile == `i', absorb(fyear ff_48) vce(cluster i.lpermno#i.fyear)
+estadd scalar ar2 = e(r2_a)
+summarize rank_rem if fog_tercile == `i'
+estadd scalar ymean = r(mean)
+estadd local yearfe "Yes", replace
+estadd local indfe "Yes", replace
+}
+
+esttab regressionT1_1 regressionT1_2 regressionT1_3 regressionT1_4 regressionT1_5 using "$output\table_fogTercile.tex", replace fragment label nolines  ///
+mgroups("Accrual Earnings Management" "Real Earnings Management", pattern(1 0 0 1 0) prefix(\multicolumn{@span}{c}{) suffix(}) span erepeat(\cmidrule(lr){@span})) keep(visib fog) ///
+mtitles("\makecell{AEM \\ (performance- \\ adj.)}" "\makecell{AEM \\ (modified \\ Jone's')}" "\makecell{AEM \\ Rank}" "REM" "\makecell{REM \\ Rank}") collabels(none) booktabs ///
+stats(yearfe indfe N ymean ar2, fmt(0 0 0 2 2) labels("Year FE" "Industry FE" "N" "Dep mean" "Adjusted R-sq")) ///
+prehead("\begin{table}\begin{center}\caption{The Effect of Visibility on Earnings Management by Terciles of Fog}\label{tab: fogTercile}\tabcolsep=0.1cm\scalebox{0.8}{\begin{tabular}{lccccc}\toprule") ///
+posthead("\midrule\multicolumn{6}{c}{\textbf{First Tercile}}\\") 
+
+esttab regressionT2_1 regressionT2_2 regressionT2_3 regressionT2_4 regressionT2_5 using "$output\table_fogTercile.tex", append fragment label nolines ///
+stats(yearfe indfe N ymean ar2, fmt(0 0 0 2 2) labels("Year FE" "Industry FE" "N" "Dep mean" "Adjusted R-sq")) ///
+posthead("\midrule\multicolumn{6}{c}{\textbf{Second Tercile}} \\") keep(visib fog) nonumbers nomtitles
+
+esttab regressionT3_1 regressionT3_2 regressionT3_3 regressionT3_4 regressionT3_5 using "$output\table_fogTercile.tex", append fragment label nolines ///
+posthead("\midrule \multicolumn{6}{c}{\textbf{Third Tercile}} \\") keep(visib fog) nonumbers nomtitles ///
+stats(yearfe indfe N ymean ar2, fmt(0 0 0 2 2) labels("Year FE" "Industry FE" "N" "Dep mean" "Adjusted R-sq")) ///
+postfoot("\bottomrule\end{tabular}}\end{center}\footnotesize{Notes: The sample is divided into three subsamples by the magnitude of fog, namely, the first tercile, second tercile, and the third tercile. The dependent variables are indicated at the top of each column. The same set of control variables are included as in Table \ref{tab: table4}. A description of all variables can be found in Table \ref{tab: variabledescriptions}. The dependent variables in columns (1)-(3) are: a firms' accrual earnings management calculated using the performance-adjusted method, a firm's accrual earnings management calculated using the modified Jone's method, and the rank of the firm's accrual earnings management (modified Jone's), respectively. The dependent variables in columns (4)-(5) are: a firm's real earnings management, and the rank of the firm's real earnings management, respectively. Year fixed effects and industry fixed effects are included in all regressions. The control variables include: firm size, book-to-market ratio, return on assets, leverage ratio, firm age, Big N auditor, number of years that a firm was audited by the same auditor, net operating assets (with dependent variable being $AEM$, and Herfindahl–Hirschman index (with dependent variable being $REM$. Standard errors are clustered at the level of firm-year. *** p < 1\%, ** p < 5\%, * p < 10\%.}\end{table}") 
+
+**# Reviewer 1 Comment 2: Fog with NEW CONTROLS
+
+global control_variables_aem size bm roa lev firm_age rank au_years oa_scale /*xrd_int*/ loss grow Boardindependence lit InstOwn stockreturn sale_sd rem
+
+global control_variables_rem size bm roa lev firm_age rank au_years hhi_sale /*xrd_int*/ loss grow Boardindependence lit InstOwn stockreturn sale_sd dac
+
+xtset lpermno fyear
+gen stockreturn = (prcc_f - l.prcc_f)/l.prcc_f
+
+*ssc install rangestat
+
+rangestat (sd) sale, interval(fyear -2 0) by(lpermno)  
+label var sale_sd "Sales Std3."
+
+	capture drop _merge
+merge 1:1 tic fyear using "$output\board_characteristics"
+	keep if _merge == 1 | _merge == 3
+	capture drop _merge
+merge 1:1 cusip8 fyear using "$output\institutional_ownership_x.dta"
+	keep if _merge == 1 | _merge == 3
+
+label var grow "Sales growth"
+label var loss "Loss"
+
+gen lit = 1 if (sic >= 2833 & sic <= 2836) | (sic >= 3570 & sic <= 3577) | (sic >= 3600 & sic <=3674) | (sic >= 5200 & sic <= 5961) | (sic >= 7370 & sic <= 7379) | (sic >= 8731 & sic <= 8734)
+replace lit = 0 if mi(lit) & !mi(sic)
+
+label var lit "Litigious"
+
+	eststo clear
+forvalues i = 1/3{
+eststo regressionT`i'_1: reghdfe dacck visib fog $control_variables_aem if fog_tercile == `i', absorb(fyear ff_48) vce(cluster i.lpermno#i.fyear)
+estadd scalar ar2 = e(r2_a)
+summarize dacck if fog_tercile == `i'
+estadd scalar ymean = r(mean)
+estadd local yearfe "Yes", replace
+estadd local indfe "Yes", replace
+	
+eststo regressionT`i'_2: reghdfe dac visib fog $control_variables_aem if fog_tercile == `i', absorb(fyear ff_48) vce(cluster i.lpermno#i.fyear)
+estadd scalar ar2 = e(r2_a)
+summarize dac if fog_tercile == `i'
+estadd scalar ymean = r(mean)
+estadd local yearfe "Yes", replace
+estadd local indfe "Yes", replace
+
+eststo regressionT`i'_3: reghdfe rank_dac visib fog $control_variables_aem if fog_tercile == `i', absorb(fyear ff_48) vce(cluster i.lpermno#i.fyear)
+estadd scalar ar2 = e(r2_a)
+summarize rank_dac if fog_tercile == `i'
+estadd scalar ymean = r(mean)
+estadd local yearfe "Yes", replace
+estadd local indfe "Yes", replace
+
+eststo regressionT`i'_4: reghdfe rem visib fog $control_variables_rem if fog_tercile == `i', absorb(fyear ff_48) vce(cluster i.lpermno#i.fyear)
+estadd scalar ar2 = e(r2_a)
+summarize rem if fog_tercile == `i'
+estadd scalar ymean = r(mean)
+estadd local yearfe "Yes", replace
+estadd local indfe "Yes", replace
+
+eststo regressionT`i'_5: reghdfe rank_rem visib fog $control_variables_rem if fog_tercile == `i', absorb(fyear ff_48) vce(cluster i.lpermno#i.fyear)
+estadd scalar ar2 = e(r2_a)
+summarize rank_rem if fog_tercile == `i'
+estadd scalar ymean = r(mean)
+estadd local yearfe "Yes", replace
+estadd local indfe "Yes", replace
+}
+
+esttab regressionT1_1 regressionT1_2 regressionT1_3 regressionT1_4 regressionT1_5 using "$output\table_fogTercile_wNewControls.tex", replace fragment label nolines  ///
+mgroups("Accrual Earnings Management" "Real Earnings Management", pattern(1 0 0 1 0) prefix(\multicolumn{@span}{c}{) suffix(}) span erepeat(\cmidrule(lr){@span})) keep(visib fog) ///
+mtitles("\makecell{AEM \\ (performance- \\ adj.)}" "\makecell{AEM \\ (modified \\ Jone's')}" "\makecell{AEM \\ Rank}" "REM" "\makecell{REM \\ Rank}") collabels(none) booktabs ///
+stats(yearfe indfe N ymean ar2, fmt(0 0 0 2 2) labels("Year FE" "Industry FE" "N" "Dep mean" "Adjusted R-sq")) ///
+prehead("\begin{table}\begin{center}\caption{The Effect of Visibility on Earnings Management by Terciles of Fog}\label{tab: fogTercile}\tabcolsep=0.1cm\scalebox{0.8}{\begin{tabular}{lccccc}\toprule") ///
+posthead("\midrule\multicolumn{6}{c}{\textbf{First Tercile}}\\") 
+
+esttab regressionT2_1 regressionT2_2 regressionT2_3 regressionT2_4 regressionT2_5 using "$output\table_fogTercile_wNewControls.tex", append fragment label nolines ///
+stats(yearfe indfe N ymean ar2, fmt(0 0 0 2 2) labels("Year FE" "Industry FE" "N" "Dep mean" "Adjusted R-sq")) ///
+posthead("\midrule\multicolumn{6}{c}{\textbf{Second Tercile}} \\") keep(visib fog) nonumbers nomtitles
+
+esttab regressionT3_1 regressionT3_2 regressionT3_3 regressionT3_4 regressionT3_5 using "$output\table_fogTercile_wNewControls.tex", append fragment label nolines ///
+posthead("\midrule \multicolumn{6}{c}{\textbf{Third Tercile}} \\") keep(visib fog) nonumbers nomtitles ///
+stats(yearfe indfe N ymean ar2, fmt(0 0 0 2 2) labels("Year FE" "Industry FE" "N" "Dep mean" "Adjusted R-sq")) ///
+postfoot("\bottomrule\end{tabular}}\end{center}\footnotesize{Notes: The sample is divided into three subsamples by the magnitude of fog, namely, the first tercile, second tercile, and the third tercile. The dependent variables are indicated at the top of each column. The same set of control variables are included as in Table \ref{tab: table4}. A description of all variables can be found in Table \ref{tab: variabledescriptions}. The dependent variables in columns (1)-(3) are: a firms' accrual earnings management calculated using the performance-adjusted method, a firm's accrual earnings management calculated using the modified Jone's method, and the rank of the firm's accrual earnings management (modified Jone's), respectively. The dependent variables in columns (4)-(5) are: a firm's real earnings management, and the rank of the firm's real earnings management, respectively. Year fixed effects and industry fixed effects are included in all regressions. The control variables include: firm size, book-to-market ratio, return on assets, leverage ratio, firm age, Big N auditor, number of years that a firm was audited by the same auditor, sale loss, sale growth, board independence, litigious industry, institutional ownership, stock return, 3-year rolling standard deviation of sales, $REM$ (for $AEM$), $AEM$ (for $REM$), net operating assets (with dependent variable being $AEM$, and Herfindahl–Hirschman index (with dependent variable being $REM$. Standard errors are clustered at the level of firm-year. *** p < 1\%, ** p < 5\%, * p < 10\%.}\end{table}") 
+
+**# Reviewer 1 Comment 4: PM2.5 with OLD CONTROLS
+global control_variables_aem size bm roa lev firm_age rank au_years oa_scale /*xrd_int*/
+global control_variables_rem size bm roa lev firm_age rank au_years hhi_sale /*xrd_int*/
+
 use "$output\final_data_47662", replace
 	capture drop _merge
 merge m:1 state city fyear using "$maindir\US_PM25_weightedannualmean.dta"
@@ -404,7 +558,146 @@ esttab regression1 regression2 regression3 regression4 regression5 using "$outpu
 booktabs label scalar(ymean) nomtitles nonumbers fragment nolines keep(visib_res) ///
 posthead("\midrule \multicolumn{6}{c}{\textbf{Panel B: Residual value of Regressing Visibility on PM 2.5}} \\") ///
 stats(yearfe indfe N ymean ar2, fmt(0 0 0 2 2) labels("Year FE" "Industry FE" "N" "Dep mean" "Adjusted R-sq")) ///
-postfoot("\bottomrule\end{tabular}}\end{center}\footnotesize{Notes: The dependent variables are indicated at the top of each column. The dependent variable in column (1) is a firm's accrual earnings management (AEM) calculated using the performance-adjusted modified Jone's model. The dependent variable in column (2) is AEM that is calculated using the modified Jone's model. The dependent variable in column (3) is the rank of the firm's AEM (modified Jone's). The dependent variables in columns (4)-(5) are a firm's real earnings management (REM) and the rank of the firm's REM, respectively. In Panel A, the main regressor is the fitted value of visibility from the regression where we regress visibility on annual PM 2.5 for each city and year and control variables including firm size, book-to-market ratio, returns on assets, leverage, firm age, the auditor being from Big N CPA firms, the number of years of being audited by the same auditor, the firm's operation assets, and Herfindahl–Hirschman Index. In Panel B, the main regressor is the residual value of visibility from the regression where we regress visibility on the variables above. In both panels, the same set of control variables are included as in Table \ref{tab: table4}. A description of all variables can be found in Table \ref{tab: variabledescriptions}. Year fixed effects and industry fixed effects are included in all regressions. The same firm control variables are included as in Table \ref{tab: table4}. Standard errors are clustered at the level of firm and year. *** p < 1\%, ** p < 5\%, * p < 10\%.}\end{table}") 
+postfoot("\bottomrule\end{tabular}}\end{center}\footnotesize{Notes: The dependent variables are indicated at the top of each column. The dependent variable in column (1) is a firm's accrual earnings management (AEM) calculated using the performance-adjusted modified Jone's model. The dependent variable in column (2) is AEM that is calculated using the modified Jone's model. The dependent variable in column (3) is the rank of the firm's AEM (modified Jone's). The dependent variables in columns (4)-(5) are a firm's real earnings management (REM) and the rank of the firm's REM, respectively. In Panel A, the main regressor is the fitted value of visibility from the regression where we regress visibility on annual PM 2.5 for each city and year and control variables including firm size, book-to-market ratio, returns on assets, leverage, firm age, the auditor being from Big N CPA firms, the number of years of being audited by the same auditor, the firm's operation assets (for AEM), and Herfindahl–Hirschman Index (for REM). In Panel B, the main regressor is the residual value of visibility from the regression where we regress visibility on the variables above. In both panels, the same set of control variables are included as in Table \ref{tab: table4}. A description of all variables can be found in Table \ref{tab: variabledescriptions}. Year fixed effects and industry fixed effects are included in all regressions. The same firm control variables are included as in Table \ref{tab: table4}. Standard errors are clustered at the level of firm and year. *** p < 1\%, ** p < 5\%, * p < 10\%.}\end{table}") 
+
+**# Reviewer 1 Comment 4: PM2.5 with NEW CONTROLS
+global control_variables_aem size bm roa lev firm_age rank au_years oa_scale /*xrd_int*/ loss grow Boardindependence lit InstOwn stockreturn sale_sd rem
+
+global control_variables_rem size bm roa lev firm_age rank au_years hhi_sale /*xrd_int*/ loss grow Boardindependence lit InstOwn stockreturn sale_sd dac
+
+use "$output\final_data_47662", replace
+	capture drop _merge
+merge m:1 state city fyear using "$maindir\US_PM25_weightedannualmean.dta"
+keep if _m == 3 //3583 observations, or 762 state-city-fyears
+label var pollutant_value "PM 2.5 (Weighted Annual Mean)"
+
+xtset lpermno fyear
+gen stockreturn = (prcc_f - l.prcc_f)/l.prcc_f
+
+*ssc install rangestat
+
+rangestat (sd) sale, interval(fyear -2 0) by(lpermno)  
+label var sale_sd "Sales Std3."
+
+	capture drop _merge
+merge 1:1 tic fyear using "$output\board_characteristics"
+	keep if _merge == 1 | _merge == 3
+	capture drop _merge
+merge 1:1 cusip8 fyear using "$output\institutional_ownership_x.dta"
+	keep if _merge == 1 | _merge == 3
+
+label var grow "Sales growth"
+label var loss "Loss"
+
+gen lit = 1 if (sic >= 2833 & sic <= 2836) | (sic >= 3570 & sic <= 3577) | (sic >= 3600 & sic <=3674) | (sic >= 5200 & sic <= 5961) | (sic >= 7370 & sic <= 7379) | (sic >= 8731 & sic <= 8734)
+replace lit = 0 if mi(lit) & !mi(sic)
+
+label var lit "Litigious"
+
+global first_stage size bm roa lev firm_age rank au_years hhi_sale /*xrd_int*/ loss grow Boardindependence lit InstOwn stockreturn sale_sd dac
+reghdfe visib pollutant_value $control_variables_aem, absorb(i.fyear i.ff_48) vce(cluster i.lpermno#i.fyear)
+predict visib_PM2_5_aem, xb
+label var visib_PM2_5_aem "Fitted visibility (AEM)"
+
+reghdfe visib pollutant_value $control_variables_rem, absorb(i.fyear i.ff_48) vce(cluster i.lpermno#i.fyear)
+predict visib_PM2_5_rem, xb
+label var visib_PM2_5_rem "Fitted visibility (REM)"
+
+reghdfe visib pollutant_value $first_stage, absorb(i.fyear i.ff_48) vce(cluster i.lpermno#i.fyear)
+predict visib_PM2_5, xb
+label var visib_PM2_5 "Fitted visibility"
+
+	eststo clear
+eststo regression1: reghdfe dacck visib_PM2_5 $control_variables_aem, absorb(i.fyear i.ff_48) vce(cluster i.lpermno#i.fyear)
+estadd scalar ar2 = e(r2_a)
+summarize dacck
+estadd scalar ymean = r(mean)
+estadd local yearfe "Yes", replace
+estadd local indfe "Yes", replace
+
+eststo regression2: reghdfe dac visib_PM2_5 $control_variables_aem, absorb(i.fyear i.ff_48) vce(cluster i.lpermno#i.fyear)
+estadd scalar ar2 = e(r2_a)
+summarize dac
+estadd scalar ymean = r(mean)
+estadd local yearfe "Yes", replace
+estadd local indfe "Yes", replace
+
+eststo regression3: reghdfe rank_dac visib_PM2_5 $control_variables_aem, absorb(i.fyear i.ff_48) vce(cluster i.lpermno#i.fyear)
+estadd scalar ar2 = e(r2_a)
+summarize rank_dac
+estadd scalar ymean = r(mean)
+estadd local yearfe "Yes", replace
+estadd local indfe "Yes", replace
+
+eststo regression4: reghdfe rem visib_PM2_5 $control_variables_rem, absorb(i.fyear i.ff_48) vce(cluster i.lpermno#i.fyear)
+estadd scalar ar2 = e(r2_a)
+summarize rem
+estadd scalar ymean = r(mean)
+estadd local yearfe "Yes", replace
+estadd local indfe "Yes", replace
+
+eststo regression5: reghdfe rank_rem visib_PM2_5 $control_variables_rem, absorb(i.fyear i.ff_48) vce(cluster i.lpermno#i.fyear)
+estadd scalar ar2 = e(r2_a)
+summarize rank_rem
+estadd scalar ymean = r(mean)
+estadd local yearfe "Yes", replace
+estadd local indfe "Yes", replace
+
+esttab regression1 regression2 regression3 regression4 regression5 using "$output\main_results_visib_PM2_5_fitted_NewControls.tex", replace ///
+mgroups("Accrual Earnings Management" "Real Earnings Management", pattern(1 0 0 1 0) prefix(\multicolumn{@span}{c}{) suffix(}) span erepeat(\cmidrule(lr){@span})) ///
+mtitles("\makecell{AEM \\ (performance \\ -adj.)}" "\makecell{AEM \\ (modified \\ Jone's)}" "\makecell{AEM \\ Rank}" "REM" "\makecell{REM \\ Rank}") collabels(none) fragment nolines booktabs label keep(visib_PM2_5) ///
+stats(yearfe indfe N ymean ar2, fmt(0 0 0 2 2) labels("Year FE" "Industry FE" "N" "Dep mean" "Adjusted R-sq")) ///
+prehead("\begin{table}\begin{center}\caption{The Effect of Fitted and Residual Values of Visibility on Earnings Management}\label{tab: visib_fitted_res}\tabcolsep=0.3cm\scalebox{0.8}{\begin{tabular}{lccccc}\toprule")  ///
+posthead("\midrule \multicolumn{6}{c}{\textbf{Panel A: Fitted value of Regressing Visibility on PM 2.5}} \\")
+
+gen visib_res_aem = visib - visib_PM2_5_aem
+gen visib_res_rem = visib - visib_PM2_5_rem
+gen visib_res = visib - visib_PM2_5
+
+label var visib_res "Residual Visibility"
+	eststo clear
+eststo regression1: reghdfe dacck visib_res $control_variables_aem, absorb(i.fyear i.ff_48) vce(cluster i.lpermno#i.fyear)
+estadd scalar ar2 = e(r2_a)
+summarize dacck
+estadd scalar ymean = r(mean)
+estadd local yearfe "Yes", replace
+estadd local indfe "Yes", replace
+
+eststo regression2: reghdfe dac visib_res $control_variables_aem, absorb(i.fyear i.ff_48) vce(cluster i.lpermno#i.fyear)
+estadd scalar ar2 = e(r2_a)
+summarize dac
+estadd scalar ymean = r(mean)
+estadd local yearfe "Yes", replace
+estadd local indfe "Yes", replace
+
+eststo regression3: reghdfe rank_dac visib_res $control_variables_aem, absorb(i.fyear i.ff_48) vce(cluster i.lpermno#i.fyear)
+estadd scalar ar2 = e(r2_a)
+summarize rank_dac
+estadd scalar ymean = r(mean)
+estadd local yearfe "Yes", replace
+estadd local indfe "Yes", replace
+
+eststo regression4: reghdfe rem visib_res $control_variables_rem, absorb(i.fyear i.ff_48) vce(cluster i.lpermno#i.fyear)
+estadd scalar ar2 = e(r2_a)
+summarize rem
+estadd scalar ymean = r(mean)
+estadd local yearfe "Yes", replace
+estadd local indfe "Yes", replace
+
+eststo regression5: reghdfe rank_rem visib_res $control_variables_rem, absorb(i.fyear i.ff_48) vce(cluster i.lpermno#i.fyear)
+estadd scalar ar2 = e(r2_a)
+summarize rank_rem
+estadd scalar ymean = r(mean)
+estadd local yearfe "Yes", replace
+estadd local indfe "Yes", replace
+
+global first_stage size bm roa lev firm_age rank au_years oa_scale hhi_sale /*xrd_int*/
+
+esttab regression1 regression2 regression3 regression4 regression5 using "$output\main_results_visib_PM2_5_fitted_NewControls.tex", append ///
+booktabs label scalar(ymean) nomtitles nonumbers fragment nolines keep(visib_res) ///
+posthead("\midrule \multicolumn{6}{c}{\textbf{Panel B: Residual value of Regressing Visibility on PM 2.5}} \\") ///
+stats(yearfe indfe N ymean ar2, fmt(0 0 0 2 2) labels("Year FE" "Industry FE" "N" "Dep mean" "Adjusted R-sq")) ///
+postfoot("\bottomrule\end{tabular}}\end{center}\footnotesize{Notes: The dependent variables are indicated at the top of each column. The dependent variable in column (1) is a firm's accrual earnings management (AEM) calculated using the performance-adjusted modified Jone's model. The dependent variable in column (2) is AEM that is calculated using the modified Jone's model. The dependent variable in column (3) is the rank of the firm's AEM (modified Jone's). The dependent variables in columns (4)-(5) are a firm's real earnings management (REM) and the rank of the firm's REM, respectively. In Panel A, the main regressor is the fitted value of visibility from the regression where we regress visibility on annual PM 2.5 for each city and year and control variables including firm size, book-to-market ratio, return on assets, leverage ratio, firm age, Big N auditor, number of years that a firm was audited by the same auditor, sale loss, sale growth, board independence, litigious industry, institutional ownership, stock return, 3-year rolling standard deviation of sales, $REM$ (for $AEM$), $AEM$ (for $REM$), net operating assets (with dependent variable being $AEM$, and Herfindahl–Hirschman index (with dependent variable being $REM$. In Panel B, the main regressor is the residual value of visibility from the regression where we regress visibility on the variables above. In both panels, the same set of control variables are included as in Table \ref{tab: table4}. A description of all variables can be found in Table \ref{tab: variabledescriptions}. Year fixed effects and industry fixed effects are included in all regressions. The same firm control variables are included as in Table \ref{tab: table4}. Standard errors are clustered at the level of firm and year. *** p < 1\%, ** p < 5\%, * p < 10\%.}\end{table}") 
 
 **# Reviewer 2 Comment 4: Add controls
 **1) add TICKER
@@ -535,15 +828,17 @@ merge m:1 sic using "$output\knowledge_intensive_industry.dta"
 	gen knowledge_intense = (_merge == 3)
 	drop _merge
 
-erase "$output\board_independence_x.dta"
-erase "$output\female_board_x.dta"
-erase "$output\CEO_duality_x.dta"
-erase "$output\institutional_ownership_x.dta"
-erase "$output\knowledge_intensive_industry.dta"
+// erase "$output\board_independence_x.dta"
+// erase "$output\female_board_x.dta"
+// erase "$output\CEO_duality_x.dta"
+// erase "$output\knowledge_intensive_industry.dta"
 
 * G29_mean, gender_ratio, dual, loss, grow, institutional_ownership (4个: institutional_ownership, HHI, 5, 10)
 
 **# Reviewer 2 Comment 2: Knowledge-intensive v.s. Labor-intensive
+global control_variables_aem size bm roa lev firm_age rank au_years oa_scale /*xrd_int*/
+global control_variables_rem size bm roa lev firm_age rank au_years hhi_sale /*xrd_int*/
+
 ** Knowledge Intensive Industries
 import excel using "E:\21. Air Pollution and Accounting\DATA\R&R\knowledge intensive industry.xlsx", firstrow clear
 rename SIC sic
@@ -652,6 +947,143 @@ prehead("\begin{table}\begin{center}\caption{The Effect of Visibility on Earning
 posthead("\midrule") postfoot("\bottomrule\end{tabular}}\end{center}\footnotesize{Notes: The dependent variables are indicated at the top of each column. A description of all variables can be found in Table \ref{tab: variabledescriptions}. The dependent variables in columns (1)-(3) are: a firms' accrual earnings management calculated using the performance-adjusted method, a firm's accrual earnings management calculated using the modified Jone's method, and the rank of the firm's accrual earnings management (modified Jone's), respectively. The dependent variables in columns (4)-(5) are: a firm's real earnings management, and the rank of the firm's real earnings management, respectively. Year fixed effects and industry fixed effects are included in all regressions. Standard errors are clustered at the level of firm-year. *** p < 1\%, ** p < 5\%, * p < 10\%.}\end{table}") 
 restore
 
+**# Reviewer 2 Comment 2: Knowledge-intensive v.s. Labor-intensive, NEW CONTROLS
+global control_variables_aem size bm roa lev firm_age rank au_years oa_scale /*xrd_int*/ loss grow Boardindependence lit InstOwn stockreturn sale_sd rem
+
+global control_variables_rem size bm roa lev firm_age rank au_years hhi_sale /*xrd_int*/ loss grow Boardindependence lit InstOwn stockreturn sale_sd dac
+
+** Knowledge Intensive Industries
+import excel using "E:\21. Air Pollution and Accounting\DATA\R&R\knowledge intensive industry.xlsx", firstrow clear
+rename SIC sic
+
+bysort sic: gen dup = _n
+drop if dup > 1
+save "$output\knowledge_intensive_industry.dta", replace
+
+use "$output\final_data_47662", replace
+	capture drop _merge
+merge m:1 sic using "$output\knowledge_intensive_industry.dta"
+	keep if _merge == 1 | _merge == 3
+	gen knowledge_intense = (_merge == 3)
+	drop _merge
+
+xtset lpermno fyear
+gen stockreturn = (prcc_f - l.prcc_f)/l.prcc_f
+
+*ssc install rangestat
+
+rangestat (sd) sale, interval(fyear -2 0) by(lpermno)  
+label var sale_sd "Sales Std3."
+
+	capture drop _merge
+merge 1:1 tic fyear using "$output\board_characteristics", force
+	keep if _merge == 1 | _merge == 3
+	capture drop _merge
+merge 1:1 cusip8 fyear using "$output\institutional_ownership_x.dta", force
+	keep if _merge == 1 | _merge == 3
+
+label var grow "Sales growth"
+label var loss "Loss"
+
+destring sic, replace
+gen lit = 1 if (sic >= 2833 & sic <= 2836) | (sic >= 3570 & sic <= 3577) | (sic >= 3600 & sic <=3674) | (sic >= 5200 & sic <= 5961) | (sic >= 7370 & sic <= 7379) | (sic >= 8731 & sic <= 8734)
+replace lit = 0 if mi(lit) & !mi(sic)
+
+label var lit "Litigious"
+
+*==================== Regression (Signed) =============================
+preserve
+keep if knowledge_intense == 1
+	eststo clear
+eststo regression1: reghdfe dacck visib $control_variables_aem, absorb(fyear ff_48) vce(cluster i.lpermno#i.fyear)
+estadd scalar ar2 = e(r2_a)
+summarize dacck
+estadd scalar ymean = r(mean)
+estadd local yearfe "Yes", replace
+estadd local indfe "Yes", replace
+	
+eststo regression2: reghdfe dac visib $control_variables_aem, absorb(fyear ff_48) vce(cluster i.lpermno#i.fyear)
+estadd scalar ar2 = e(r2_a)
+summarize dac
+estadd scalar ymean = r(mean)
+estadd local yearfe "Yes", replace
+estadd local indfe "Yes", replace
+
+eststo regression3: reghdfe rank_dac visib $control_variables_aem, absorb(fyear ff_48) vce(cluster i.lpermno#i.fyear)
+estadd scalar ar2 = e(r2_a)
+summarize rank_dac
+estadd scalar ymean = r(mean)
+estadd local yearfe "Yes", replace
+estadd local indfe "Yes", replace
+
+eststo regression4: reghdfe rem visib $control_variables_rem, absorb(fyear ff_48) vce(cluster i.lpermno#i.fyear)
+estadd scalar ar2 = e(r2_a)
+summarize rem
+estadd scalar ymean = r(mean)
+estadd local yearfe "Yes", replace
+estadd local indfe "Yes", replace
+
+eststo regression5: reghdfe rank_rem visib $control_variables_rem, absorb(fyear ff_48) vce(cluster i.lpermno#i.fyear)
+estadd scalar ar2 = e(r2_a)
+summarize rank_rem
+estadd scalar ymean = r(mean)
+estadd local yearfe "Yes", replace
+estadd local indfe "Yes", replace
+
+esttab regression1 regression2 regression3 regression4 regression5 using "$output\results_knowledge_intensive_NEW_CONTROLS.tex", replace ///
+mgroups("Accrual Earnings Management" "Real Earnings Management", pattern(1 0 0 1 0) prefix(\multicolumn{@span}{c}{) suffix(}) span erepeat(\cmidrule(lr){@span})) ///
+mtitles("\makecell{AEM \\ (performance-adj.)}" "\makecell{AEM \\ (modified Jone's')}" "\makecell{AEM \\ Rank}" "REM" "\makecell{REM \\ Rank}") collabels(none) booktabs label scalar(ymean) ///
+stats(yearfe indfe N ymean ar2, fmt(0 0 0 2 2) labels("Year FE" "Industry FE" "N" "Dep mean" "Adjusted R-sq")) ///
+prehead("\begin{table}\begin{center}\caption{The Effect of Visibility on Earnings Management, among Knowledge-intensive Industries}\label{tab: table4}\tabcolsep=0.1cm\scalebox{0.9}{\begin{tabular}{lccccc}\toprule")  ///
+posthead("\midrule") postfoot("\bottomrule\end{tabular}}\end{center}\footnotesize{Notes: The dependent variables are indicated at the top of each column. A description of all variables can be found in Table \ref{tab: variabledescriptions}. The dependent variables in columns (1)-(3) are: a firms' accrual earnings management calculated using the performance-adjusted method, a firm's accrual earnings management calculated using the modified Jone's method, and the rank of the firm's accrual earnings management (modified Jone's), respectively. The dependent variables in columns (4)-(5) are: a firm's real earnings management, and the rank of the firm's real earnings management, respectively. The control variables include: firm size, book-to-market ratio, return on assets, leverage ratio, firm age, Big N auditor, number of years that a firm was audited by the same auditor, sale loss, sale growth, board independence, litigious industry, institutional ownership, stock return, 3-year rolling standard deviation of sales, $REM$ (for $AEM$), $AEM$ (for $REM$), net operating assets (with dependent variable being $AEM$, and Herfindahl–Hirschman index (with dependent variable being $REM$. Year fixed effects and industry fixed effects are included in all regressions. Standard errors are clustered at the level of firm-year. *** p < 1\%, ** p < 5\%, * p < 10\%.}\end{table}") 
+restore
+
+preserve
+keep if knowledge_intense == 0
+	eststo clear
+eststo regression1: reghdfe dacck visib $control_variables_aem, absorb(fyear ff_48) vce(cluster i.lpermno#i.fyear)
+estadd scalar ar2 = e(r2_a)
+summarize dacck
+estadd scalar ymean = r(mean)
+estadd local yearfe "Yes", replace
+estadd local indfe "Yes", replace
+	
+eststo regression2: reghdfe dac visib $control_variables_aem, absorb(fyear ff_48) vce(cluster i.lpermno#i.fyear)
+estadd scalar ar2 = e(r2_a)
+summarize dac
+estadd scalar ymean = r(mean)
+estadd local yearfe "Yes", replace
+estadd local indfe "Yes", replace
+
+eststo regression3: reghdfe rank_dac visib $control_variables_aem, absorb(fyear ff_48) vce(cluster i.lpermno#i.fyear)
+estadd scalar ar2 = e(r2_a)
+summarize rank_dac
+estadd scalar ymean = r(mean)
+estadd local yearfe "Yes", replace
+estadd local indfe "Yes", replace
+
+eststo regression4: reghdfe rem visib $control_variables_rem, absorb(fyear ff_48) vce(cluster i.lpermno#i.fyear)
+estadd scalar ar2 = e(r2_a)
+summarize rem
+estadd scalar ymean = r(mean)
+estadd local yearfe "Yes", replace
+estadd local indfe "Yes", replace
+
+eststo regression5: reghdfe rank_rem visib $control_variables_rem, absorb(fyear ff_48) vce(cluster i.lpermno#i.fyear)
+estadd scalar ar2 = e(r2_a)
+summarize rank_rem
+estadd scalar ymean = r(mean)
+estadd local yearfe "Yes", replace
+estadd local indfe "Yes", replace
+
+esttab regression1 regression2 regression3 regression4 regression5 using "$output\results_non_knowledge_intensive_NEW_CONTROLS.tex", replace ///
+mgroups("Accrual Earnings Management" "Real Earnings Management", pattern(1 0 0 1 0) prefix(\multicolumn{@span}{c}{) suffix(}) span erepeat(\cmidrule(lr){@span})) ///
+mtitles("\makecell{AEM \\ (performance-adj.)}" "\makecell{AEM \\ (modified Jone's')}" "\makecell{AEM \\ Rank}" "REM" "\makecell{REM \\ Rank}") collabels(none) booktabs label scalar(ymean) ///
+stats(yearfe indfe N ymean ar2, fmt(0 0 0 2 2) labels("Year FE" "Industry FE" "N" "Dep mean" "Adjusted R-sq")) ///
+prehead("\begin{table}\begin{center}\caption{The Effect of Visibility on Earnings Management, among Non-knowledge-intensive Industries}\label{tab: table4}\tabcolsep=0.1cm\scalebox{0.9}{\begin{tabular}{lccccc}\toprule")  ///
+posthead("\midrule") postfoot("\bottomrule\end{tabular}}\end{center}\footnotesize{Notes: The dependent variables are indicated at the top of each column. A description of all variables can be found in Table \ref{tab: variabledescriptions}. The dependent variables in columns (1)-(3) are: a firms' accrual earnings management calculated using the performance-adjusted method, a firm's accrual earnings management calculated using the modified Jone's method, and the rank of the firm's accrual earnings management (modified Jone's), respectively. The dependent variables in columns (4)-(5) are: a firm's real earnings management, and the rank of the firm's real earnings management, respectively. The control variables include: firm size, book-to-market ratio, return on assets, leverage ratio, firm age, Big N auditor, number of years that a firm was audited by the same auditor, sale loss, sale growth, board independence, litigious industry, institutional ownership, stock return, 3-year rolling standard deviation of sales, $REM$ (for $AEM$), $AEM$ (for $REM$), net operating assets (with dependent variable being $AEM$, and Herfindahl–Hirschman index (with dependent variable being $REM$. Year fixed effects and industry fixed effects are included in all regressions. Standard errors are clustered at the level of firm-year. *** p < 1\%, ** p < 5\%, * p < 10\%.}\end{table}") 
+restore
+
 **# Reviewer Comment 6: Corporate Governance - female board%
 ** female board% (across the US)
 use "E:\21. Air Pollution and Accounting\DATA\R&R\BoardEx - Organization Summary - Analytics.dta", replace
@@ -661,7 +1093,7 @@ duplicates drop ticker fyear, force
 rename ticker tic
 save "$output\female_board_x.dta", replace
 
-** 3) dual role
+** dual role
 use "E:\21. Air Pollution and Accounting\DATA\R&R\CEO duality.dta", replace
 drop if mi(PERMCO) & mi(GVKEY)
 drop if mi(datestartrole) & mi(dateendrole)
@@ -700,22 +1132,384 @@ rename year fyear
 
 save "$output\CEO_duality_x.dta", replace
 
+* G-index
+use "$maindir\GINDEX_ISS.dta", replace
+keep TICKER YEAR GINDEX
+rename TICKER tic
+rename YEAR fyear
+save "$output\GINDEX_x.dta", replace
+
+use "$maindir\GOVERNANCE_ISS_07-23", replace
+	duplicates drop Year TICKER, force
+	rename (Year TICKER)(fyear tic)
+	gen gparachute = 1 if GPARACHUTE == "YES"
+	replace gparachute = 0 if mi(GPARACHUTE)
+		ta gparachute
+		
+	gen ppill = 1 if PPILL == "YES"
+	replace ppill = 0 if mi(PPILL)
+		ta ppill
+	keep fyear tic gparachute ppill
+	label var gparachute "G-parachute"
+save "$output\governance_iss_s", replace
+
+** V2 board independence V2 
+use "E:\21. Air Pollution and Accounting\DATA\cg variable to kexin", replace
+rename ticker tic
+rename year fyear
+save "$output\board_characteristics", replace
+
 use "$output\final_data_47662", replace
 	capture drop _merge
 merge m:1 tic fyear using "$output\female_board_x.dta"
 	keep if _merge == 1 | _merge == 3
 	
 	capture drop _merge
-merge 1:1 lpermco fyear using "$output\CEO_duality_x.dta"
+merge 1:1 tic fyear using "$output\board_characteristics"
 	keep if _merge == 1 | _merge == 3
-	
+	drop _merge
+
 * genderratio, median = 0.9
 label var genderratio "Gender ratio"
 * dual_max, 0/1
-label var dual_max "CEO duality"
+* Female board%, dual role
+replace boarddiversity = 1 if boarddiversity > 1
+	eststo clear
+label var boarddiversity "Female board\%"
+
+global control_variables_aem size bm roa lev firm_age rank au_years oa_scale /*xrd_int*/
+global control_variables_rem size bm roa lev firm_age rank au_years hhi_sale /*xrd_int*/
+
+**# results 1 with OLD CONTROLS
+	eststo clear
+eststo regression1: reghdfe dacck visib Boardindependence c.visib#c.Boardindependence $control_variables_aem, absorb(fyear ff_48) vce(cluster i.lpermno#i.fyear) //c.?
+estadd scalar ar2 = e(r2_a)
+summarize dacck
+estadd scalar ymean = r(mean)
+estadd local yearfe "Yes", replace
+estadd local indfe "Yes", replace
+estadd local firmcont "Yes", replace
+	
+eststo regression2: reghdfe dacck visib boarddiversity c.visib#c.boarddiversity $control_variables_aem, absorb(fyear ff_48) vce(cluster i.lpermno#i.fyear) //c.?
+estadd scalar ar2 = e(r2_a)
+summarize dacck
+estadd scalar ymean = r(mean)
+estadd local yearfe "Yes", replace
+estadd local indfe "Yes", replace
+estadd local firmcont "Yes", replace
+
+eststo regression3: reghdfe dac visib Boardindependence c.visib#c.Boardindependence $control_variables_aem, absorb(fyear ff_48) vce(cluster i.lpermno#i.fyear) //c.?
+estadd scalar ar2 = e(r2_a)
+summarize dac
+estadd scalar ymean = r(mean)
+estadd local yearfe "Yes", replace
+estadd local indfe "Yes", replace
+estadd local firmcont "Yes", replace
+
+eststo regression4: reghdfe dac visib boarddiversity c.visib#c.boarddiversity $control_variables_aem, absorb(fyear ff_48) vce(cluster i.lpermno#i.fyear) //c.?
+estadd scalar ar2 = e(r2_a)
+summarize dac
+estadd scalar ymean = r(mean)
+estadd local yearfe "Yes", replace
+estadd local indfe "Yes", replace
+estadd local firmcont "Yes", replace
+
+eststo regression5: reghdfe rem visib Boardindependence c.visib#c.Boardindependence $control_variables_rem, absorb(fyear ff_48) vce(cluster i.lpermno#i.fyear)
+estadd scalar ar2 = e(r2_a)
+summarize rem
+estadd scalar ymean = r(mean)
+estadd local yearfe "Yes", replace
+estadd local indfe "Yes", replace
+estadd local firmcont "Yes", replace
+
+eststo regression6: reghdfe rem visib boarddiversity c.visib#c.boarddiversity $control_variables_rem, absorb(fyear ff_48) vce(cluster i.lpermno#i.fyear)
+estadd scalar ar2 = e(r2_a)
+summarize rem
+estadd scalar ymean = r(mean)
+estadd local yearfe "Yes", replace
+estadd local indfe "Yes", replace
+estadd local firmcont "Yes", replace
+
+esttab regression1 regression2 regression3 regression4 regression5 regression6 using "$output\results_governance_Boardind_femalePercent.tex", replace ///
+mgroups("Accrual Earnings Management" "Real Earnings Management", pattern(1 0 0 0 1 0) prefix(\multicolumn{@span}{c}{) suffix(}) span erepeat(\cmidrule(lr){@span})) drop($control_variables_rem $control_variables_aem) ///
+mtitles("Board independence" "Female board\%" "Board independence" "Female board\%" "Board independence" "Female board\%") collabels(none) booktabs label scalar(ymean) order(visib Boardindependence c.visib#c.Boardindependence boarddiversity c.visib#c.boarddiversity ) ///
+stats(yearfe indfe firmcont N ymean ar2, fmt(0 0 0 0 2 2) labels("Year FE" "Industry FE" "Firm Controls" "N" "Dep mean" "Adjusted R-sq")) ///
+prehead("\begin{table}\begin{center}\caption{The Effect of Visibility on Earnings Management by the Degree of Corporate Governance (Alternative Measures)}\label{tab: table15}\tabcolsep=0.1cm\scalebox{0.85}{\begin{tabular}{lcccccc}\toprule")  ///
+posthead("\midrule") postfoot("\bottomrule\end{tabular}}\end{center}\footnotesize{Notes: This table reports how the effects of visibility on AEM and REM differ by the degree of the internal corporate governance. We use board independence and percentage of female board members as two separate measures for the level of corporate governance. The dependent variable in columns (1)-(4) is AEM, and the dependent variable in columns (5) and (6) is REM. The AEM measure in columns (1) and (2) is calculated using the performance-adjusted model, and the AEM measure in columns (3) and (4) is calculated using the modified Jone's model. A description of all variables can be found in Table \ref{tab: variabledescriptions}. Year fixed effects and industry fixed effects are included in all regressions. Standard errors are clustered at the level of firm and year. *** p < 1\%, ** p < 5\%, * p < 10\%.}\end{table}") 
+
+**# results 1 with NEW CONTROLS
+global control_variables_aem size bm roa lev firm_age rank au_years oa_scale /*xrd_int*/ loss grow Boardindependence lit InstOwn stockreturn sale_sd rem
+
+global control_variables_rem size bm roa lev firm_age rank au_years hhi_sale /*xrd_int*/ loss grow Boardindependence lit InstOwn stockreturn sale_sd dac
+
+use "$output\final_data_47662", replace
+
+xtset lpermno fyear
+gen stockreturn = (prcc_f - l.prcc_f)/l.prcc_f
+
+*ssc install rangestat
+
+rangestat (sd) sale, interval(fyear -2 0) by(lpermno)  
+label var sale_sd "Sales Std3."
+
+	capture drop _merge
+merge 1:1 tic fyear using "$output\board_characteristics", force
+	keep if _merge == 1 | _merge == 3
+	capture drop _merge
+merge 1:1 cusip8 fyear using "$output\institutional_ownership_x.dta", force
+	keep if _merge == 1 | _merge == 3
+
+label var grow "Sales growth"
+label var loss "Loss"
+
+destring sic, replace
+gen lit = 1 if (sic >= 2833 & sic <= 2836) | (sic >= 3570 & sic <= 3577) | (sic >= 3600 & sic <=3674) | (sic >= 5200 & sic <= 5961) | (sic >= 7370 & sic <= 7379) | (sic >= 8731 & sic <= 8734)
+replace lit = 0 if mi(lit) & !mi(sic)
+
+label var lit "Litigious"
+
+replace boarddiversity = 1 if boarddiversity > 1
+	eststo clear
+label var boarddiversity "Female board\%"
+label var CEOduality "CEO dual"
 
 	eststo clear
-eststo regression1: reghdfe dacck visib genderratio c.visib#c.genderratio $control_variables_aem, absorb(fyear ff_48) vce(cluster i.lpermno#i.fyear) //c.?
+eststo regression1: reghdfe dacck visib Boardindependence c.visib#c.Boardindependence $control_variables_aem, absorb(fyear ff_48) vce(cluster i.lpermno#i.fyear) //c.?
+estadd scalar ar2 = e(r2_a)
+summarize dacck
+estadd scalar ymean = r(mean)
+estadd local yearfe "Yes", replace
+estadd local indfe "Yes", replace
+estadd local firmcont "Yes", replace
+	
+eststo regression2: reghdfe dacck visib boarddiversity c.visib#c.boarddiversity $control_variables_aem, absorb(fyear ff_48) vce(cluster i.lpermno#i.fyear) //c.?
+estadd scalar ar2 = e(r2_a)
+summarize dacck
+estadd scalar ymean = r(mean)
+estadd local yearfe "Yes", replace
+estadd local indfe "Yes", replace
+estadd local firmcont "Yes", replace
+
+eststo regression3: reghdfe dac visib Boardindependence c.visib#c.Boardindependence $control_variables_aem, absorb(fyear ff_48) vce(cluster i.lpermno#i.fyear) //c.?
+estadd scalar ar2 = e(r2_a)
+summarize dac
+estadd scalar ymean = r(mean)
+estadd local yearfe "Yes", replace
+estadd local indfe "Yes", replace
+estadd local firmcont "Yes", replace
+
+eststo regression4: reghdfe dac visib boarddiversity c.visib#c.boarddiversity $control_variables_aem, absorb(fyear ff_48) vce(cluster i.lpermno#i.fyear) //c.?
+estadd scalar ar2 = e(r2_a)
+summarize dac
+estadd scalar ymean = r(mean)
+estadd local yearfe "Yes", replace
+estadd local indfe "Yes", replace
+estadd local firmcont "Yes", replace
+
+eststo regression5: reghdfe rem visib Boardindependence c.visib#c.Boardindependence $control_variables_rem, absorb(fyear ff_48) vce(cluster i.lpermno#i.fyear)
+estadd scalar ar2 = e(r2_a)
+summarize rem
+estadd scalar ymean = r(mean)
+estadd local yearfe "Yes", replace
+estadd local indfe "Yes", replace
+estadd local firmcont "Yes", replace
+
+eststo regression6: reghdfe rem visib boarddiversity c.visib#c.boarddiversity $control_variables_rem, absorb(fyear ff_48) vce(cluster i.lpermno#i.fyear)
+estadd scalar ar2 = e(r2_a)
+summarize rem
+estadd scalar ymean = r(mean)
+estadd local yearfe "Yes", replace
+estadd local indfe "Yes", replace
+estadd local firmcont "Yes", replace
+
+esttab regression1 regression2 regression3 regression4 regression5 regression6 using "$output\results_governance_Boardind_femalePercent_NEW.tex", replace ///
+mgroups("Accrual Earnings Management" "Real Earnings Management", pattern(1 0 0 0 1 0) prefix(\multicolumn{@span}{c}{) suffix(}) span erepeat(\cmidrule(lr){@span})) drop($control_variables_rem $control_variables_aem) ///
+mtitles("Board independence" "Female board\%" "Board independence" "Female board\%" "Board independence" "Female board\%") collabels(none) booktabs label scalar(ymean) order(visib Boardindependence c.visib#c.Boardindependence boarddiversity c.visib#c.boarddiversity ) ///
+stats(yearfe indfe firmcont N ymean ar2, fmt(0 0 0 0 2 2) labels("Year FE" "Industry FE" "Firm Controls" "N" "Dep mean" "Adjusted R-sq")) ///
+prehead("\begin{table}\begin{center}\caption{The Effect of Visibility on Earnings Management by the Degree of Corporate Governance (Alternative Measures)}\label{tab: table15}\tabcolsep=0.1cm\scalebox{0.85}{\begin{tabular}{lcccccc}\toprule")  ///
+posthead("\midrule") postfoot("\bottomrule\end{tabular}}\end{center}\footnotesize{Notes: This table reports how the effects of visibility on AEM and REM differ by the degree of the internal corporate governance. We use board independence and percentage of female board members as two separate measures for the level of corporate governance. The dependent variable in columns (1)-(4) is AEM, and the dependent variable in columns (5) and (6) is REM. The AEM measure in columns (1) and (2) is calculated using the performance-adjusted model, and the AEM measure in columns (3) and (4) is calculated using the modified Jone's model. Control variables include: firm size, book-to-market ratio, return on assets, leverage ratio, firm age, Big N auditor, number of years that a firm was audited by the same auditor, sale loss, sale growth, board independence, litigious industry, institutional ownership, stock return, 3-year rolling standard deviation of sales, $REM$ (for $AEM$), $AEM$ (for $REM$), net operating assets (with dependent variable being $AEM$, and Herfindahl–Hirschman index (with dependent variable being $REM$. A description of all variables can be found in Table \ref{tab: variabledescriptions}. Year fixed effects and industry fixed effects are included in all regressions. Standard errors are clustered at the level of firm and year. *** p < 1\%, ** p < 5\%, * p < 10\%.}\end{table}") 
+
+**# Results 2 with OLD CONTROLS
+global control_variables_aem size bm roa lev firm_age rank au_years oa_scale /*xrd_int*/
+global control_variables_rem size bm roa lev firm_age rank au_years hhi_sale /*xrd_int*/
+
+use "$output\final_data_47662", replace	
+	capture drop _merge
+merge 1:1 tic fyear using "$output\GINDEX_x.dta"
+	keep if _merge == 1 | _merge == 3
+
+	capture drop _merge
+merge 1:1 tic fyear using "$output\governance_iss_s"
+	keep if _merge == 1 | _merge == 3
+
+	label var ppill "Poison and Pill"
+	
+eststo regression1: reghdfe dacck visib gparachute c.visib#c.gparachute $control_variables_aem, absorb(fyear ff_48) vce(cluster i.lpermno#i.fyear) //c.?
+estadd scalar ar2 = e(r2_a)
+summarize dacck
+estadd scalar ymean = r(mean)
+estadd local yearfe "Yes", replace
+estadd local indfe "Yes", replace
+estadd local firmcont "Yes", replace
+
+eststo regression2: reghdfe dacck visib ppill c.visib#c.ppill $control_variables_aem, absorb(fyear ff_48) vce(cluster i.lpermno#i.fyear) //c.?
+estadd scalar ar2 = e(r2_a)
+summarize dacck
+estadd scalar ymean = r(mean)
+estadd local yearfe "Yes", replace
+estadd local indfe "Yes", replace
+estadd local firmcont "Yes", replace
+	
+eststo regression3: reghdfe dac visib gparachute c.visib#c.gparachute $control_variables_aem, absorb(fyear ff_48) vce(cluster i.lpermno#i.fyear) //c.?
+estadd scalar ar2 = e(r2_a)
+summarize dac
+estadd scalar ymean = r(mean)
+estadd local yearfe "Yes", replace
+estadd local indfe "Yes", replace
+estadd local firmcont "Yes", replace
+
+eststo regression4: reghdfe dac visib ppill c.visib#c.ppill $control_variables_aem, absorb(fyear ff_48) vce(cluster i.lpermno#i.fyear) //c.?
+estadd scalar ar2 = e(r2_a)
+summarize dac
+estadd scalar ymean = r(mean)
+estadd local yearfe "Yes", replace
+estadd local indfe "Yes", replace
+estadd local firmcont "Yes", replace
+
+eststo regression5: reghdfe rem visib gparachute c.visib#c.gparachute $control_variables_rem, absorb(fyear ff_48) vce(cluster i.lpermno#i.fyear)
+estadd scalar ar2 = e(r2_a)
+summarize rem
+estadd scalar ymean = r(mean)
+estadd local yearfe "Yes", replace
+estadd local indfe "Yes", replace
+estadd local firmcont "Yes", replace
+
+eststo regression6: reghdfe rem visib ppill c.visib#c.ppill $control_variables_rem, absorb(fyear ff_48) vce(cluster i.lpermno#i.fyear)
+estadd scalar ar2 = e(r2_a)
+summarize rem
+estadd scalar ymean = r(mean)
+estadd local yearfe "Yes", replace
+estadd local indfe "Yes", replace
+estadd local firmcont "Yes", replace
+
+esttab regression1 regression2 regression3 regression4 regression5 regression6 using "$output\results_governance2_gparachute_ppill.tex", replace ///
+mgroups("Accrual Earnings Management" "Real Earnings Management", pattern(1 0 0 0 1 0) prefix(\multicolumn{@span}{c}{) suffix(}) span erepeat(\cmidrule(lr){@span})) drop($control_variables_rem $control_variables_aem) ///
+mtitles("G-parachute" "Poison and pill" "G-parachute" "Poison and pill" "G-parachute" "Poison and pill") collabels(none) booktabs label scalar(ymean) order(visib gparachute c.visib#c.gparachute ppill c.visib#c.ppill) ///
+stats(yearfe indfe firmcont N ymean ar2, fmt(0 0 0 0 2 2) labels("Year FE" "Industry FE" "Firm Controls" "N" "Dep mean" "Adjusted R-sq")) ///
+prehead("\begin{table}\begin{center}\caption{The Effect of Visibility on Earnings Management by the Degree of Corporate Governance (Alternative Measures)}\label{tab: table15}\tabcolsep=0.1cm\scalebox{0.75}{\begin{tabular}{lcccccc}\toprule")  ///
+posthead("\midrule") postfoot("\bottomrule\end{tabular}}\end{center}\footnotesize{Notes: This table reports how the effects of visibility on AEM and REM differ by the degree of the internal corporate governance. We use g-parachute and poison and pill as two separate measures for the level of corporate governance. The dependent variable in columns (1)-(4) is AEM, and the dependent variable in columns (5) and (6) is REM. The AEM measure in columns (1) and (2) is calculated using the performance-adjusted model, and the AEM measure in columns (3) and (4) is calculated using the modified Jone's model. Control variables include: firm size, book-to-market ratio, return on assets, leverage ratio, firm age, Big N auditor, number of years that a firm was audited by the same auditor, net operating assets (with dependent variable being AEM, and Herfindahl–Hirschman index (with dependent variable being REM.  A description of all variables can be found in Table \ref{tab: variabledescriptions}. Year fixed effects and industry fixed effects are included in all regressions. Standard errors are clustered at the level of firm and year. *** p < 1\%, ** p < 5\%, * p < 10\%.}\end{table}") 
+
+**# Results 2 with NEW CONTROLS
+global control_variables_aem size bm roa lev firm_age rank au_years oa_scale /*xrd_int*/ loss grow Boardindependence lit InstOwn stockreturn sale_sd rem
+
+global control_variables_rem size bm roa lev firm_age rank au_years hhi_sale /*xrd_int*/ loss grow Boardindependence lit InstOwn stockreturn sale_sd dac
+
+use "$output\final_data_47662", replace	
+	capture drop _merge
+merge 1:1 tic fyear using "$output\GINDEX_x.dta"
+	keep if _merge == 1 | _merge == 3
+
+	capture drop _merge
+merge 1:1 tic fyear using "$output\governance_iss_s"
+	keep if _merge == 1 | _merge == 3
+
+	label var ppill "Poison and Pill"
+
+xtset lpermno fyear
+gen stockreturn = (prcc_f - l.prcc_f)/l.prcc_f
+
+*ssc install rangestat
+
+rangestat (sd) sale, interval(fyear -2 0) by(lpermno)  
+label var sale_sd "Sales Std3."
+
+	capture drop _merge
+merge 1:1 tic fyear using "$output\board_characteristics", force
+	keep if _merge == 1 | _merge == 3
+	capture drop _merge
+merge 1:1 cusip8 fyear using "$output\institutional_ownership_x.dta", force
+	keep if _merge == 1 | _merge == 3
+
+label var grow "Sales growth"
+label var loss "Loss"
+
+destring sic, replace
+gen lit = 1 if (sic >= 2833 & sic <= 2836) | (sic >= 3570 & sic <= 3577) | (sic >= 3600 & sic <=3674) | (sic >= 5200 & sic <= 5961) | (sic >= 7370 & sic <= 7379) | (sic >= 8731 & sic <= 8734)
+replace lit = 0 if mi(lit) & !mi(sic)
+
+label var lit "Litigious"
+
+eststo regression1: reghdfe dacck visib gparachute c.visib#c.gparachute $control_variables_aem, absorb(fyear ff_48) vce(cluster i.lpermno#i.fyear) //c.?
+estadd scalar ar2 = e(r2_a)
+summarize dacck
+estadd scalar ymean = r(mean)
+estadd local yearfe "Yes", replace
+estadd local indfe "Yes", replace
+estadd local firmcont "Yes", replace
+
+eststo regression2: reghdfe dacck visib ppill c.visib#c.ppill $control_variables_aem, absorb(fyear ff_48) vce(cluster i.lpermno#i.fyear) //c.?
+estadd scalar ar2 = e(r2_a)
+summarize dacck
+estadd scalar ymean = r(mean)
+estadd local yearfe "Yes", replace
+estadd local indfe "Yes", replace
+estadd local firmcont "Yes", replace
+	
+eststo regression3: reghdfe dac visib gparachute c.visib#c.gparachute $control_variables_aem, absorb(fyear ff_48) vce(cluster i.lpermno#i.fyear) //c.?
+estadd scalar ar2 = e(r2_a)
+summarize dac
+estadd scalar ymean = r(mean)
+estadd local yearfe "Yes", replace
+estadd local indfe "Yes", replace
+estadd local firmcont "Yes", replace
+
+eststo regression4: reghdfe dac visib ppill c.visib#c.ppill $control_variables_aem, absorb(fyear ff_48) vce(cluster i.lpermno#i.fyear) //c.?
+estadd scalar ar2 = e(r2_a)
+summarize dac
+estadd scalar ymean = r(mean)
+estadd local yearfe "Yes", replace
+estadd local indfe "Yes", replace
+estadd local firmcont "Yes", replace
+
+eststo regression5: reghdfe rem visib gparachute c.visib#c.gparachute $control_variables_rem, absorb(fyear ff_48) vce(cluster i.lpermno#i.fyear)
+estadd scalar ar2 = e(r2_a)
+summarize rem
+estadd scalar ymean = r(mean)
+estadd local yearfe "Yes", replace
+estadd local indfe "Yes", replace
+estadd local firmcont "Yes", replace
+
+eststo regression6: reghdfe rem visib ppill c.visib#c.ppill $control_variables_rem, absorb(fyear ff_48) vce(cluster i.lpermno#i.fyear)
+estadd scalar ar2 = e(r2_a)
+summarize rem
+estadd scalar ymean = r(mean)
+estadd local yearfe "Yes", replace
+estadd local indfe "Yes", replace
+estadd local firmcont "Yes", replace
+
+esttab regression1 regression2 regression3 regression4 regression5 regression6 using "$output\results_governance2_gparachute_ppill_NEW.tex", replace ///
+mgroups("Accrual Earnings Management" "Real Earnings Management", pattern(1 0 0 0 1 0) prefix(\multicolumn{@span}{c}{) suffix(}) span erepeat(\cmidrule(lr){@span})) drop($control_variables_rem $control_variables_aem) ///
+mtitles("G-parachute" "Poison and pill" "G-parachute" "Poison and pill" "G-parachute" "Poison and pill") collabels(none) booktabs label scalar(ymean) order(visib gparachute c.visib#c.gparachute ppill c.visib#c.ppill) ///
+stats(yearfe indfe firmcont N ymean ar2, fmt(0 0 0 0 2 2) labels("Year FE" "Industry FE" "Firm Controls" "N" "Dep mean" "Adjusted R-sq")) ///
+prehead("\begin{table}\begin{center}\caption{The Effect of Visibility on Earnings Management by the Degree of Corporate Governance (Alternative Measures)}\label{tab: table15}\tabcolsep=0.1cm\scalebox{0.75}{\begin{tabular}{lcccccc}\toprule")  ///
+posthead("\midrule") postfoot("\bottomrule\end{tabular}}\end{center}\footnotesize{Notes: This table reports how the effects of visibility on AEM and REM differ by the degree of the internal corporate governance. We use g-parachute and poison and pill as two separate measures for the level of corporate governance. The dependent variable in columns (1)-(4) is AEM, and the dependent variable in columns (5) and (6) is REM. The AEM measure in columns (1) and (2) is calculated using the performance-adjusted model, and the AEM measure in columns (3) and (4) is calculated using the modified Jone's model. Control variables include: firm size, book-to-market ratio, return on assets, leverage ratio, firm age, Big N auditor, number of years that a firm was audited by the same auditor, sale loss, sale growth, board independence, litigious industry, institutional ownership, stock return, 3-year rolling standard deviation of sales, REM (for AEM), AEM (for REM), net operating assets (with dependent variable being AEM, and Herfindahl–Hirschman index (with dependent variable being REM. Year fixed effects and industry fixed effects are included in all regressions. Standard errors are clustered at the level of firm and year. *** p < 1\%, ** p < 5\%, * p < 10\%.}\end{table}") 
+
+global control_variables_aem size bm roa lev firm_age rank au_years oa_scale /*xrd_int*/
+global control_variables_rem size bm roa lev firm_age rank au_years hhi_sale /*xrd_int*/
+
+**# Results 3 with OLD CONTROLS
+use "$output\final_data_47662", replace
+	capture drop _merge
+merge 1:1 lpermco fyear using "$output\CEO_duality_x.dta"
+	keep if _merge == 1 | _merge == 3
+
+	capture drop _merge
+merge 1:1 tic fyear using "$output\board_characteristics", force
+	keep if _merge == 1 | _merge == 3
+	
+label var dual_max "CEO duality"
+	eststo clear
+eststo regression1: reghdfe dacck visib CEOduality c.visib#c.CEOduality $control_variables_aem, absorb(fyear ff_48) vce(cluster i.lpermno#i.fyear) //c.?
 estadd scalar ar2 = e(r2_a)
 summarize dacck
 estadd scalar ymean = r(mean)
@@ -730,9 +1524,8 @@ estadd scalar ymean = r(mean)
 estadd local yearfe "Yes", replace
 estadd local indfe "Yes", replace
 estadd local firmcont "Yes", replace
-
 	
-eststo regression3: reghdfe dac visib genderratio c.visib#c.genderratio $control_variables_aem, absorb(fyear ff_48) vce(cluster i.lpermno#i.fyear) //c.?
+eststo regression3: reghdfe dac visib CEOduality c.visib#c.CEOduality $control_variables_aem, absorb(fyear ff_48) vce(cluster i.lpermno#i.fyear) //c.?
 estadd scalar ar2 = e(r2_a)
 summarize dac
 estadd scalar ymean = r(mean)
@@ -748,7 +1541,7 @@ estadd local yearfe "Yes", replace
 estadd local indfe "Yes", replace
 estadd local firmcont "Yes", replace
 
-eststo regression5: reghdfe rem visib genderratio c.visib#c.genderratio $control_variables_rem, absorb(fyear ff_48) vce(cluster i.lpermno#i.fyear)
+eststo regression5: reghdfe rem visib CEOduality c.visib#c.CEOduality $control_variables_rem, absorb(fyear ff_48) vce(cluster i.lpermno#i.fyear)
 estadd scalar ar2 = e(r2_a)
 summarize rem
 estadd scalar ymean = r(mean)
@@ -764,11 +1557,265 @@ estadd local yearfe "Yes", replace
 estadd local indfe "Yes", replace
 estadd local firmcont "Yes", replace
 
-esttab regression1 regression2 regression3 regression4 regression5 regression6 using "$output\results_governance.tex", replace ///
+esttab regression1 regression2 regression3 regression4 regression5 regression6 using "$output\results_governance3_CEOduality.tex", replace ///
 mgroups("Accrual Earnings Management" "Real Earnings Management", pattern(1 0 0 0 1 0) prefix(\multicolumn{@span}{c}{) suffix(}) span erepeat(\cmidrule(lr){@span})) drop($control_variables_rem $control_variables_aem) ///
-mtitles("Gender ratio" "Duality" "Gender ratio" "Duality" "Gender ratio" "Duality") collabels(none) booktabs label scalar(ymean) order(visib genderratio c.visib#c.genderratio dual_max c.visib#c.dual_max) ///
+mtitles("CEO dual 1" "CEO dual 2" "CEO dual 1" "CEO dual 2" "CEO dual 1" "CEO dual 2") collabels(none) booktabs label scalar(ymean) order(visib dual_max c.visib#c.dual_max dual_max c.visib#c.dual_max) ///
 stats(yearfe indfe firmcont N ymean ar2, fmt(0 0 0 0 2 2) labels("Year FE" "Industry FE" "Firm Controls" "N" "Dep mean" "Adjusted R-sq")) ///
 prehead("\begin{table}\begin{center}\caption{The Effect of Visibility on Earnings Management by the Degree of Corporate Governance (Alternative Measures)}\label{tab: table15}\tabcolsep=0.1cm\scalebox{0.85}{\begin{tabular}{lcccccc}\toprule")  ///
-posthead("\midrule") postfoot("\bottomrule\end{tabular}}\end{center}\footnotesize{Notes: This table reports how the effects of visibility on AEM and REM differ by the degree of the internal corporate governance. We use gender ratio in the board and an indicator for whether the CEO has dual role in the board as two measures for the level of corporate governance. The dependent variable in columns (1)-(4) is AEM, and the dependent variable in columns (5) and (6) is REM. The AEM measure in columns (1) and (2) is calculated using the performance-adjusted model, and the AEM measure in columns (3) and (4) is calculated using the modified Jone's model. Firm controls are the same as in Table \ref{tab: table4}. A description of all variables can be found in Table \ref{tab: variabledescriptions}. Year fixed effects and industry fixed effects are included in all regressions. Standard errors are clustered at the level of firm and year. *** p < 1\%, ** p < 5\%, * p < 10\%.}\end{table}") 
+posthead("\midrule") postfoot("\bottomrule\end{tabular}}\end{center}\footnotesize{Notes: This table reports how the effects of visibility on AEM and REM differ by the degree of the internal corporate governance. We use two measures of CEO duality as two measures for the level of corporate governance. The dependent variable in columns (1)-(4) is AEM, and the dependent variable in columns (5) and (6) is REM. The AEM measure in columns (1) and (2) is calculated using the performance-adjusted model, and the AEM measure in columns (3) and (4) is calculated using the modified Jone's model. Control variables include: firm size, book-to-market ratio, return on assets, leverage ratio, firm age, Big N auditor, number of years that a firm was audited by the same auditor, net operating assets (with dependent variable being AEM, and Herfindahl–Hirschman index (with dependent variable being REM. A description of all variables can be found in Table \ref{tab: variabledescriptions}. Year fixed effects and industry fixed effects are included in all regressions. Standard errors are clustered at the level of firm and year. *** p < 1\%, ** p < 5\%, * p < 10\%.}\end{table}") 
+
+global control_variables_aem size bm roa lev firm_age rank au_years oa_scale /*xrd_int*/ loss grow Boardindependence lit InstOwn stockreturn sale_sd rem
+
+global control_variables_rem size bm roa lev firm_age rank au_years hhi_sale /*xrd_int*/ loss grow Boardindependence lit InstOwn stockreturn sale_sd dac
+
+**# Results 3 with NEW CONTROLS
+use "$output\final_data_47662", replace
+	capture drop _merge
+merge 1:1 lpermco fyear using "$output\CEO_duality_x.dta"
+	keep if _merge == 1 | _merge == 3
+
+	capture drop _merge
+merge 1:1 tic fyear using "$output\board_characteristics", force
+	keep if _merge == 1 | _merge == 3
+	
+label var dual_max "CEO duality"
+
+xtset lpermno fyear
+gen stockreturn = (prcc_f - l.prcc_f)/l.prcc_f
+
+*ssc install rangestat
+
+rangestat (sd) sale, interval(fyear -2 0) by(lpermno)  
+label var sale_sd "Sales Std3."
+
+	capture drop _merge
+merge 1:1 tic fyear using "$output\board_characteristics", force
+	keep if _merge == 1 | _merge == 3
+	capture drop _merge
+merge 1:1 cusip8 fyear using "$output\institutional_ownership_x.dta", force
+	keep if _merge == 1 | _merge == 3
+
+label var grow "Sales growth"
+label var loss "Loss"
+
+destring sic, replace
+gen lit = 1 if (sic >= 2833 & sic <= 2836) | (sic >= 3570 & sic <= 3577) | (sic >= 3600 & sic <=3674) | (sic >= 5200 & sic <= 5961) | (sic >= 7370 & sic <= 7379) | (sic >= 8731 & sic <= 8734)
+replace lit = 0 if mi(lit) & !mi(sic)
+
+label var lit "Litigious"
+
+	eststo clear
+eststo regression1: reghdfe dacck visib CEOduality c.visib#c.CEOduality $control_variables_aem, absorb(fyear ff_48) vce(cluster i.lpermno#i.fyear) //c.?
+estadd scalar ar2 = e(r2_a)
+summarize dacck
+estadd scalar ymean = r(mean)
+estadd local yearfe "Yes", replace
+estadd local indfe "Yes", replace
+estadd local firmcont "Yes", replace
+
+eststo regression2: reghdfe dacck visib dual_max c.visib#c.dual_max $control_variables_aem, absorb(fyear ff_48) vce(cluster i.lpermno#i.fyear) //c.?
+estadd scalar ar2 = e(r2_a)
+summarize dacck
+estadd scalar ymean = r(mean)
+estadd local yearfe "Yes", replace
+estadd local indfe "Yes", replace
+estadd local firmcont "Yes", replace
+	
+eststo regression3: reghdfe dac visib CEOduality c.visib#c.CEOduality $control_variables_aem, absorb(fyear ff_48) vce(cluster i.lpermno#i.fyear) //c.?
+estadd scalar ar2 = e(r2_a)
+summarize dac
+estadd scalar ymean = r(mean)
+estadd local yearfe "Yes", replace
+estadd local indfe "Yes", replace
+estadd local firmcont "Yes", replace
+
+eststo regression4: reghdfe dac visib dual_max c.visib#c.dual_max $control_variables_aem, absorb(fyear ff_48) vce(cluster i.lpermno#i.fyear) //c.?
+estadd scalar ar2 = e(r2_a)
+summarize dac
+estadd scalar ymean = r(mean)
+estadd local yearfe "Yes", replace
+estadd local indfe "Yes", replace
+estadd local firmcont "Yes", replace
+
+eststo regression5: reghdfe rem visib CEOduality c.visib#c.CEOduality $control_variables_rem, absorb(fyear ff_48) vce(cluster i.lpermno#i.fyear)
+estadd scalar ar2 = e(r2_a)
+summarize rem
+estadd scalar ymean = r(mean)
+estadd local yearfe "Yes", replace
+estadd local indfe "Yes", replace
+estadd local firmcont "Yes", replace
+
+eststo regression6: reghdfe rem visib dual_max c.visib#c.dual_max $control_variables_rem, absorb(fyear ff_48) vce(cluster i.lpermno#i.fyear)
+estadd scalar ar2 = e(r2_a)
+summarize rem
+estadd scalar ymean = r(mean)
+estadd local yearfe "Yes", replace
+estadd local indfe "Yes", replace
+estadd local firmcont "Yes", replace
+
+esttab regression1 regression2 regression3 regression4 regression5 regression6 using "$output\results_governance3_CEOduality_NEW.tex", replace ///
+mgroups("Accrual Earnings Management" "Real Earnings Management", pattern(1 0 0 0 1 0) prefix(\multicolumn{@span}{c}{) suffix(}) span erepeat(\cmidrule(lr){@span})) drop($control_variables_rem $control_variables_aem) ///
+mtitles("CEO dual 1" "CEO dual 2" "CEO dual 1" "CEO dual 2" "CEO dual 1" "CEO dual 2") collabels(none) booktabs label scalar(ymean) order(visib dual_max c.visib#c.dual_max dual_max c.visib#c.dual_max) ///
+stats(yearfe indfe firmcont N ymean ar2, fmt(0 0 0 0 2 2) labels("Year FE" "Industry FE" "Firm Controls" "N" "Dep mean" "Adjusted R-sq")) ///
+prehead("\begin{table}\begin{center}\caption{The Effect of Visibility on Earnings Management by the Degree of Corporate Governance (Alternative Measures)}\label{tab: table15}\tabcolsep=0.1cm\scalebox{0.85}{\begin{tabular}{lcccccc}\toprule")  ///
+posthead("\midrule") postfoot("\bottomrule\end{tabular}}\end{center}\footnotesize{Notes: This table reports how the effects of visibility on AEM and REM differ by the degree of the internal corporate governance. We use two measures of CEO duality as two measures for the level of corporate governance. The dependent variable in columns (1)-(4) is AEM, and the dependent variable in columns (5) and (6) is REM. The AEM measure in columns (1) and (2) is calculated using the performance-adjusted model, and the AEM measure in columns (3) and (4) is calculated using the modified Jone's model. Control variables include: firm size, book-to-market ratio, return on assets, leverage ratio, firm age, Big N auditor, number of years that a firm was audited by the same auditor, sale loss, sale growth, board independence, litigious industry, institutional ownership, stock return, 3-year rolling standard deviation of sales, REM (for AEM), AEM (for REM), net operating assets (with dependent variable being AEM, and Herfindahl–Hirschman index (with dependent variable being REM. A description of all variables can be found in Table \ref{tab: variabledescriptions}. Year fixed effects and industry fixed effects are included in all regressions. Standard errors are clustered at the level of firm and year. *** p < 1\%, ** p < 5\%, * p < 10\%.}\end{table}") 
+
+
+**# Reviewer 2 Comment 2 (cont'd): Firm Productivity Channel
+global control_variables_aem size bm roa lev firm_age rank au_years oa_scale /*xrd_int*/
+global control_variables_rem size bm roa lev firm_age rank au_years hhi_sale /*xrd_int*/
+use "$output\final_data_47662", replace
+
+ *==================== Regression (Signed) =============================
+	eststo clear
+eststo regression1: reghdfe stkco visib $control_variables_aem, absorb(fyear ff_48) vce(cluster i.lpermno#i.fyear)
+estadd scalar ar2 = e(r2_a)
+summarize dacck
+estadd scalar ymean = r(mean)
+estadd local yearfe "Yes", replace
+estadd local indfe "Yes", replace
+
+eststo regression2: reghdfe stkcpa visib $control_variables_aem, absorb(fyear ff_48) vce(cluster i.lpermno#i.fyear)
+estadd scalar ar2 = e(r2_a)
+summarize rem
+estadd scalar ymean = r(mean)
+estadd local yearfe "Yes", replace
+estadd local indfe "Yes", replace
+
+esttab regression1 regression2  using "$output\visib_firm_productivity.tex", replace ///
+mtitles("\makecell{Stock compensation \\ balance}" "\makecell{After-tax \\ Stock Compen.}") collabels(none) booktabs label scalar(ymean) ///
+stats(yearfe indfe N ymean ar2, fmt(0 0 0 2 2) labels("Year FE" "Industry FE" "N" "Dep mean" "Adjusted R-sq")) ///
+prehead("\begin{table}\begin{center}\caption{The Effect of Visibility on Proxies for Firm Productivity}\label{tab: visib_firmprod}\tabcolsep=0.1cm\scalebox{0.9}{\begin{tabular}{lcc}\toprule")  ///
+posthead("\midrule") postfoot("\bottomrule\end{tabular}}\end{center}\footnotesize{Notes: The dependent variables are indicated at the top of each column. A description of all variables can be found in Table \ref{tab: variabledescriptions}. The dependent variables in columns (1)-(2) are: a firm's stock compensation and a firm's after-tex stock compensation. The control variables include: firm size, book-to-market ratio, return on assets, leverage ratio, firm age, Big N auditor, number of years that a firm was audited by the same auditor, net operating assets (with dependent variable being $AEM$, and Herfindahl–Hirschman index (with dependent variable being $REM$. Year fixed effects and industry fixed effects are included in all regressions. Standard errors are clustered at the level of firm-year. *** p < 1\%, ** p < 5\%, * p < 10\%.}\end{table}") 
+
+**# Reviewer 2 Comment 2 (cont'd): Firm Productivity Channel， NEW CONTROLS
+global control_variables_aem size bm roa lev firm_age rank au_years oa_scale /*xrd_int*/ loss grow Boardindependence lit InstOwn stockreturn sale_sd rem
+
+global control_variables_rem size bm roa lev firm_age rank au_years hhi_sale /*xrd_int*/ loss grow Boardindependence lit InstOwn stockreturn sale_sd dac
+
+use "$output\final_data_47662", replace
+
+xtset lpermno fyear
+gen stockreturn = (prcc_f - l.prcc_f)/l.prcc_f
+
+*ssc install rangestat
+
+rangestat (sd) sale, interval(fyear -2 0) by(lpermno)  
+label var sale_sd "Sales Std3."
+
+	capture drop _merge
+merge 1:1 tic fyear using "$output\board_characteristics", force
+	keep if _merge == 1 | _merge == 3
+	capture drop _merge
+merge 1:1 cusip8 fyear using "$output\institutional_ownership_x.dta", force
+	keep if _merge == 1 | _merge == 3
+
+label var grow "Sales growth"
+label var loss "Loss"
+
+destring sic, replace
+gen lit = 1 if (sic >= 2833 & sic <= 2836) | (sic >= 3570 & sic <= 3577) | (sic >= 3600 & sic <=3674) | (sic >= 5200 & sic <= 5961) | (sic >= 7370 & sic <= 7379) | (sic >= 8731 & sic <= 8734)
+replace lit = 0 if mi(lit) & !mi(sic)
+
+label var lit "Litigious"
+
+
+ *==================== Regression (Signed) =============================
+	eststo clear
+eststo regression1: reghdfe stkco visib $control_variables_aem, absorb(fyear ff_48) vce(cluster i.lpermno#i.fyear)
+estadd scalar ar2 = e(r2_a)
+summarize dacck
+estadd scalar ymean = r(mean)
+estadd local yearfe "Yes", replace
+estadd local indfe "Yes", replace
+
+eststo regression2: reghdfe stkcpa visib $control_variables_aem, absorb(fyear ff_48) vce(cluster i.lpermno#i.fyear)
+estadd scalar ar2 = e(r2_a)
+summarize rem
+estadd scalar ymean = r(mean)
+estadd local yearfe "Yes", replace
+estadd local indfe "Yes", replace
+
+esttab regression1 regression2  using "$output\visib_firm_productivity_NEW_CONTROLS.tex", replace ///
+mtitles("\makecell{Stock compensation \\ balance}" "\makecell{After-tax \\ Stock Compen.}") collabels(none) booktabs label scalar(ymean) ///
+stats(yearfe indfe N ymean ar2, fmt(0 0 0 2 2) labels("Year FE" "Industry FE" "N" "Dep mean" "Adjusted R-sq")) ///
+prehead("\begin{table}\begin{center}\caption{The Effect of Visibility on Proxies for Firm Productivity}\label{tab: visib_firmprod}\tabcolsep=0.1cm\scalebox{0.9}{\begin{tabular}{lcc}\toprule")  ///
+posthead("\midrule") postfoot("\bottomrule\end{tabular}}\end{center}\footnotesize{Notes: The dependent variables are indicated at the top of each column. A description of all variables can be found in Table \ref{tab: variabledescriptions}. The dependent variables in columns (1)-(2) are: a firm's stock compensation and a firm's after-tex stock compensation. The control variables include: firm size, book-to-market ratio, return on assets, leverage ratio, firm age, Big N auditor, number of years that a firm was audited by the same auditor, sale loss, sale growth, board independence, litigious industry, institutional ownership, stock return, 3-year rolling standard deviation of sales, $REM$ (for $AEM$), $AEM$ (for $REM$), net operating assets (with dependent variable being $AEM$, and Herfindahl–Hirschman index (with dependent variable being $REM$. Year fixed effects and industry fixed effects are included in all regressions. Standard errors are clustered at the level of firm-year. *** p < 1\%, ** p < 5\%, * p < 10\%.}\end{table}") 
+
+**# Table 5
+global control_variables_aem size bm roa lev firm_age rank au_years oa_scale /*xrd_int*/ loss grow Boardindependence lit InstOwn stockreturn sale_sd rem
+
+global control_variables_rem size bm roa lev firm_age rank au_years hhi_sale /*xrd_int*/ loss grow Boardindependence lit InstOwn stockreturn sale_sd dac
+
+use "$output\final_data_47662", replace
+
+xtset lpermno fyear
+gen stockreturn = (prcc_f - l.prcc_f)/l.prcc_f
+
+*ssc install rangestat
+
+rangestat (sd) sale, interval(fyear -2 0) by(lpermno)  
+label var sale_sd "Sales Std3."
+
+	capture drop _merge
+merge 1:1 tic fyear using "$output\board_characteristics"
+	keep if _merge == 1 | _merge == 3
+	capture drop _merge
+merge 1:1 cusip8 fyear using "$output\institutional_ownership_x.dta"
+	keep if _merge == 1 | _merge == 3
+
+label var grow "Sales growth"
+label var loss "Loss"
+
+gen lit = 1 if (sic >= 2833 & sic <= 2836) | (sic >= 3570 & sic <= 3577) | (sic >= 3600 & sic <=3674) | (sic >= 5200 & sic <= 5961) | (sic >= 7370 & sic <= 7379) | (sic >= 8731 & sic <= 8734)
+replace lit = 0 if mi(lit) & !mi(sic)
+
+label var lit "Litigious"
+
+*Litigious industry = 1 if 4-digit SIC is Pharmaceuticals (2833-2836), computer (3570-3577), electronics (3600-3674), retailing (5200-5961), programming (7370-7379), R&D services (8731-8734), and 0 otherwise.
+xtset lpermno fyear
+*==================== Regression (Signed) =============================
+	eststo clear
+eststo regression1: reghdfe dacck visib $control_variables_aem, absorb(fyear ff_48) vce(cluster i.lpermno#i.fyear)
+estadd scalar ar2 = e(r2_a)
+summarize dacck
+estadd scalar ymean = r(mean)
+estadd local yearfe "Yes", replace
+estadd local indfe "Yes", replace
+	
+eststo regression2: reghdfe dac visib $control_variables_aem, absorb(fyear ff_48) vce(cluster i.lpermno#i.fyear)
+estadd scalar ar2 = e(r2_a)
+summarize dac
+estadd scalar ymean = r(mean)
+estadd local yearfe "Yes", replace
+estadd local indfe "Yes", replace
+
+eststo regression3: reghdfe rank_dac visib $control_variables_aem, absorb(fyear ff_48) vce(cluster i.lpermno#i.fyear)
+estadd scalar ar2 = e(r2_a)
+summarize rank_dac
+estadd scalar ymean = r(mean)
+estadd local yearfe "Yes", replace
+estadd local indfe "Yes", replace
+
+eststo regression4: reghdfe rem visib $control_variables_rem, absorb(fyear ff_48) vce(cluster i.lpermno#i.fyear)
+estadd scalar ar2 = e(r2_a)
+summarize rem
+estadd scalar ymean = r(mean)
+estadd local yearfe "Yes", replace
+estadd local indfe "Yes", replace
+
+eststo regression5: reghdfe rank_rem visib $control_variables_rem, absorb(fyear ff_48) vce(cluster i.lpermno#i.fyear)
+estadd scalar ar2 = e(r2_a)
+summarize rank_rem
+estadd scalar ymean = r(mean)
+estadd local yearfe "Yes", replace
+estadd local indfe "Yes", replace
+
+esttab regression1 regression2 regression3 regression4 regression5 using "$output\table4_newcontrols.tex", replace ///
+mgroups("Accrual Earnings Management" "Real Earnings Management", pattern(1 0 0 1 0) prefix(\multicolumn{@span}{c}{) suffix(}) span erepeat(\cmidrule(lr){@span})) ///
+mtitles("\makecell{AEM \\ (performance-adj.)}" "\makecell{AEM \\ (modified Jone's')}" "\makecell{AEM \\ Rank}" "REM" "\makecell{REM \\ Rank}") collabels(none) booktabs label scalar(ymean) ///
+stats(yearfe indfe N ymean ar2, fmt(0 0 0 2 2) labels("Year FE" "Industry FE" "N" "Dep mean" "Adjusted R-sq")) ///
+prehead("\begin{table}\begin{center}\caption{The Effect of Visibility on Earnings Management}\label{tab: table4}\tabcolsep=0.1cm\scalebox{0.9}{\begin{tabular}{lccccc}\toprule")  ///
+posthead("\midrule") postfoot("\bottomrule\end{tabular}}\end{center}\footnotesize{Notes: The dependent variables are indicated at the top of each column. A description of all variables can be found in Table \ref{tab: variabledescriptions}. The dependent variables in columns (1)-(3) are: a firms' accrual earnings management calculated using the performance-adjusted method, a firm's accrual earnings management calculated using the modified Jone's method, and the rank of the firm's accrual earnings management (modified Jone's), respectively. The dependent variables in columns (4)-(5) are: a firm's real earnings management, and the rank of the firm's real earnings management, respectively. Year fixed effects and industry fixed effects are included in all regressions. Standard errors are clustered at the level of firm-year. *** p < 1\%, ** p < 5\%, * p < 10\%.}\end{table}") 
 
 
