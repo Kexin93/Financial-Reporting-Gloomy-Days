@@ -1238,9 +1238,9 @@ prehead("\begin{table}\begin{center}\caption{The Effect of Visibility on Earning
 posthead("\midrule") postfoot("\bottomrule\end{tabular}}\end{center}\footnotesize{Notes: This table reports how the effects of visibility on AEM and REM differ by the degree of the internal corporate governance. We use board independence and percentage of female board members as two separate measures for the level of corporate governance. The dependent variable in columns (1)-(4) is AEM, and the dependent variable in columns (5) and (6) is REM. The AEM measure in columns (1) and (2) is calculated using the performance-adjusted model, and the AEM measure in columns (3) and (4) is calculated using the modified Jone's model. A description of all variables can be found in Table \ref{tab: variabledescriptions}. Year fixed effects and industry fixed effects are included in all regressions. Standard errors are clustered at the level of firm and year. *** p < 1\%, ** p < 5\%, * p < 10\%.}\end{table}") 
 
 **# results 1 with NEW CONTROLS
-global control_variables_aem size bm roa lev firm_age rank au_years oa_scale /*xrd_int*/ loss grow Boardindependence lit InstOwn stockreturn sale_sd rem
+global control_variables_aem size bm roa lev firm_age rank au_years oa_scale /*xrd_int*/ loss grow /*Boardindependence*/ lit InstOwn stockreturn sale_sd rem
 
-global control_variables_rem size bm roa lev firm_age rank au_years hhi_sale /*xrd_int*/ loss grow Boardindependence lit InstOwn stockreturn sale_sd dac
+global control_variables_rem size bm roa lev firm_age rank au_years hhi_sale /*xrd_int*/ loss grow /*Boardindependence*/ lit InstOwn stockreturn sale_sd dac
 
 use "$output\final_data_47662", replace
 
@@ -1326,7 +1326,7 @@ esttab regression1 regression2 regression3 regression4 regression5 regression6 u
 mgroups("Accrual Earnings Management" "Real Earnings Management", pattern(1 0 0 0 1 0) prefix(\multicolumn{@span}{c}{) suffix(}) span erepeat(\cmidrule(lr){@span})) drop($control_variables_rem $control_variables_aem) ///
 mtitles("Board independence" "Female board\%" "Board independence" "Female board\%" "Board independence" "Female board\%") collabels(none) booktabs label scalar(ymean) order(visib Boardindependence c.visib#c.Boardindependence boarddiversity c.visib#c.boarddiversity ) ///
 stats(yearfe indfe firmcont N ymean ar2, fmt(0 0 0 0 2 2) labels("Year FE" "Industry FE" "Firm Controls" "N" "Dep mean" "Adjusted R-sq")) ///
-prehead("\begin{table}\begin{center}\caption{The Effect of Visibility on Earnings Management by the Degree of Corporate Governance (Alternative Measures)}\label{tab: table15}\tabcolsep=0.1cm\scalebox{0.85}{\begin{tabular}{lcccccc}\toprule")  ///
+prehead("\begin{table}\begin{center}\caption{The Effect of Visibility on Earnings Management by the Degree of Corporate Governance (Alternative Measures)}\label{tab: table15}\tabcolsep=0.1cm\scalebox{0.7}{\begin{tabular}{lcccccc}\toprule")  ///
 posthead("\midrule") postfoot("\bottomrule\end{tabular}}\end{center}\footnotesize{Notes: This table reports how the effects of visibility on AEM and REM differ by the degree of the internal corporate governance. We use board independence and percentage of female board members as two separate measures for the level of corporate governance. The dependent variable in columns (1)-(4) is AEM, and the dependent variable in columns (5) and (6) is REM. The AEM measure in columns (1) and (2) is calculated using the performance-adjusted model, and the AEM measure in columns (3) and (4) is calculated using the modified Jone's model. Control variables include: firm size, book-to-market ratio, return on assets, leverage ratio, firm age, Big N auditor, number of years that a firm was audited by the same auditor, sale loss, sale growth, board independence, litigious industry, institutional ownership, stock return, 3-year rolling standard deviation of sales, $REM$ (for $AEM$), $AEM$ (for $REM$), net operating assets (with dependent variable being $AEM$, and Herfindahl–Hirschman index (with dependent variable being $REM$. A description of all variables can be found in Table \ref{tab: variabledescriptions}. Year fixed effects and industry fixed effects are included in all regressions. Standard errors are clustered at the level of firm and year. *** p < 1\%, ** p < 5\%, * p < 10\%.}\end{table}") 
 
 **# Results 2 with OLD CONTROLS
@@ -1509,7 +1509,7 @@ merge 1:1 tic fyear using "$output\board_characteristics", force
 	
 label var dual_max "CEO duality"
 	eststo clear
-eststo regression1: reghdfe dacck visib CEOduality c.visib#c.CEOduality $control_variables_aem, absorb(fyear ff_48) vce(cluster i.lpermno#i.fyear) //c.?
+eststo regression1: reghdfe dacck  visib CEOduality c.visib#c.CEOduality $control_variables_aem, absorb(fyear ff_48) vce(cluster i.lpermno#i.fyear) //c.?
 estadd scalar ar2 = e(r2_a)
 summarize dacck
 estadd scalar ymean = r(mean)
@@ -1559,14 +1559,14 @@ estadd local firmcont "Yes", replace
 
 esttab regression1 regression2 regression3 regression4 regression5 regression6 using "$output\results_governance3_CEOduality.tex", replace ///
 mgroups("Accrual Earnings Management" "Real Earnings Management", pattern(1 0 0 0 1 0) prefix(\multicolumn{@span}{c}{) suffix(}) span erepeat(\cmidrule(lr){@span})) drop($control_variables_rem $control_variables_aem) ///
-mtitles("CEO dual 1" "CEO dual 2" "CEO dual 1" "CEO dual 2" "CEO dual 1" "CEO dual 2") collabels(none) booktabs label scalar(ymean) order(visib dual_max c.visib#c.dual_max dual_max c.visib#c.dual_max) ///
+mtitles("CEO dual 1" "CEO dual 2" "CEO dual 1" "CEO dual 2" "CEO dual 1" "CEO dual 2") collabels(none) booktabs label scalar(ymean) order(visib CEOduality c.visib#c.CEOduality dual_max c.visib#c.dual_max) ///
 stats(yearfe indfe firmcont N ymean ar2, fmt(0 0 0 0 2 2) labels("Year FE" "Industry FE" "Firm Controls" "N" "Dep mean" "Adjusted R-sq")) ///
 prehead("\begin{table}\begin{center}\caption{The Effect of Visibility on Earnings Management by the Degree of Corporate Governance (Alternative Measures)}\label{tab: table15}\tabcolsep=0.1cm\scalebox{0.85}{\begin{tabular}{lcccccc}\toprule")  ///
 posthead("\midrule") postfoot("\bottomrule\end{tabular}}\end{center}\footnotesize{Notes: This table reports how the effects of visibility on AEM and REM differ by the degree of the internal corporate governance. We use two measures of CEO duality as two measures for the level of corporate governance. The dependent variable in columns (1)-(4) is AEM, and the dependent variable in columns (5) and (6) is REM. The AEM measure in columns (1) and (2) is calculated using the performance-adjusted model, and the AEM measure in columns (3) and (4) is calculated using the modified Jone's model. Control variables include: firm size, book-to-market ratio, return on assets, leverage ratio, firm age, Big N auditor, number of years that a firm was audited by the same auditor, net operating assets (with dependent variable being AEM, and Herfindahl–Hirschman index (with dependent variable being REM. A description of all variables can be found in Table \ref{tab: variabledescriptions}. Year fixed effects and industry fixed effects are included in all regressions. Standard errors are clustered at the level of firm and year. *** p < 1\%, ** p < 5\%, * p < 10\%.}\end{table}") 
 
-global control_variables_aem size bm roa lev firm_age rank au_years oa_scale /*xrd_int*/ loss grow Boardindependence lit InstOwn stockreturn sale_sd rem
+global control_variables_aem size bm roa lev firm_age rank au_years oa_scale /*xrd_int*/ loss grow /*Boardindependence*/ lit InstOwn stockreturn sale_sd rem
 
-global control_variables_rem size bm roa lev firm_age rank au_years hhi_sale /*xrd_int*/ loss grow Boardindependence lit InstOwn stockreturn sale_sd dac
+global control_variables_rem size bm roa lev firm_age rank au_years hhi_sale /*xrd_int*/ loss grow /*Boardindependence*/ lit InstOwn stockreturn sale_sd dac
 
 **# Results 3 with NEW CONTROLS
 use "$output\final_data_47662", replace
@@ -1655,7 +1655,7 @@ estadd local firmcont "Yes", replace
 
 esttab regression1 regression2 regression3 regression4 regression5 regression6 using "$output\results_governance3_CEOduality_NEW.tex", replace ///
 mgroups("Accrual Earnings Management" "Real Earnings Management", pattern(1 0 0 0 1 0) prefix(\multicolumn{@span}{c}{) suffix(}) span erepeat(\cmidrule(lr){@span})) drop($control_variables_rem $control_variables_aem) ///
-mtitles("CEO dual 1" "CEO dual 2" "CEO dual 1" "CEO dual 2" "CEO dual 1" "CEO dual 2") collabels(none) booktabs label scalar(ymean) order(visib dual_max c.visib#c.dual_max dual_max c.visib#c.dual_max) ///
+mtitles("CEO dual 1" "CEO dual 2" "CEO dual 1" "CEO dual 2" "CEO dual 1" "CEO dual 2") collabels(none) booktabs label scalar(ymean) order(visib CEOduality c.visib#c.CEOduality dual_max c.visib#c.dual_max) ///
 stats(yearfe indfe firmcont N ymean ar2, fmt(0 0 0 0 2 2) labels("Year FE" "Industry FE" "Firm Controls" "N" "Dep mean" "Adjusted R-sq")) ///
 prehead("\begin{table}\begin{center}\caption{The Effect of Visibility on Earnings Management by the Degree of Corporate Governance (Alternative Measures)}\label{tab: table15}\tabcolsep=0.1cm\scalebox{0.85}{\begin{tabular}{lcccccc}\toprule")  ///
 posthead("\midrule") postfoot("\bottomrule\end{tabular}}\end{center}\footnotesize{Notes: This table reports how the effects of visibility on AEM and REM differ by the degree of the internal corporate governance. We use two measures of CEO duality as two measures for the level of corporate governance. The dependent variable in columns (1)-(4) is AEM, and the dependent variable in columns (5) and (6) is REM. The AEM measure in columns (1) and (2) is calculated using the performance-adjusted model, and the AEM measure in columns (3) and (4) is calculated using the modified Jone's model. Control variables include: firm size, book-to-market ratio, return on assets, leverage ratio, firm age, Big N auditor, number of years that a firm was audited by the same auditor, sale loss, sale growth, board independence, litigious industry, institutional ownership, stock return, 3-year rolling standard deviation of sales, REM (for AEM), AEM (for REM), net operating assets (with dependent variable being AEM, and Herfindahl–Hirschman index (with dependent variable being REM. A description of all variables can be found in Table \ref{tab: variabledescriptions}. Year fixed effects and industry fixed effects are included in all regressions. Standard errors are clustered at the level of firm and year. *** p < 1\%, ** p < 5\%, * p < 10\%.}\end{table}") 
