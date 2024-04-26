@@ -2102,4 +2102,28 @@ stats(yearfe indfe N ymean ar2, fmt(0 0 0 2 2) labels("Year FE" "Industry FE" "N
 prehead("\begin{table}\begin{center}\caption{The Effect of Visibility on Earnings Management}\label{tab: table4}\tabcolsep=0.1cm\scalebox{0.9}{\begin{tabular}{lccccc}\toprule")  ///
 posthead("\midrule") postfoot("\bottomrule\end{tabular}}\end{center}\footnotesize{Notes: The dependent variables are indicated at the top of each column. A description of all variables can be found in Table \ref{tab: variabledescriptions}. The dependent variables in columns (1)-(3) are: a firms' accrual earnings management calculated using the performance-adjusted method, a firm's accrual earnings management calculated using the modified Jone's method, and the rank of the firm's accrual earnings management (modified Jone's), respectively. The dependent variables in columns (4)-(5) are: a firm's real earnings management, and the rank of the firm's real earnings management, respectively. Year fixed effects and industry fixed effects are included in all regressions. Standard errors are clustered at the level of firm-year. *** p < 1\%, ** p < 5\%, * p < 10\%.}\end{table}") 
 
+**# Reviewer 2 Comment 7 Event
+/*
+1. **July 5, 2011 - Phoenix, Arizona**
+   - A massive dust storm known as a haboob struck Phoenix, Arizona, resulting from strong outflow boundaries from storms initiated southeast of Tucson [(Raman, Arellano, & Brost, 2014)]
+https://www.sciencedirect.com/science/article/abs/pii/S1352231014001228?via%3Dihub
+
+
+2. **April 12, 2000**
+   - A severe dust storm driven mainly by a passing cold front was analyzed in detail [(Wang Bao-jian, 2001)]
+Bao-jian, W. (2001). A Meso-micro scale synoptic analysis of strong dust storm on 12 April 2000. Gansu Meteorology.
+The strong dust storm on 12 April 2000 was mainly a passing cold front, with mesoscale system turbulence strengthening and stimulating it.
+
+3. **December 15, 2003 - Texas and New Mexico**
+   - A major dust event occurred in the Chihuahuan Desert region, covering Texas and New Mexico, characterized by multiple small-scale sources merging to form a regional-scale dust storm [(Lee et al., 2009)]
+https://www.sciencedirect.com/science/article/abs/pii/S0169555X08002717?via%3Dihub
+
+The 2003 dust storm in southwestern North America was mainly caused by cropland and rangeland, with microscale variations in erodibility or meteorological factors potentially determining actual dust emission points.
+
+4. **April 2008 and March 2009 - Salt Lake City, Utah**
+   - Significant dust event days occurred, driven by approaching mid-level troughs which caused dust outbreaks and storms. Strengthening cyclonic systems in the region were primary producers of these dust events [(Hahnenberger & Nicoll, 2012)]
+https://www.sciencedirect.com/science/article/abs/pii/S1352231012005808?via%3Dihub
+*/
+
+gen 
 
