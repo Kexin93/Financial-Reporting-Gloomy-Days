@@ -27,10 +27,23 @@ use "$maindir\Accounting Variables\conv.dta", replace
 xtset lpermno fyear
 rangestat (sd) sale, interval(fyear -2 0) by(lpermno)  
 label var sale_sd "Sales Std3."
+
 gen stockreturn = (prcc_f - l.prcc_f)/l.prcc_f
+
 gen salesgrowth = (sale - l.sale)/l.sale
+
 label var salesgrowth "Sales growth"
-keep lpermno fyear sale sale_sd stockreturn salesgrowth
+
+gen stockreturn_F1 = f.stockreturn
+gen stockreturn_F2 = f2.stockreturn
+gen stockreturn_F3 = f3.stockreturn
+
+gen roa_F1 = f.roa
+gen roa_F2 = f2.roa
+gen roa_F3 = f3.roa
+
+keep lpermno fyear sale sale_sd stockreturn salesgrowth stockreturn_F1 stockreturn_F2 stockreturn_F3 roa_F1 roa_F2 roa_F3
+
 save "$maindir\sale_sd.dta", replace
 
 *Pollutants
@@ -346,7 +359,7 @@ restore
 
 **# Reviewer 1 Comment 4: Future 3 months (in do-file 16)
 
-**# Reviewer 1 Comment 2: Fog with OLD CONTROLS
+**# Reviewer 1 Comment 1: Fog with OLD CONTROLS
 global control_variables_aem size bm roa lev firm_age rank au_years oa_scale /*xrd_int*/
 global control_variables_rem size bm roa lev firm_age rank au_years hhi_sale /*xrd_int*/
 
@@ -613,7 +626,7 @@ postfoot("\bottomrule\end{tabular}}\end{center}\footnotesize{Notes: The sample i
 
 use "$output\final_data_47662", replace
 
-**# Reviewer 1 Comment 2: Fog with NEW CONTROLS
+**# Reviewer 1 Comment 1: Fog with NEW CONTROLS
 
 global control_variables_aem size bm roa lev firm_age rank au_years oa_scale /*xrd_int*/ loss grow Boardindependence lit InstOwn stockreturn sale_sd rem
 
@@ -696,7 +709,7 @@ posthead("\midrule \multicolumn{6}{c}{\textbf{Third Tercile}} \\") keep(visib fo
 stats(yearfe indfe N ymean ar2, fmt(0 0 0 2 2) labels("Year FE" "Industry FE" "N" "Dep mean" "Adjusted R-sq")) ///
 postfoot("\bottomrule\end{tabular}}\end{center}\footnotesize{Notes: The sample is divided into three subsamples by the magnitude of fog, namely, the first tercile, second tercile, and the third tercile. The dependent variables are indicated at the top of each column. The same set of control variables are included as in Table \ref{tab: table4}. A description of all variables can be found in Table \ref{tab: variabledescriptions}. The dependent variables in columns (1)-(3) are: a firms' accrual earnings management calculated using the performance-adjusted method, a firm's accrual earnings management calculated using the modified Jone's method, and the rank of the firm's accrual earnings management (modified Jone's), respectively. The dependent variables in columns (4)-(5) are: a firm's real earnings management, and the rank of the firm's real earnings management, respectively. Year fixed effects and industry fixed effects are included in all regressions. The control variables include: firm size, book-to-market ratio, return on assets, leverage ratio, firm age, Big N auditor, number of years that a firm was audited by the same auditor, sale loss, sale growth, board independence, litigious industry, institutional ownership, stock return, 3-year rolling standard deviation of sales, $REM$ (for $AEM$), $AEM$ (for $REM$), net operating assets (with dependent variable being $AEM$, and Herfindahl–Hirschman index (with dependent variable being $REM$. Standard errors are clustered at the level of firm-year. *** p < 1\%, ** p < 5\%, * p < 10\%.}\end{table}") 
 
-**# Reviewer 1 Comment 2: Fog with NEW CONTROLS
+**# Reviewer 1 Comment 1: Fog with NEW CONTROLS
 global control_variables_aem size bm roa lev firm_age rank au_years oa_scale /*xrd_int*/ loss salesgrowth /*Boardindependence*/ lit InstOwn_Perc stockreturn sale_sd rem
 
 global control_variables_rem size bm roa lev firm_age rank au_years hhi_sale /*xrd_int*/ loss salesgrowth /*Boardindependence*/ lit InstOwn_Perc stockreturn sale_sd dac
@@ -2417,6 +2430,102 @@ stats(yearfe indfe N ymean ar2, fmt(0 0 0 2 2) labels("Year FE" "Industry FE" "N
 prehead("\begin{table}\begin{center}\caption{The Effect of Visibility on Proxies for Firm Productivity}\label{tab: visib_firmprod}\tabcolsep=0.1cm\scalebox{0.9}{\begin{tabular}{lcc}\toprule")  ///
 posthead("\midrule") postfoot("\bottomrule\end{tabular}}\end{center}\footnotesize{Notes: The dependent variables are indicated at the top of each column. A description of all variables can be found in Table \ref{tab: variabledescriptions}. The dependent variables in columns (1)-(2) are: a firm's stock compensation and a firm's after-tex stock compensation. The control variables include: firm size, book-to-market ratio, return on assets, leverage ratio, firm age, Big N auditor, number of years that a firm was audited by the same auditor, sale loss, sale growth, board independence, litigious industry, institutional ownership, stock return, 3-year rolling standard deviation of sales, $REM$ (for $AEM$), $AEM$ (for $REM$), net operating assets (with dependent variable being $AEM$, and Herfindahl–Hirschman index (with dependent variable being $REM$. Year fixed effects and industry fixed effects are included in all regressions. Standard errors are clustered at the level of firm-year. *** p < 1\%, ** p < 5\%, * p < 10\%.}\end{table}") 
 
+**# Reviewer 2 Comment 2 (cont'd): Firm Productivity Channel，RET & ROA with NEW CONTROLS
+global control_variables size bm lev firm_age rank au_years oa_scale hhi_sale /*xrd_int*/ loss salesgrowth /*Boardindependence*/ lit InstOwn_Perc sale_sd 
+
+use "$output\final_data_47662", replace
+
+xtset lpermno fyear
+
+*ssc install rangestat
+	capture drop _merge
+merge 1:1 lpermno fyear using "$maindir\sale_sd.dta"
+keep if _merge == 1 | _merge == 3
+
+	capture drop _merge
+merge 1:1 tic fyear using "$output\board_characteristics"
+	keep if _merge == 1 | _merge == 3
+	capture drop _merge
+merge 1:1 cusip8 fyear using "$output\institutional_ownership_x.dta"
+	keep if _merge == 1 | _merge == 3
+
+label var salesgrowth "Sales growth"
+label var loss "Loss"
+
+gen lit = 1 if (sic >= 2833 & sic <= 2836) | (sic >= 3570 & sic <= 3577) | (sic >= 3600 & sic <=3674) | (sic >= 5200 & sic <= 5961) | (sic >= 7370 & sic <= 7379) | (sic >= 8731 & sic <= 8734)
+replace lit = 0 if mi(lit) & !mi(sic)
+
+label var lit "Litigious"
+replace InstOwn_Perc = 0 if mi(InstOwn_Perc)
+
+*Litigious industry = 1 if 4-digit SIC is Pharmaceuticals (2833-2836), computer (3570-3577), electronics (3600-3674), retailing (5200-5961), programming (7370-7379), R&D services (8731-8734), and 0 otherwise.
+xtset lpermno fyear
+
+	eststo clear
+eststo regression1: reghdfe roa visib $control_variables, absorb(fyear ff_48) vce(cluster i.lpermno#i.fyear)
+estadd scalar ar2 = e(r2_a)
+summarize dacck
+estadd scalar ymean = r(mean)
+estadd local yearfe "Yes", replace
+estadd local indfe "Yes", replace
+
+eststo regression2: reghdfe roa_F1 visib $control_variables, absorb(fyear ff_48) vce(cluster i.lpermno#i.fyear)
+estadd scalar ar2 = e(r2_a)
+summarize dacck
+estadd scalar ymean = r(mean)
+estadd local yearfe "Yes", replace
+estadd local indfe "Yes", replace
+
+eststo regression3: reghdfe roa_F2 visib $control_variables, absorb(fyear ff_48) vce(cluster i.lpermno#i.fyear)
+estadd scalar ar2 = e(r2_a)
+summarize dacck
+estadd scalar ymean = r(mean)
+estadd local yearfe "Yes", replace
+estadd local indfe "Yes", replace
+
+eststo regression4: reghdfe roa_F3 visib $control_variables, absorb(fyear ff_48) vce(cluster i.lpermno#i.fyear)
+estadd scalar ar2 = e(r2_a)
+summarize dacck
+estadd scalar ymean = r(mean)
+estadd local yearfe "Yes", replace
+estadd local indfe "Yes", replace
+
+eststo regression5: reghdfe stockreturn visib $control_variables, absorb(fyear ff_48) vce(cluster i.lpermno#i.fyear)
+estadd scalar ar2 = e(r2_a)
+summarize rem
+estadd scalar ymean = r(mean)
+estadd local yearfe "Yes", replace
+estadd local indfe "Yes", replace
+
+eststo regression6: reghdfe stockreturn_F1 visib $control_variables, absorb(fyear ff_48) vce(cluster i.lpermno#i.fyear)
+estadd scalar ar2 = e(r2_a)
+summarize rem
+estadd scalar ymean = r(mean)
+estadd local yearfe "Yes", replace
+estadd local indfe "Yes", replace
+
+eststo regression7: reghdfe stockreturn_F2 visib $control_variables, absorb(fyear ff_48) vce(cluster i.lpermno#i.fyear)
+estadd scalar ar2 = e(r2_a)
+summarize rem
+estadd scalar ymean = r(mean)
+estadd local yearfe "Yes", replace
+estadd local indfe "Yes", replace
+
+eststo regression8: reghdfe stockreturn_F3 visib $control_variables, absorb(fyear ff_48) vce(cluster i.lpermno#i.fyear)
+estadd scalar ar2 = e(r2_a)
+summarize rem
+estadd scalar ymean = r(mean)
+estadd local yearfe "Yes", replace
+estadd local indfe "Yes", replace
+
+esttab regression1 regression2 regression3 regression4 regression5 regression6 regression7 regression8 using "$output\visib_firm_productivity_roa_ret.tex", replace ///
+mtitles("t" "t+1" "t+2" "t+3" "t" "t+1" "t+2" "t+3") collabels(none) booktabs label scalar(ymean) ///
+stats(yearfe indfe N ymean ar2, fmt(0 0 0 2 2) labels("Year FE" "Industry FE" "N" "Dep mean" "Adjusted R-sq")) ///
+prehead("\begin{table}\begin{center}\caption{The Effect of Visibility on Proxies for Firm Productivity}\label{tab: visib_firmprod2}\tabcolsep=0.1cm\scalebox{0.9}{\begin{tabular}{lcccccccc}\toprule")  ///
+mgroups("Returns on assets" "Stock return", pattern(1 0 0 0 1 0 0 0) prefix(\multicolumn{@span}{c}{) suffix(}) span erepeat(\cmidrule(lr){@span})) ///
+posthead("\midrule") postfoot("\bottomrule\end{tabular}}\end{center}\footnotesize{Notes: The dependent variables are indicated at the top of each column. A description of all variables can be found in Table \ref{tab: variabledescriptions}. The dependent variables in columns (1)-(4) are the current and forward values of a firm's returns on assets. The dependent variables in columns (5)-(8) are the current and forward values of a firm's stock returns. The control variables include: firm size, book-to-market ratio, leverage ratio, firm age, Big N auditor, number of years that a firm was audited by the same auditor, loss, sale growth, litigious industry, institutional ownership, 3-year rolling standard deviation of sales, net operating assets, and Herfindahl–Hirschman index. Year fixed effects and industry fixed effects are included in all regressions. Standard errors are clustered at the level of firm-year. *** p < 1\%, ** p < 5\%, * p < 10\%.}\end{table}") 
+
+
 **# Reviwer 2 Comment 4: Add Controls (Table 5)
 global control_variables_aem size bm roa lev firm_age rank au_years oa_scale /*xrd_int*/ loss salesgrowth /*Boardindependence*/ lit InstOwn_Perc stockreturn sale_sd rem
 
@@ -2491,142 +2600,5 @@ mgroups("Accrual Earnings Management" "Real Earnings Management", pattern(1 0 0 
 mtitles("\makecell{AEM \\ (performance-adj.)}" "\makecell{AEM \\ (modified Jone's')}" "\makecell{AEM \\ Rank}" "REM" "\makecell{REM \\ Rank}") collabels(none) booktabs label scalar(ymean) ///
 stats(yearfe indfe N ymean ar2, fmt(0 0 0 2 2) labels("Year FE" "Industry FE" "N" "Dep mean" "Adjusted R-sq")) ///
 prehead("\begin{table}\begin{center}\caption{The Effect of Visibility on Earnings Management}\label{tab: table4newcontrols}\tabcolsep=0.1cm\scalebox{0.8}{\begin{tabular}{lccccc}\toprule")  ///
-posthead("\midrule") postfoot("\bottomrule\end{tabular}}\end{center}\footnotesize{Notes: The dependent variables are indicated at the top of each column. A description of all variables can be found in Table \ref{tab: variabledescriptions}. The dependent variables in columns (1)-(3) are: a firms' accrual earnings management calculated using the performance-adjusted method, a firm's accrual earnings management calculated using the modified Jone's method, and the rank of the firm's accrual earnings management (modified Jone's), respectively. The dependent variables in columns (4)-(5) are: a firm's real earnings management, and the rank of the firm's real earnings management, respectively. Year fixed effects and industry fixed effects are included in all regressions. Standard errors are clustered at the level of firm-year. *** p < 1\%, ** p < 5\%, * p < 10\%.}\end{table}") 
-
-**# Reviewer 2 Comment 7 Event
-/*
-1. **July 5, 2011 - Phoenix, Arizona**
-   - A massive dust storm known as a haboob struck Phoenix, Arizona, resulting from strong outflow boundaries from storms initiated southeast of Tucson [(Raman, Arellano, & Brost, 2014)]
-https://www.sciencedirect.com/science/article/abs/pii/S1352231014001228?via%3Dihub
-
-
-2. **April 12, 2000** year too early
-   - A severe dust storm driven mainly by a passing cold front was analyzed in detail [(Wang Bao-jian, 2001)]
-Bao-jian, W. (2001). A Meso-micro scale synoptic analysis of strong dust storm on 12 April 2000. Gansu Meteorology.
-The strong dust storm on 12 April 2000 was mainly a passing cold front, with mesoscale system turbulence strengthening and stimulating it.
-
-3. **December 15, 2003 - Texas and New Mexico** year too early
-   - A major dust event occurred in the Chihuahuan Desert region, covering Texas and New Mexico, characterized by multiple small-scale sources merging to form a regional-scale dust storm [(Lee et al., 2009)]
-https://www.sciencedirect.com/science/article/abs/pii/S0169555X08002717?via%3Dihub
-
-The 2003 dust storm in southwestern North America was mainly caused by cropland and rangeland, with microscale variations in erodibility or meteorological factors potentially determining actual dust emission points.
-
-4. **April 2008 and March 2009 - Salt Lake City, Utah**
-   - Significant dust event days occurred, driven by approaching mid-level troughs which caused dust outbreaks and storms. Strengthening cyclonic systems in the region were primary producers of these dust events [(Hahnenberger & Nicoll, 2012)]
-https://www.sciencedirect.com/science/article/abs/pii/S1352231012005808?via%3Dihub
-*/
-	
-global control_variables_aem size bm roa lev firm_age rank au_years oa_scale /*xrd_int*/ loss grow Boardindependence lit InstOwn stockreturn sale_sd rem
-
-global control_variables_rem size bm roa lev firm_age rank au_years hhi_sale /*xrd_int*/ loss grow Boardindependence lit InstOwn stockreturn sale_sd dac
-
-global control_variables_aem size bm roa lev firm_age rank au_years oa_scale /*xrd_int*/
-global control_variables_rem size bm roa lev firm_age rank au_years hhi_sale /*xrd_int*/
-
-use "$output\final_data_47662", replace
-
-*Event 1
-	capture drop postTreat dust
-gen postTreat = 1 if fyear >= 2011
-replace postTreat = 0 if mi(postTreat) & fyear < 2011
-gen dust = 1 if state == "AZ" /*& city == "Phoenix"*/
-replace dust = 0 if mi(dust)
-
-egen city_id = group(city)
-
-reghdfe visib postTreat dust c.postTreat#c.dust fog if fyear >= 2009 & fyear <= 2014, absorb(fyear city_id) vce(cluster i.city_id#i.fyear)
-
-replace state = "PA" if city == "Canonsburg" & mi(state)
-replace state = "OH" if city == "Columbus" & mi(state)
-replace state = "TX" if city == "Houston" & mi(state)
-replace state = "CA" if city == "Los Angeles" & mi(state)
-replace state = "VA" if city == "McLean" & mi(state)
-replace state = "NY" if city == "New York" & mi(state)
-replace state = "NJ" if city == "Secaucus" & mi(state)
-replace state = "CA" if city == "Sunnyvale" & mi(state)
-replace state = "GA" if city == "Suwanee" & mi(state)
-replace state = "FL" if city == "West Palm Beach" & mi(state)
-replace state = "NY" if city == "White Plains" & mi(state)
-count if mi(state)
-
-*Event 2
-	capture drop postTreat dust
-gen postTreat = 1 if fyear >= 2000
-replace postTreat = 0 if mi(postTreat) & fyear < 2000
-gen dust = 1 if state == "TX" | state == "NM" //Texas & New Mexico
-replace dust = 0 if mi(dust)
-
-reghdfe visib postTreat dust c.postTreat#c.dust fog if fyear >= 2009 & fyear <= 2014, absorb(fyear city_id) vce(cluster i.city_id#i.fyear)
-
-*==================== Regression (Signed) =============================
-use "$output\final_data_47662", replace
-
-* Event 4
-	capture drop postTreat dust
-gen postTreat = 1 if fyear >= 2008
-replace postTreat = 0 if mi(postTreat) & fyear < 2008
-gen dust = 1 if state == "UT" //UT
-replace dust = 0 if mi(dust)
-
-egen city_id = group(city)
-
-reghdfe visib postTreat dust c.postTreat#c.dust fog if fyear <= 2014, absorb(fyear city_id) vce(cluster i.city_id#i.fyear)
-
-reg visib postTreat dust c.postTreat#c.dust fog $control_variables_aem  i.fyear i.city_id if fyear <= 2014, vce(robust)
-
-predict visib_hat, xb
-
-	eststo clear
-eststo regression1: ivregress 2sls dacck (visib = c.postTreat#c.dust) postTreat dust fog $control_variables_aem i.fyear i.ff_48 if fyear <= 2014, vce(robust)
-estadd scalar ar2 = e(r2_a)
-summarize dacck
-estadd scalar ymean = r(mean)
-		estat firststage
-		matrix FS = r(singleresults)
-		estadd scalar fs = FS[1, 4]
-
-estadd scalar ymean = r(mean)
-estadd local yearfe "Yes", replace
-estadd local indfe "Yes", replace
-	
-eststo regression2: reghdfe dac visib_hat $control_variables_aem, absorb(fyear ff_48) vce(cluster i.lpermno#i.fyear)
-estadd scalar ar2 = e(r2_a)
-summarize dac
-estadd scalar ymean = r(mean)
-estadd local yearfe "Yes", replace
-estadd local indfe "Yes", replace
-
-eststo regression3: reghdfe rank_dac visib_hat $control_variables_aem, absorb(fyear ff_48) vce(cluster i.lpermno#i.fyear)
-estadd scalar ar2 = e(r2_a)
-summarize rank_dac
-estadd scalar ymean = r(mean)
-estadd local yearfe "Yes", replace
-estadd local indfe "Yes", replace
-
-eststo regression4: ivregress 2sls rem (visib = c.postTreat#c.dust)postTreat dust fog $control_variables_rem i.fyear i.ff_48, vce(robust)
-summarize rem
-estadd scalar ar2 = e(r2_a)
-summarize dacck
-estadd scalar ymean = r(mean)
-		estat firststage
-		matrix FS = r(singleresults)
-		estadd scalar fs = FS[1, 4]
-
-estadd scalar ymean = r(mean)
-estadd local yearfe "Yes", replace
-estadd local indfe "Yes", replace
-
-eststo regression5: reghdfe rank_rem visib_hat $control_variables_rem, absorb(fyear ff_48) vce(cluster i.lpermno#i.fyear)
-estadd scalar ar2 = e(r2_a)
-summarize rank_rem
-estadd scalar ymean = r(mean)
-estadd local yearfe "Yes", replace
-estadd local indfe "Yes", replace
-
-esttab regression1 regression2 regression3 regression4 regression5 using "$output\table4_dust_hat.tex", replace ///
-mgroups("Accrual Earnings Management" "Real Earnings Management", pattern(1 0 0 1 0) prefix(\multicolumn{@span}{c}{) suffix(}) span erepeat(\cmidrule(lr){@span})) ///
-mtitles("\makecell{AEM \\ (performance-adj.)}" "\makecell{AEM \\ (modified Jone's')}" "\makecell{AEM \\ Rank}" "REM" "\makecell{REM \\ Rank}") collabels(none) booktabs label scalar(ymean) ///
-stats(yearfe indfe N ymean ar2, fmt(0 0 0 2 2) labels("Year FE" "Industry FE" "N" "Dep mean" "Adjusted R-sq")) ///
-prehead("\begin{table}\begin{center}\caption{The Effect of Visibility on Earnings Management}\label{tab: table4}\tabcolsep=0.1cm\scalebox{0.9}{\begin{tabular}{lccccc}\toprule")  ///
 posthead("\midrule") postfoot("\bottomrule\end{tabular}}\end{center}\footnotesize{Notes: The dependent variables are indicated at the top of each column. A description of all variables can be found in Table \ref{tab: variabledescriptions}. The dependent variables in columns (1)-(3) are: a firms' accrual earnings management calculated using the performance-adjusted method, a firm's accrual earnings management calculated using the modified Jone's method, and the rank of the firm's accrual earnings management (modified Jone's), respectively. The dependent variables in columns (4)-(5) are: a firm's real earnings management, and the rank of the firm's real earnings management, respectively. Year fixed effects and industry fixed effects are included in all regressions. Standard errors are clustered at the level of firm-year. *** p < 1\%, ** p < 5\%, * p < 10\%.}\end{table}") 
 
