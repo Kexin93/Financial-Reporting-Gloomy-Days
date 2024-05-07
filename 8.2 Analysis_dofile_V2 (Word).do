@@ -117,6 +117,12 @@ gen lsale = l1.sale
 gen loa = l1.oa
 gen oa_scale = loa/lsale
 
+gen d_cfo_neg = - d_cfo
+gen rank_d_cfo_neg = 9- rank_d_cfo
+
+gen d_discexp_neg = -d_discexp
+gen rank_d_discexp_neg = 9-rank_d_discexp
+
 /*generate KZ score*/
 *xtset lpermno fyear 
 gen cashflow=dp+ib
@@ -144,55 +150,6 @@ gen Tobinq=(at +(csho* prcc_f)-ceq)/at
 *gen Tobinq_2=(at +(csho* prcc_f)-(ceq+txdb))/at
 *label variable Tobinq_2 "(at +(csho* prcc_f)-(ceq+txdb))/at"
 gen KZ=-1.002*CF_lscaled- 39.368*DIV_lscaled- 1.315*C_lscaled+ 3.319*BLEV+ 0.283*Tobinq
-
-* ============ Labeling =================
-label var firm_ID "firm-year ID"
-label var firm_FID "firm FID = firm_ID - 1"
-label var dac "AEM (modified Jone's)"
-label var absdac "|AEM|" 
-label var rank_dac "AEM Rank"
-*label var rank_absdac ""
-label var rem "REM"
-label var absrem "{REM}"
-label var rank_rem "REM Rank"
-*label var rank_absrem ""
-label var stdz_rem "REM Variability"
-label var size "Size"
-label var bm "BM"
-label var roa "ROA"
-label var lev "Leverage"
-label var oa_scale "NOA"
-*label var hhi_sale "HHI"
-label var au_years "Auditor Tenure"
-label var firm_age "Firm Age"
-label var rank "Big N" //binary
-label var visib "Visibility"
-label var cover "ANAL"
-label var KZ "Financial Constraint"
-
-* sales  
-label var rank_d_cfo "Rank($REM_{CFO}$)"
-label var d_cfo "$REM_{CFO}$"
-
-gen d_cfo_neg = - d_cfo
-gen rank_d_cfo_neg = 9- rank_d_cfo
-
-label var d_cfo_neg "$REM_{CFO}$"
-label var rank_d_cfo_neg " Rank($REM_{CFO}$)"
-
-* over-production
- label var d_prod "$REM_{PROD}$"
- label var rank_d_prod "Rank($REM_{PROD}$)"
-
-* expenditure
- label var d_discexp "$REM_{DISX}$"
- label var rank_d_discexp " Rank($REM_{DISX}$)"
-
-gen d_discexp_neg = -d_discexp
-gen rank_d_discexp_neg = 9-rank_d_discexp
-
- label var d_discexp_neg "$REM_{DISX}$"
- label var rank_d_discexp_neg "Rank($REM_{DISX}$)"
  
  capture ssc install sicff
 * generate 48 industries based on the 4-digit sic code: sic
@@ -235,11 +192,56 @@ append using `data2'
 merge 1:1 lpermno fyear using `convk'	
 
 drop if _merge == 2
-label var dacck "AEM (performance-adjusted)"
 
 *save "$output\final_data_47662", replace
 
+**# Start of Analyses
 use "$output\final_data_47662", replace
+
+* ============ Labeling =================
+label var dacck "AEM (performance-adjusted)"
+label var firm_ID "firm-year ID"
+label var firm_FID "firm FID = firm_ID - 1"
+label var dac "AEM (modified Jone's)"
+label var absdac "|AEM|" 
+label var rank_dac "AEM Rank"
+*label var rank_absdac ""
+label var rem "REM"
+label var absrem "{REM}"
+label var rank_rem "REM Rank"
+*label var rank_absrem ""
+label var stdz_rem "REM Variability"
+label var size "Size"
+label var bm "BM"
+label var roa "ROA"
+label var lev "Leverage"
+label var oa_scale "NOA"
+*label var hhi_sale "HHI"
+label var au_years "Auditor Tenure"
+label var firm_age "Firm Age"
+label var rank "Big N" //binary
+label var visib "Visibility"
+label var cover "ANAL"
+label var KZ "Financial Constraint"
+
+* sales  
+label var rank_d_cfo "Rank(REM_CFO)"
+label var d_cfo "REM_CFO"
+
+label var d_cfo_neg "REM_CFO"
+label var rank_d_cfo_neg "Rank(REM_CFO)"
+
+* over-production
+ label var d_prod "REM_PROD"
+ label var rank_d_prod "Rank(REM_PROD)"
+
+* expenditure
+ label var d_discexp "REM_DISX"
+ label var rank_d_discexp " Rank(REM_DISX)"
+
+ label var d_discexp_neg "REM_DISX"
+ label var rank_d_discexp_neg "Rank(REM_DISX)"
+ 
 	capture drop _merge
 merge m:1 state city fyear using "$maindir\US_PM25_weightedannualmean.dta"
 keep if _m == 1 | _m == 3 //3583 observations, or 762 state-city-fyears
@@ -275,6 +277,9 @@ label var stockreturn "Stock return"
 label var sale_sd "Sales rolling std."
 
 **# Table 2
+global summ_vars dacck dac rank_dac rem rank_rem stdz_rem d_cfo_neg rank_d_cfo_neg d_prod rank_d_prod ///
+d_discexp_neg rank_d_discexp_neg size bm roa lev firm_age rank au_years /*<--tenure*/ oa_scale hhi_sale cover sale /*<--noa*/ /*xrd_int */ /*cycle*/ loss salesgrowth /*Boardindependence*/ lit InstOwn_Perc stockreturn sale_sd pollutant_value
+
 eststo summ_stats: estpost sum $summ_vars
 
 eststo obs: estpost summarize $summ_vars
@@ -305,12 +310,12 @@ eststo Median: estpost summarize $summ_vars
 
 ereturn list 
 
-* .tex
-esttab obs Mean std p25 p50 p75 using "$output\summ_stats_firm.tex", fragment  ///
-label cells("count(pattern(1 0 0 0 0 0)) mean(pattern(0 1 0 0 0 0) fmt(3)) sd(pattern(0 0 1 0 0 0) fmt(3)) p25(pattern(0 0 0 1 0 0) fmt(3)) p50(pattern(0 0 0 0 1 0) fmt(3)) p75(pattern(0 0 0 0 0 1) fmt(3))") noobs  ///
-nonumbers replace booktabs collabels(none) mtitles("N" "Mean" "Std. Dev." "Bottom 25\%" "Median" "Top 25\%") ///
-prehead("\begin{table}\begin{center}\caption{Summary Statistics of Firm Characteristics}\label{tab: summstats1}\tabcolsep=0.1cm\scalebox{0.6}{\begin{tabular}{lcccccc}\toprule")  ///
-postfoot("\bottomrule\end{tabular}}\end{center}\footnotesize{Notes: This table reports the descriptive statistics of firm-level characteristics for 12,191 firm-year-station observations from 2003 to 2017. Firm characteristics are obtained from Compustat and I/B/E/S data. We restrict the sample to be within a year before the actual period end date of each firm's financial report. The characteristics include the following: $AEM$ (performance-adjusted) is computed using the cross-sectional performance-adjusted modified Jones model as in Kothari et al.(2005); $AEM$ (modified Jone's) is calculated following Dechow (1995); $AEM \ Rank$ denotes the rank of $AEM (modified Jone's)$ for the year and industry;  REM, the aggregate measure of real earnings management, is the sum of $REM_{CFO}$, $REM_{PROD}$, and $REM_{DISX}$, where $REM_{CFO}$ and $REM_{DISX}$ are the negative values of discretionary cash flows and discretionary expenses, respectively; $REM \ Rank$ represents the rank of $REM$ for the year and industry;  $REM \ Variability$ indicates the standard deviation of $REM$ across the five consecutive years prior to the firm's actual period end date; $REM_{CFO}$ denotes abnormal cash flows from operations, which are measured as the deviation of the firm's actual cash flows from the normal level of discretionary cash flows as are predicted using the corresponding industry-year regression; $REM_{PROD}$ denotes abnormal production costs, and is measured as the deviation of the firm's actual production costs from the normal level of production costs as are predicted using the corresponding industry-year regression; $REM_{DISX}$, discretionary expenses, are measured as the deviation of the firm's actual expenses from the normal level of discretionary expenses as are predicted using the corresponding industry-year regression. $Size$, the firm's size, is calculated as the logged value of the firm's total assets in the current fiscal year; $BM$, the book-to-market ratio in the current fiscal year, is calculated as the ratio of the firm's book value of equity and the market value of equity; $ROA$ is the ratio of the firm's income before extraordinary items and total assets; $Leverage$, the leverage ratio in the current fiscal year, is defined as the ratio between the firm's total liabilities and total assets;  $Firm \ Age$, the age of the firm, is defined as the number of years starting from the first time when the firm's stock returns are reported in the monthly stock files of the Center for Research in Security Prices (CRSP); $Big \ N$ is an indicator that takes 1 if the firm was audited by a Big N CPA firm, and 0 otherwise;  $Auditor \ Tenure$ denotes the number of years that the firm was audited by a same auditor; $NOA$ is the ratio between the firm's net operating assets at the beginning of the year and lagged sales during the corresponding industry-year (net operating assets are calculated using shareholders' equity less cash and marketable securities, plus total debt); $HHI$ refers to Herfindahl–Hirschman Index; $ANAL$, the number of analysts following the firm in the current fiscal year, is obtained from I/B/E/S; $Sales$ refers to the sales of the firm in the current fiscal year; $Loss$ refers to the firm's loss; $Sales \ growhth$ refers to the firm's sales growth; $Litigious$ is an indicator for litigious industry; $Institutional \ ownership$ refers to the percent of shares outstanding that is owned by institutional owners; $Stock \ return$ refers to the return to the firm's stocks; and $Sales \ rolling \ std.$ refers to the 3-year rolling standard deviation of the firm's sales. $PM \ 2.5$ refers to the weighted annual mean of PM 2.5 for each city and year. Standard deviations are in parentheses. *** p < 1\%, ** p < 5\%, * p < 10\%.}\end{table}") 
+* .rtf
+estout obs Mean std p25 p50 p75 using "$output\Word_results.rtf",  ///
+label nonumbers replace mlabels("N" "Mean" "Std. Dev." "Bottom 25%" "Median" "Top 25%") collabels(none) ///
+cells("count(pattern(1 0 0 0 0 0)) mean(pattern(0 1 0 0 0 0) fmt(2)) sd(pattern(0 0 1 0 0 0) fmt(2)) p25(pattern(0 0 0 1 0 0) fmt(2)) p50(pattern(0 0 0 0 1 0) fmt(2)) p75(pattern(0 0 0 0 0 1) fmt(2))") ///
+title("Summary Statistics of Firm Characteristics") ///
+note("Notes: This table reports the descriptive statistics of firm-level characteristics for 12,191 firm-year-station observations from 2003 to 2017. Firm characteristics are obtained from Compustat and I/B/E/S data. We restrict the sample to be within a year before the actual period end date of each firm's financial report. The characteristics include the following: AEM (performance-adjusted) is computed using the cross-sectional performance-adjusted modified Jones model as in Kothari et al.(2005); AEM (modified Jone's) is calculated following Dechow (1995); AEM Rank denotes the rank of AEM (modified Jone's) for the year and industry; REM, the aggregate measure of real earnings management, is the sum of REM_{CFO}, REM_{PROD}, and REM_{DISX}, where REM_{CFO} and REM_{DISX} are the negative values of discretionary cash flows and discretionary expenses, respectively; REM Rank represents the rank of REM for the year and industry; REM Variability indicates the standard deviation of REM across the five consecutive years prior to the firm's actual period end date; REM_{CFO} denotes abnormal cash flows from operations, which are measured as the deviation of the firm's actual cash flows from the normal level of discretionary cash flows as are predicted using the corresponding industry-year regression; REM_{PROD} denotes abnormal production costs, and is measured as the deviation of the firm's actual production costs from the normal level of production costs as are predicted using the corresponding industry-year regression; REM_{DISX}, discretionary expenses, are measured as the deviation of the firm's actual expenses from the normal level of discretionary expenses as are predicted using the corresponding industry-year regression. Size, the firm's size, is calculated as the logged value of the firm's total assets in the current fiscal year; BM, the book-to-market ratio in the current fiscal year, is calculated as the ratio of the firm's book value of equity and the market value of equity; ROA is the ratio of the firm's income before extraordinary items and total assets; Leverage, the leverage ratio in the current fiscal year, is defined as the ratio between the firm's total liabilities and total assets; Firm Age, the age of the firm, is defined as the number of years starting from the first time when the firm's stock returns are reported in the monthly stock files of the Center for Research in Security Prices (CRSP); Big N is an indicator that takes 1 if the firm was audited by a Big N CPA firm, and 0 otherwise; Auditor Tenure denotes the number of years that the firm was audited by a same auditor; NOA is the ratio between the firm's net operating assets at the beginning of the year and lagged sales during the corresponding industry-year (net operating assets are calculated using shareholders' equity less cash and marketable securities, plus total debt); HHI refers to Herfindahl–Hirschman Index; ANAL, the number of analysts following the firm in the current fiscal year, is obtained from I/B/E/S; Sales refers to the sales of the firm in the current fiscal year; Loss refers to the firm's loss; Sales growhth refers to the firm's sales growth; Litigious is an indicator for litigious industry; Institutional ownership refers to the percent of shares outstanding that is owned by institutional owners; Stock return refers to the return to the firm's stocks; and Sales rolling std. refers to the 3-year rolling standard deviation of the firm's sales. PM 2.5 refers to the weighted annual mean of PM 2.5 for each city and year. Standard deviations are in parentheses. *** p < 1%, ** p < 5%, * p < 10%.") 
 
 **# Table 3
 
@@ -343,11 +348,11 @@ global summ_vars_weather temp dewp slp visib wdsp ///
 	eststo clear
 eststo summ_stats: estpost sum $summ_vars_weather
 
-eststo obs: estpost summarize $summ_vars_weather
+eststo obs: estpost summarize $summ_vars_weather, detail
 
 ereturn list 
 
-eststo Mean: estpost summarize $summ_vars_weather
+eststo Mean: estpost summarize $summ_vars_weather, detail
 
 ereturn list 
 
@@ -363,7 +368,7 @@ eststo p75: estpost summarize $summ_vars_weather, detail
 
 ereturn list 
 
-eststo std: estpost summarize $summ_vars_weather
+eststo std: estpost summarize $summ_vars_weather, detail
 
 ereturn list 
 
@@ -372,11 +377,11 @@ eststo Median: estpost summarize $summ_vars_weather
 ereturn list 
 
 * .tex
-esttab obs Mean std p25 p50 p75 using "$output\summ_stats_weather.tex", fragment  ///
-label cells("count(pattern(1 0 0 0 0 0)) mean(pattern(0 1 0 0 0 0) fmt(3)) sd(pattern(0 0 1 0 0 0) fmt(3)) p25(pattern(0 0 0 1 0 0) fmt(3)) p50(pattern(0 0 0 0 1 0) fmt(3)) p75(pattern(0 0 0 0 0 1) fmt(3))") noobs  ///
-nonumbers replace booktabs collabels(none) mtitles("N" "Mean" "Std. Dev." "Bottom 25\%" "Median" "Top 25\%") ///
-prehead("\begin{table}\begin{center}\caption{Summary Statistics of Weather-related Characteristics}\label{tab: summstats2}\tabcolsep=0.1cm\scalebox{0.67}{\begin{tabular}{lcccccc}\toprule")  ///
-postfoot("\bottomrule\end{tabular}}\end{center}\footnotesize{Notes: This table reports the descriptive statistics of weather-related characteristics for 12,191 firm-year-station observations from 2003 to 2017. Weather-related characterstics are: temp, mean temperature for the day in degrees Fahrenheit; dewp, mean dew point for the day in degrees Fahrenheit to tenths; slp, mean sea level pressure for the day in millibars to tenths; visib, mean visibility for the day in millibars to tenths; wdsp, mean wind speed for the day in knots to tenths; gust, maximum wind gust reported for the day in knots to tenths; mxspd, maximum sustained wind speed reported for the day in knots to tenths; prcp, total precipitation (rain and/or melted snow) reported during the day in inches and hundredths; sndp, snow depth in inches to tenths, and will be the last report for the day if reported more than once; max, maximum temperature reported during the day in Fahrenheit; min, minimum temperature reported during the day in Fahrenheit; rain, an indicator that takes 1 during the day of rain or drizzle; fog, an indicator that takes 1 during the day of fog; snow, an indicator that takes 1 during the day of snow or ice pellets; thunder, an indicator that takes 1 during the day of thunder; hail, an indicator during the day of hail; tornado, an indicator that takes 1 during the day of tornado or funnel cloud. Details of each weather-related variable, including the definition, unit, can be found in Table \ref{tab: variabledescriptions2}. Standard deviations are in parentheses. *** p < 1\%, ** p < 5\%, * p < 10\%.}\end{table}") 
+estout obs Mean std p25 p50 p75 using "$output\summ_stats_weather.rtf", ///
+ label cells("count(pattern(1 0 0 0 0 0)) mean(pattern(0 1 0 0 0 0) fmt(2)) sd(pattern(0 0 1 0 0 0) fmt(2)) p25(pattern(0 0 0 1 0 0) fmt(2)) p50(pattern(0 0 0 0 1 0) fmt(2)) p75(pattern(0 0 0 0 0 1) fmt(2))")  ///
+nonumbers replace collabels(none) mlabels("N" "Mean" "Std. Dev." "Bottom 25%" "Median" "Top 25%") ///
+title("Summary Statistics of Weather-related Characteristics")  ///
+note("Notes: This table reports the descriptive statistics of weather-related characteristics for 12,191 firm-year-station observations from 2003 to 2017. Weather-related characterstics are: temp, mean temperature for the day in degrees Fahrenheit; dewp, mean dew point for the day in degrees Fahrenheit to tenths; slp, mean sea level pressure for the day in millibars to tenths; visib, mean visibility for the day in millibars to tenths; wdsp, mean wind speed for the day in knots to tenths; gust, maximum wind gust reported for the day in knots to tenths; mxspd, maximum sustained wind speed reported for the day in knots to tenths; prcp, total precipitation (rain and/or melted snow) reported during the day in inches and hundredths; sndp, snow depth in inches to tenths, and will be the last report for the day if reported more than once; max, maximum temperature reported during the day in Fahrenheit; min, minimum temperature reported during the day in Fahrenheit; rain, an indicator that takes 1 during the day of rain or drizzle; fog, an indicator that takes 1 during the day of fog; snow, an indicator that takes 1 during the day of snow or ice pellets; thunder, an indicator that takes 1 during the day of thunder; hail, an indicator during the day of hail; tornado, an indicator that takes 1 during the day of tornado or funnel cloud. Details of each weather-related variable, including the definition, unit, can be found in Table \ref{tab: variabledescriptions2}. Standard deviations are in parentheses. *** p < 1\%, ** p < 5\%, * p < 10\%.") 
 
 **# Table 4
 *========= t-test table ========================
@@ -384,7 +389,6 @@ global summ_vars dacck dac rank_dac rem rank_rem stdz_rem d_cfo_neg rank_d_cfo_n
 d_discexp_neg rank_d_discexp_neg size bm roa lev firm_age rank au_years /*<--tenure*/ oa_scale hhi_sale cover sale /*<--noa*/ /*xrd_int */ /*cycle*/ loss salesgrowth /*Boardindependence*/ lit InstOwn_Perc stockreturn sale_sd pollutant_value
 
 global control_variables_rem size bm roa lev firm_age rank au_years hhi_sale /*xrd_int*/ loss salesgrowth /*Boardindependence*/ lit InstOwn_Perc stockreturn sale_sd dac
-
 
 summarize visib if !mi(visib), d
 local visib_median = r(p50) 
@@ -399,13 +403,15 @@ eststo unpolluted_sample: estpost summarize $summ_vars if polluted == 0
 gen unpolluted = -polluted
 eststo difference:  estpost ttest $summ_vars, by(unpolluted)
 
-esttab allsample polluted_sample unpolluted_sample difference using "$output\ttest.tex", ///
-replace cells("mean(pattern(1 1 1 0)  fmt(3)) b(star pattern(0 0 0 1) fmt(3)) ") ///
-label mtitles("All" "Polluted" "Unpolluted" "Polluted-Unpolluted") collabels(none) nonumbers booktabs ///
-prehead("\begin{table}\begin{center}\caption{Uni-variate Test}\label{tab: ttest}\tabcolsep=0.1cm\begin{tabular}{lcccc}\toprule")  ///
-posthead("\midrule") postfoot("\bottomrule\end{tabular}\end{center}\footnotesize{Notes: This table shows the univarite test of the difference between firms exposed to higher air quality and those exposed to lower air quality (defined as being lower than the median of visibility over years: 2003-2017). A description of all variables can be found in Table \ref{tab: variabledescriptions}. *** p < 1\%, ** p < 5\%, * p < 10\%.}\end{table}") 
-
+esttab allsample polluted_sample unpolluted_sample difference using "$output\ttest.rtf", ///
+replace cells("mean(pattern(1 1 1 0)  fmt(3)) b(star pattern(0 0 0 1) fmt(3)) ") collabels(none) ///
+label mtitles("All" "Polluted" "Unpolluted" "Polluted-Unpolluted") nonumbers title("Uni-variate Test")  ///
+note("Notes: This table shows the univarite test of the difference between firms exposed to higher air quality and those exposed to lower air quality (defined as being lower than the median of visibility over years: 2003-2017). A description of all variables can be found in Table. *** p < 1\%, ** p < 5\%, * p < 10\%.") 
+exit
 **# Table 5
+global control_variables_aem size bm roa lev firm_age rank au_years oa_scale /*xrd_int*/
+global control_variables_rem size bm roa lev firm_age rank au_years hhi_sale /*xrd_int*/
+
 *==================== Regression (Signed) =============================
 	eststo clear
 eststo regression1: reghdfe dacck visib $control_variables_aem, absorb(fyear ff_48) vce(cluster i.lpermno#i.fyear)
@@ -443,12 +449,12 @@ estadd scalar ymean = r(mean)
 estadd local yearfe "Yes", replace
 estadd local indfe "Yes", replace
 
-esttab regression1 regression2 regression3 regression4 regression5 using "$output\table4.tex", replace ///
-mgroups("Accrual Earnings Management" "Real Earnings Management", pattern(1 0 0 1 0) prefix(\multicolumn{@span}{c}{) suffix(}) span erepeat(\cmidrule(lr){@span})) ///
-mtitles("\makecell{AEM \\ (performance-adj.)}" "\makecell{AEM \\ (modified Jone's')}" "\makecell{AEM \\ Rank}" "REM" "\makecell{REM \\ Rank}") collabels(none) booktabs label scalar(ymean) ///
+esttab regression1 regression2 regression3 regression4 regression5 using "$output\table4.rtf", replace ///
+mgroups("Accrual Earnings Management" "Real Earnings Management", pattern(1 0 0 1 0)) ///
+mtitles("AEM (performance-adj.)" "AEM (modified Jone's')" "AEM Rank" "REM" "REM Rank") collabels(none) label scalar(ymean) ///
 stats(yearfe indfe N ymean ar2, fmt(0 0 0 2 2) labels("Year FE" "Industry FE" "N" "Dep mean" "Adjusted R-sq")) ///
-prehead("\begin{table}\begin{center}\caption{The Effect of Visibility on Earnings Management}\label{tab: table4}\tabcolsep=0.1cm\scalebox{0.9}{\begin{tabular}{lccccc}\toprule")  ///
-posthead("\midrule") postfoot("\bottomrule\end{tabular}}\end{center}\footnotesize{Notes: The dependent variables are indicated at the top of each column. A description of all variables can be found in Table \ref{tab: variabledescriptions}. The dependent variables in columns (1)-(3) are: a firms' accrual earnings management calculated using the performance-adjusted method, a firm's accrual earnings management calculated using the modified Jone's method, and the rank of the firm's accrual earnings management (modified Jone's), respectively. The dependent variables in columns (4)-(5) are: a firm's real earnings management, and the rank of the firm's real earnings management, respectively. Year fixed effects and industry fixed effects are included in all regressions. Standard errors are clustered at the level of firm-year. *** p < 1\%, ** p < 5\%, * p < 10\%.}\end{table}") 
+title("The Effect of Visibility on Earnings Management")  ///
+note("Notes: The dependent variables are indicated at the top of each column. A description of all variables can be found in Table \ref{tab: variabledescriptions}. The dependent variables in columns (1)-(3) are: a firms' accrual earnings management calculated using the performance-adjusted method, a firm's accrual earnings management calculated using the modified Jone's method, and the rank of the firm's accrual earnings management (modified Jone's), respectively. The dependent variables in columns (4)-(5) are: a firm's real earnings management, and the rank of the firm's real earnings management, respectively. Year fixed effects and industry fixed effects are included in all regressions. Standard errors are clustered at the level of firm-year. *** p < 1\%, ** p < 5\%, * p < 10\%.") 
 
 **# Table 6
 *======================= Decomposition of REM ========================
@@ -494,11 +500,11 @@ estadd scalar ymean = r(mean)
 estadd local yearfe "Yes", replace
 estadd local indfe "Yes", replace
 
-esttab sales1 sales2 overprod1 overprod2 expenditure1 expenditure2 using "$output\table5.tex", replace ///
-depvars collabels(none) booktabs label scalar(ymean) ///
+esttab sales1 sales2 overprod1 overprod2 expenditure1 expenditure2 using "$output\table5.rtf", replace ///
+depvars collabels(none) label scalar(ymean) ///
 stats(yearfe indfe N ymean ar2, fmt(0 0 0 2 2) labels("Year FE" "Industry FE" "N" "Dep mean" "Adjusted R-sq")) ///
-prehead("\begin{table}\begin{center}\caption{The Effects of Visibility on Individual REM Measures}\label{tab: table5}\tabcolsep=0.1cm\scalebox{0.78}{\begin{tabular}{lcccccc}\toprule")  ///
-posthead("\midrule") postfoot("\bottomrule\end{tabular}}\end{center}\footnotesize{Notes: The table reports the effects of visibility on each component of the aggregate measure of real earnings management (REM). A description of all variables can be found in Table \ref{tab: variabledescriptions}. The dependent variables are indicated at the top of each column. The dependent variables in columns (1)-(2) are: the discretionary cash flow component of a firm's REM, and the rank of this component. To be consistent with the sign of the aggregate measure of REM, we take the negative value of discretionary cash flows. The dependent variables in columns (3)-(4) are: the production cost component of a firm's REM, and the rank of this component. The dependent variables in columns (5)-(6) are: the discretionary expense component of a firm's REM, and the rank of this component. To be consistent with the sign of the aggregate measure of REM, we take the negative value of discretionary expenses. Year fixed effects and industry fixed effects are included in all regressions. Standard errors are clustered at the level of firm and year.  *** p < 1\%, ** p < 5\%, * p < 10\%.}\end{table}") 
+title("The Effects of Visibility on Individual REM Measures")  ///
+note("Notes: The table reports the effects of visibility on each component of the aggregate measure of real earnings management (REM). A description of all variables can be found in Table \ref{tab: variabledescriptions}. The dependent variables are indicated at the top of each column. The dependent variables in columns (1)-(2) are: the discretionary cash flow component of a firm's REM, and the rank of this component. To be consistent with the sign of the aggregate measure of REM, we take the negative value of discretionary cash flows. The dependent variables in columns (3)-(4) are: the production cost component of a firm's REM, and the rank of this component. The dependent variables in columns (5)-(6) are: the discretionary expense component of a firm's REM, and the rank of this component. To be consistent with the sign of the aggregate measure of REM, we take the negative value of discretionary expenses. Year fixed effects and industry fixed effects are included in all regressions. Standard errors are clustered at the level of firm and year.  *** p < 1\%, ** p < 5\%, * p < 10\%.") 
 
 **# Table 7
 *================================== External Monitoring? Analyst ================================
@@ -543,12 +549,12 @@ estadd local yearfe "Yes", replace
 estadd local indfe "Yes", replace
 estadd local firmcont "Yes", replace
 
-esttab regression1 regression2 regression3 regression4 regression5 using "$output\table8.tex", replace ///
-mgroups("Accrual Earnings Management" "Real Earnings Management", pattern(1 0 0 1 0) prefix(\multicolumn{@span}{c}{) suffix(}) span erepeat(\cmidrule(lr){@span})) drop($control_variables_rem $control_variables_aem) ///
-mtitles("\makecell{AEM \\ (performance-adj.)}" "\makecell{AEM \\ (modified Jone's)}" "\makecell{AEM \\ Rank}" "REM" "\makecell{REM \\ Rank}") collabels(none) booktabs label scalar(ymean) order(visib cover c.visib#c.cover) ///
+esttab regression1 regression2 regression3 regression4 regression5 using "$output\table8.rtf", replace ///
+mgroups("Accrual Earnings Management" "Real Earnings Management", pattern(1 0 0 1 0)) drop($control_variables_rem $control_variables_aem) ///
+mtitles("AEM (performance-adj.)" "AEM (modified Jone's)" "AEM Rank" "REM" "REM Rank") collabels(none) label scalar(ymean) order(visib cover c.visib#c.cover) ///
 stats(yearfe indfe firmcont N ymean ar2, fmt(0 0 0 0 2 2) labels("Year FE" "Industry FE" "Firm Controls" "N" "Dep mean" "Adjusted R-sq")) ///
-prehead("\begin{table}\begin{center}\caption{The Effect of Visibility on Earnings Management by the Degree of External Control}\label{tab: table8}\tabcolsep=0.1cm\scalebox{0.82}{\begin{tabular}{lccccc}\toprule")  ///
-posthead("\midrule") postfoot("\bottomrule\end{tabular}}\end{center}\footnotesize{Notes: This table reports how the effects of visibility on AEM, the rank of AEM, REM, and the rank of REM differ by the degree of external monitoring. A description of all variables can be found in Table \ref{tab: variabledescriptions}. The dependent variable in column (1) is the performance-adjusted measure of AEM, the dependent variable in column (2) is AEM calculated using the modified Jone's model, the dependent variable in column (3) is the rank of AEM (modified Jone's), the dependent variable in column (4) is REM, and the dependent variable in column (5) is the rank of REM. Firm controls are the same as in Table \ref{tab: table4}.  Year fixed effects and industry fixed effects are included in all regressions. Standard errors are clustered at the level of firm and year. *** p < 1\%, ** p < 5\%, * p < 10\%.}\end{table}") 
+title("The Effect of Visibility on Earnings Management by the Degree of External Control")  ///
+note("Notes: This table reports how the effects of visibility on AEM, the rank of AEM, REM, and the rank of REM differ by the degree of external monitoring. A description of all variables can be found in Table \ref{tab: variabledescriptions}. The dependent variable in column (1) is the performance-adjusted measure of AEM, the dependent variable in column (2) is AEM calculated using the modified Jone's model, the dependent variable in column (3) is the rank of AEM (modified Jone's), the dependent variable in column (4) is REM, and the dependent variable in column (5) is the rank of REM. Firm controls are the same as in Table \ref{tab: table4}.  Year fixed effects and industry fixed effects are included in all regressions. Standard errors are clustered at the level of firm and year. *** p < 1\%, ** p < 5\%, * p < 10\%.") 
 
 **# Table 8
 *========== Table 15: visibility interacts with internal monitoring to REM ======================== 
@@ -603,12 +609,12 @@ estadd local yearfe "Yes", replace
 estadd local indfe "Yes", replace
 estadd local firmcont "Yes", replace
 
-esttab regression1 regression2 regression3 regression4 regression5 regression6 using "$output\table15.tex", replace ///
-mgroups("Accrual Earnings Management" "Real Earnings Management", pattern(1 0 0 0 1 0) prefix(\multicolumn{@span}{c}{) suffix(}) span erepeat(\cmidrule(lr){@span})) drop($control_variables_rem $control_variables_aem) ///
-mtitles("Good CG" "Poor CG" "Good CG" "Poor CG" "Good CG" "Poor CG") collabels(none) booktabs label scalar(ymean) order(visib CGOV_str_num c.visib#c.CGOV_str_num CGOV_con_num c.visib#c.CGOV_con_num) ///
+esttab regression1 regression2 regression3 regression4 regression5 regression6 using "$output\table15.rtf", replace ///
+mgroups("Accrual Earnings Management" "Real Earnings Management", pattern(1 0 0 0 1 0)) drop($control_variables_rem $control_variables_aem) ///
+mtitles("Good CG" "Poor CG" "Good CG" "Poor CG" "Good CG" "Poor CG") collabels(none) label scalar(ymean) order(visib CGOV_str_num c.visib#c.CGOV_str_num CGOV_con_num c.visib#c.CGOV_con_num) ///
 stats(yearfe indfe firmcont N ymean ar2, fmt(0 0 0 0 2 2) labels("Year FE" "Industry FE" "Firm Controls" "N" "Dep mean" "Adjusted R-sq")) ///
-prehead("\begin{table}\begin{center}\caption{The Effect of Visibility on Earnings Management by the Degree of Corporate Governance}\label{tab: table15}\tabcolsep=0.1cm\scalebox{0.85}{\begin{tabular}{lcccccc}\toprule")  ///
-posthead("\midrule") postfoot("\bottomrule\end{tabular}}\end{center}\footnotesize{Notes: This table reports how the effects of visibility on AEM and REM differ by the degree of the internal corporate governance. CG Strengths refer to the number of strengths of a firm's internal governance. CG Concerns refer to the number of concerns of a firm's internal governance. The dependent variable in columns (1)-(4) is AEM, and the dependent variable in columns (5) and (6) is REM. The AEM measure in columns (1) and (2) is calculated using the performance-adjusted model, and the AEM measure in columns (3) and (4) is calculated using the modified Jone's model. Firm controls are the same as in Table \ref{tab: table4}. A description of all variables can be found in Table \ref{tab: variabledescriptions}. Year fixed effects and industry fixed effects are included in all regressions. Standard errors are clustered at the level of firm and year. *** p < 1\%, ** p < 5\%, * p < 10\%.}\end{table}") 
+title("The Effect of Visibility on Earnings Management by the Degree of Corporate Governance")  ///
+note("Notes: This table reports how the effects of visibility on AEM and REM differ by the degree of the internal corporate governance. CG Strengths refer to the number of strengths of a firm's internal governance. CG Concerns refer to the number of concerns of a firm's internal governance. The dependent variable in columns (1)-(4) is AEM, and the dependent variable in columns (5) and (6) is REM. The AEM measure in columns (1) and (2) is calculated using the performance-adjusted model, and the AEM measure in columns (3) and (4) is calculated using the modified Jone's model. Firm controls are the same as in Table \ref{tab: table4}. A description of all variables can be found in Table \ref{tab: variabledescriptions}. Year fixed effects and industry fixed effects are included in all regressions. Standard errors are clustered at the level of firm and year. *** p < 1\%, ** p < 5\%, * p < 10\%.") 
 
 **# Table 9 PSM separate do-files
 run "$dofile\12. Analysis_dofile_PSM.do"
@@ -732,12 +738,12 @@ estadd local yearfe "Yes", replace
 estadd local indfe "Yes", replace
 estadd local blcontrols "Yes", replace
 		
-esttab regression1 regression2 regression3 regression4 regression5 regression6 using "$output\table22.tex", replace ///
-mgroups("Real Earnings Management" "Rank of Real Earnings Management", pattern(1 0 0 1 0 0) prefix(\multicolumn{@span}{c}{) suffix(}) span erepeat(\cmidrule(lr){@span})) ///
-nomtitles collabels(none) booktabs label scalar(ymean) drop($control_variables_rem) ///
+esttab regression1 regression2 regression3 regression4 regression5 regression6 using "$output\table22.rtf", replace ///
+mgroups("Real Earnings Management" "Rank of Real Earnings Management", pattern(1 0 0 1 0 0)) ///
+nomtitles collabels(none) label scalar(ymean) drop($control_variables_rem) ///
 stats(blcontrols yearfe indfe N ymean ar2, fmt(0 0 0 0 2 2) labels("Baseline Controls" "Year FE" "Industry FE" "N" "Dep mean" "Adjusted R-sq")) ///
-prehead("\begin{table}\begin{center}\caption{The Effect of Visibility on Real Earnings Management in Coastal Regions}\label{tab: table22}\tabcolsep=0.1cm\scalebox{0.8}{\begin{tabular}{lcccccc}\toprule")  ///
-posthead("\midrule") postfoot("\bottomrule\end{tabular}}\end{center}\footnotesize{Notes: This table reports the effects of visibility on the aggregate measure of real earnings management (REM) and the rank of REM. A description of all variables can be found in Table \ref{tab: variabledescriptions}. Columns (1)-(3) report the effects of visibility on REM, and columns (4)-(6) report the effects of visibility on the rank of REM. Columns (1) and (4) are the baseline specifications. Columns (2) and (5) include an indicator for whether the state the firm is located in is coastal. Columns (3) and (6) further include the interaction term between the coastal indicator variable and visiblity as an additional control. Firm controls are the same as in Table \ref{tab: table4}. Year fixed effects and industry fixed effects are included in all regressions. Standard errors are clustered at the level of firm and year. *** p < 1\%, ** p < 5\%, * p < 10\%.}\end{table}") 
+title("The Effect of Visibility on Real Earnings Management in Coastal Regions")  ///
+note("Notes: This table reports the effects of visibility on the aggregate measure of real earnings management (REM) and the rank of REM. A description of all variables can be found in Table \ref{tab: variabledescriptions}. Columns (1)-(3) report the effects of visibility on REM, and columns (4)-(6) report the effects of visibility on the rank of REM. Columns (1) and (4) are the baseline specifications. Columns (2) and (5) include an indicator for whether the state the firm is located in is coastal. Columns (3) and (6) further include the interaction term between the coastal indicator variable and visiblity as an additional control. Firm controls are the same as in Table \ref{tab: table4}. Year fixed effects and industry fixed effects are included in all regressions. Standard errors are clustered at the level of firm and year. *** p < 1\%, ** p < 5\%, * p < 10\%.") 
 
 **# Table 11 PM 2.5 in another do-file
 run "$dofile\13. Analysis_dofile_pollutants.do"
@@ -745,9 +751,11 @@ run "$dofile\13. Analysis_dofile_pollutants.do"
 **# Table D1 - Cross-correlation Table
 *======== Correlation Table ==============================
 *ssc install corrtex
-corrtex $summ_vars, file(CorrTable) replace land sig /*dig(4) star(0.05)*/
+*corrtex $summ_vars, file(CorrTable) replace land sig /*dig(4) star(0.05)*/
+asdoc pwcorr $summ_vars, label replace sig format(%9.1f) save(corr2.rtf)
 * Notes: This table reports pooled Pearson correlations for the entire sample of 10,883 firm-year observations over the period 2004-2017. *Significant at the 10% level. **Significant at the 5% level. Please see Table \ref{tab: variabledescriptions} for variable descriptions.
 
+**# Table E1
 *========== Table 25: Big N Auditors to proxy for External monitoring ======================== 
 global control_variables_rem_bign size bm roa lev firm_age /*rank*/ au_years hhi_sale /*xrd_int*/
 xtset lpermno fyear
@@ -801,12 +809,13 @@ estadd local yearfe "Yes", replace
 estadd local indfe "Yes", replace
 estadd local blcontrols "Yes", replace
 
-esttab regression1 regression2 regression3 regression4 regression5 regression6 using "$output\table25.tex", replace ///
-mgroups("Real Earnings Management" "Rank of Real Earnings Management", pattern(1 0 0 1 0 0) prefix(\multicolumn{@span}{c}{) suffix(}) span erepeat(\cmidrule(lr){@span})) ///
-nomtitles collabels(none) booktabs label scalar(ymean) drop($control_variables_rem_bign) ///
+esttab regression1 regression2 regression3 regression4 regression5 regression6 using "$output\table25.rtf", replace ///
+mgroups("Real Earnings Management" "Rank of Real Earnings Management", pattern(1 0 0 1 0 0)) ///
+nomtitles collabels(none) label scalar(ymean) drop($control_variables_rem_bign) ///
 stats(blcontrols yearfe indfe N ymean ar2, fmt(0 0 0 0 2 2) labels("Baseline Controls" "Year FE" "Industry FE" "N" "Dep mean" "Adjusted R-sq")) ///
-prehead("\begin{table}\begin{center}\caption{The Effect of Visibility on Real Earnings Management with Big N Auditors}\label{tab: table25}\tabcolsep=0.1cm\scalebox{0.85}{\begin{tabular}{lcccccc}\toprule")  ///
-posthead("\midrule") postfoot("\bottomrule\end{tabular}}\end{center}\footnotesize{Notes: This table reports the effects of visibility on the aggregate measure of real earnings management (REM) and the rank of REM. A description of all variables can be found in Table \ref{tab: variabledescriptions}. Columns (1)-(3) report the effects of visibility on REM, and columns (4)-(6) report the effects of visibility on the rank of REM. Columns (1) and (4) are the baseline specifications. Columns (2) and (5) include an indicator for Big N Auditors as an additional control. Columns (3) and (6) further include the interaction term of the Big N Auditor indicator and average visibility the firm is exposed to during the fiscal year prior to its fiscal year end date as an additional control. Firm controls are the same as in Table \ref{tab: table4}. Year fixed effects and industry fixed effects are included in all regressions. Standard errors are clustered at the level of firm and year. *** p < 1\%, ** p < 5\%, * p < 10\%.}\end{table}") 
+title("The Effect of Visibility on Real Earnings Management with Big N Auditors")  note(Notes: This table reports the effects of visibility on the aggregate measure of real earnings management (REM) and the rank of REM. A description of all variables can be found in Table \ref{tab: variabledescriptions}. Columns (1)-(3) report the effects of visibility on REM, and columns (4)-(6) report the effects of visibility on the rank of REM. Columns (1) and (4) are the baseline specifications. Columns (2) and (5) include an indicator for Big N Auditors as an additional control. Columns (3) and (6) further include the interaction term of the Big N Auditor indicator and average visibility the firm is exposed to during the fiscal year prior to its fiscal year end date as an additional control. Firm controls are the same as in Table \ref{tab: table4}. Year fixed effects and industry fixed effects are included in all regressions. Standard errors are clustered at the level of firm and year. *** p < 1\%, ** p < 5\%, * p < 10\%.) 
+
+
 
 **# Table OA1
 	eststo clear
@@ -890,10 +899,10 @@ estadd local yearfe "Yes", replace
 estadd local indfe "Yes", replace
 estadd local firmcont "Yes", replace
 
-esttab regression1 regression2 regression3 regression4  regression5 regression6 regression7 regression8 regression9 regression10 using "$output\table7.tex", replace  drop($control_variables_rem) ///
-nomtitles collabels(none) booktabs label scalar(ymean) stats(yearfe indfe firmcont N ymean ar2, fmt(0 0 0 0 2 2) labels("Year FE" "Industry FE" "Firm Controls" "N" "Dep mean" "Adjusted R-sq")) ///
-prehead("\begin{table}\begin{center}\caption{Controlling for Additional Measures of Unpleasant Weather}\label{tab: table7}\tabcolsep=0.1cm\scalebox{0.65}{\begin{tabular}{lcccccccccc}\toprule")  ///
-posthead("\midrule") postfoot("\bottomrule\end{tabular}}\end{center}\footnotesize{Notes: This table reports the effects of visibility on the aggregate measure of real earnings management (REM) with a series of additional weather control variables from NOAA. Column (1) is the baseline regression with no other weather controls. Column (2) includes the mean temperature reported by the firm's nearest station over the one-year period. Column (3) includes the mean dew point reported by the firm's nearest station over the one-year period. Column (4) includes the mean sea level pressure reported by the firm's nearest station over the one-year period. Column (5) includes the mean wind speed reported by the firm's nearest station over the one-year period. Column (6) includes the maximum wind speed reported by the firm's nearest station over the one-year period. Column (7) includes the minimum temprature reported by the firm's nearest station over the one-year period. Column (8) includes the mean probability of fog occurrence reported by the firm's nearest station over the one-year period. Column (9) includes the mean rain occurrence reported by the firm's nearest station over the one-year period. Column (10) includes all the above-mentioned weather controls. Firm controls are the same as in Table \ref{tab: table4}. A description of all variables can be found in Table \ref{tab: variabledescriptions}. Year fixed effects and industry fixed effects are included in all regressions. Standard errors are clustered at the level of firm-year. *** p < 1\%, ** p < 5\%, * p < 10\% }\end{table}")
+esttab regression1 regression2 regression3 regression4  regression5 regression6 regression7 regression8 regression9 regression10 using "$output\table7.rtf", replace  drop($control_variables_rem) ///
+nomtitles collabels(none) label scalar(ymean) stats(yearfe indfe firmcont N ymean ar2, fmt(0 0 0 0 2 2) labels("Year FE" "Industry FE" "Firm Controls" "N" "Dep mean" "Adjusted R-sq")) ///
+title("Controlling for Additional Measures of Unpleasant Weather")  ///
+note("Notes: This table reports the effects of visibility on the aggregate measure of real earnings management (REM) with a series of additional weather control variables from NOAA. Column (1) is the baseline regression with no other weather controls. Column (2) includes the mean temperature reported by the firm's nearest station over the one-year period. Column (3) includes the mean dew point reported by the firm's nearest station over the one-year period. Column (4) includes the mean sea level pressure reported by the firm's nearest station over the one-year period. Column (5) includes the mean wind speed reported by the firm's nearest station over the one-year period. Column (6) includes the maximum wind speed reported by the firm's nearest station over the one-year period. Column (7) includes the minimum temprature reported by the firm's nearest station over the one-year period. Column (8) includes the mean probability of fog occurrence reported by the firm's nearest station over the one-year period. Column (9) includes the mean rain occurrence reported by the firm's nearest station over the one-year period. Column (10) includes all the above-mentioned weather controls. Firm controls are the same as in Table \ref{tab: table4}. A description of all variables can be found in Table \ref{tab: variabledescriptions}. Year fixed effects and industry fixed effects are included in all regressions. Standard errors are clustered at the level of firm-year. *** p < 1\%, ** p < 5\%, * p < 10\%.")
 
 **# Table OA2-Table OA7 in a separate do-file
 do "$dofile\14. apde_3month_analysis_file_10883 obs.do"
