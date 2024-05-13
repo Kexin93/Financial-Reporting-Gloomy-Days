@@ -615,5 +615,94 @@ mtitles("\makecell{AEM \\ (performance-adj.)}" "\makecell{AEM \\ (modified Jone'
 stats(yearfe indfe N fs ymean /*wild*/ ar2, fmt(0 2 2) labels("Year FE" "Industry FE" "N" "First Stage F" "Control mean" /*"Wild cluster p-value"*/ "Adjusted R-sq")) ///
 prehead("\begin{table}\begin{center}\caption{TheInstrumental Variable (IV-2SLS) Results of Visibility on Earnings Management}\label{tab: table4}\tabcolsep=0.1cm\scalebox{0.9}{\begin{tabular}{lccccc}\toprule")  ///
 posthead("\midrule") postfoot("\bottomrule\end{tabular}}\end{center}\footnotesize{Notes: This table presents the IV-2SLS results of visibility on earnings management, where visibility is instrumented by gust (gust). The dependent variables are indicated at the top of each column. A description of all variables can be found in Table \ref{tab: variabledescriptions}. The dependent variables in columns (1)-(3) are: a firms' accrual earnings management calculated using the performance-adjusted method, a firm's accrual earnings management calculated using the modified Jone's method, and the rank of the firm's accrual earnings management (modified Jone's), respectively. The dependent variables in columns (4)-(5) are: a firm's real earnings management, and the rank of the firm's real earnings management, respectively. The control variables include: firm size, book-to-market ratio, return on assets, leverage ratio, firm age, Big N auditor, number of years that a firm was audited by the same auditor, sale loss, sale growth, board independence, litigious industry, institutional ownership, stock return, 3-year rolling standard deviation of sales, REM (for AEM), AEM (for REM), net operating assets (with dependent variable being AEM, and Herfindahl–Hirschman index (with dependent variable being REM. Year fixed effects and industry fixed effects are included in all regressions. Standard errors are clustered at the level of firm-year. *** p < 1\%, ** p < 5\%, * p < 10\%.}\end{table}") 
+
+**# Reviewer 2 Comment 7: Event
+global control_variables_aem size bm roa lev firm_age rank au_years oa_scale /*xrd_int*/ loss salesgrowth /*Boardindependence*/ /*lit*/ InstOwn_Perc_D stockreturn sale_sd rem
+
+global control_variables_rem size bm roa lev firm_age rank au_years hhi_sale /*xrd_int*/ loss salesgrowth /*Boardindependence*/ /*lit*/ InstOwn_Perc_D stockreturn sale_sd dac
+
+use "$output\final_data_47662", replace
+
+xtset lpermno fyear
+
+*ssc install rangestat
+	capture drop _merge
+merge 1:1 lpermno fyear using "$maindir\sale_sd.dta"
+keep if _merge == 1 | _merge == 3
+
+	capture drop _merge
+merge 1:1 tic fyear using "$output\board_characteristics"
+	keep if _merge == 1 | _merge == 3
+	capture drop _merge
+merge 1:1 cusip8 fyear using "$output\institutional_ownership_x.dta"
+	keep if _merge == 1 | _merge == 3
+
+label var salesgrowth "Sales growth"
+label var loss "Loss"
+
+gen lit = 1 if (sic >= 2833 & sic <= 2836) | (sic >= 3570 & sic <= 3577) | (sic >= 3600 & sic <=3674) | (sic >= 5200 & sic <= 5961) | (sic >= 7370 & sic <= 7379) | (sic >= 8731 & sic <= 8734)
+replace lit = 0 if mi(lit) & !mi(sic)
+
+label var lit "Litigious"
+replace InstOwn_Perc = 0 if mi(InstOwn_Perc)
+
+drop if fyear >= 2007 & fyear <= 2011
+
+gen post = (fyear >= 2012) if !mi(fyear)
+
+sum InstOwn_Perc, d
+local median = r(p50)
+gen InstOwn_Perc_D = (InstOwn_Perc >= `median') if !mi(InstOwn_Perc)
+
+	eststo clear
+eststo regression0: reghdfe visib post $control_variables_aem, absorb(ff_48) vce(cluster i.lpermno#i.fyear)
+estadd scalar ar2 = e(r2_a)
+summarize visib
+estadd scalar ymean = r(mean)
+estadd local yearfe "Yes", replace
+estadd local indfe "Yes", replace	
+
+eststo regression1: reghdfe dacck post $control_variables_aem, absorb(ff_48) vce(cluster i.lpermno#i.fyear)
+estadd scalar ar2 = e(r2_a)
+summarize dacck
+estadd scalar ymean = r(mean)
+estadd local yearfe "Yes", replace
+estadd local indfe "Yes", replace
+	
+eststo regression2: reghdfe dac post $control_variables_aem, absorb(ff_48) vce(cluster i.lpermno#i.fyear)
+estadd scalar ar2 = e(r2_a)
+summarize dac
+estadd scalar ymean = r(mean)
+estadd local yearfe "Yes", replace
+estadd local indfe "Yes", replace
+
+eststo regression3: reghdfe rank_dac post $control_variables_aem, absorb(ff_48) vce(cluster i.lpermno#i.fyear)
+estadd scalar ar2 = e(r2_a)
+summarize rank_dac
+estadd scalar ymean = r(mean)
+estadd local yearfe "Yes", replace
+estadd local indfe "Yes", replace
+
+eststo regression4: reghdfe rem post $control_variables_rem, absorb(ff_48) vce(cluster i.lpermno#i.fyear)
+estadd scalar ar2 = e(r2_a)
+summarize rem
+estadd scalar ymean = r(mean)
+estadd local yearfe "Yes", replace
+estadd local indfe "Yes", replace
+
+eststo regression5: reghdfe rank_rem post $control_variables_rem, absorb(ff_48) vce(cluster i.lpermno#i.fyear)
+estadd scalar ar2 = e(r2_a)
+summarize rank_rem
+estadd scalar ymean = r(mean)
+estadd local yearfe "Yes", replace
+estadd local indfe "Yes", replace
+
+esttab regression0 regression1 regression2 regression3 regression4 regression5 using "$output\results_event.tex", replace ///
+mgroups("Visibility" "Accrual Earnings Management" "Real Earnings Management", pattern(1 1 0 0 1 0) prefix(\multicolumn{@span}{c}{) suffix(}) span erepeat(\cmidrule(lr){@span})) starlevels(* 0.2 ** 0.1 *** 0.02)  ///
+mtitles("Visibility" "\makecell{AEM \\ (performance-adj.)}" "\makecell{AEM \\ (modified Jone's')}" "\makecell{AEM \\ Rank}" "REM" "\makecell{REM \\ Rank}") collabels(none) booktabs label scalar(ymean) ///
+stats(yearfe indfe N ymean ar2, fmt(0 0 0 2 2) labels("Year FE" "Industry FE" "N" "Dep mean" "Adjusted R-sq")) ///
+prehead("\begin{table}\begin{center}\caption{The Effect of Clean Air Effect on AEM and REM}\label{tab: table4}\tabcolsep=0.1cm\scalebox{0.9}{\begin{tabular}{lcccccc}\toprule")  ///
+posthead("\midrule") postfoot("\bottomrule\end{tabular}}\end{center}\footnotesize{Notes: The dependent variables are indicated at the top of each column. A description of all variables can be found in Table \ref{tab: variabledescriptions}. The dependent variable in column (1) is visibility. The dependent variables in columns (2)-(4) are: a firms' accrual earnings management calculated using the performance-adjusted method, a firm's accrual earnings management calculated using the modified Jone's method, and the rank of the firm's accrual earnings management (modified Jone's), respectively. The dependent variables in columns (5)-(6) are: a firm's real earnings management, and the rank of the firm's real earnings management, respectively. Control variables include: firm size, book-to-market ratio, return on assets, leverage ratio, firm age, Big N auditor, number of years that a firm was audited by the same auditor, sale loss, sale growth, institutional ownership, stock return, 3-year rolling standard deviation of sales, REM (for AEM), AEM (for REM), net operating assets (with dependent variable being AEM, and Herfindahl–Hirschman index (with dependent variable being REM. Industry fixed effects are included in all regressions. Standard errors are clustered at the level of firm-year. *** p < 1\%, ** p < 5\%, * p < 10\%.}\end{table}") 
+
 **# Reviewer 1 Comment 2: Cloud cover
 

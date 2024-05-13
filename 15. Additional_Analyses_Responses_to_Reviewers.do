@@ -2525,8 +2525,79 @@ prehead("\begin{table}\begin{center}\caption{The Effect of Visibility on Proxies
 mgroups("Returns on assets" "Stock return", pattern(1 0 0 0 1 0 0 0) prefix(\multicolumn{@span}{c}{) suffix(}) span erepeat(\cmidrule(lr){@span})) ///
 posthead("\midrule") postfoot("\bottomrule\end{tabular}}\end{center}\footnotesize{Notes: The dependent variables are indicated at the top of each column. A description of all variables can be found in Table \ref{tab: variabledescriptions}. The dependent variables in columns (1)-(4) are the current and forward values of a firm's returns on assets. The dependent variables in columns (5)-(8) are the current and forward values of a firm's stock returns. The control variables include: firm size, book-to-market ratio, leverage ratio, firm age, Big N auditor, number of years that a firm was audited by the same auditor, loss, sale growth, litigious industry, institutional ownership, 3-year rolling standard deviation of sales, net operating assets, and Herfindahl–Hirschman index. Year fixed effects and industry fixed effects are included in all regressions. Standard errors are clustered at the level of firm-year. *** p < 1\%, ** p < 5\%, * p < 10\%.}\end{table}") 
 
+**# Reviewer 2 Comment 2 (cont'd): Firm Productivity
 
-**# Reviwer 2 Comment 4: Add Controls (Table 5)
+global control_variables size bm roa lev firm_age /*rank au_years oa_scale*/ hhi_sale /*xrd_int*/ loss salesgrowth /*Boardindependence*/ /*lit*/ InstOwn_Perc /*sale_sd*/ 
+
+use "$output\final_data_47662", replace
+
+xtset lpermno fyear
+
+*ssc install rangestat
+	capture drop _merge
+merge 1:1 lpermno fyear using "$maindir\sale_sd.dta"
+keep if _merge == 1 | _merge == 3
+
+	capture drop _merge
+merge 1:1 tic fyear using "$output\board_characteristics"
+	keep if _merge == 1 | _merge == 3
+	capture drop _merge
+merge 1:1 cusip8 fyear using "$output\institutional_ownership_x.dta"
+	keep if _merge == 1 | _merge == 3
+
+label var salesgrowth "Sales growth"
+label var loss "Loss"
+
+gen lit = 1 if (sic >= 2833 & sic <= 2836) | (sic >= 3570 & sic <= 3577) | (sic >= 3600 & sic <=3674) | (sic >= 5200 & sic <= 5961) | (sic >= 7370 & sic <= 7379) | (sic >= 8731 & sic <= 8734)
+replace lit = 0 if mi(lit) & !mi(sic)
+
+label var lit "Litigious"
+replace InstOwn_Perc = 0 if mi(InstOwn_Perc)
+
+*Litigious industry = 1 if 4-digit SIC is Pharmaceuticals (2833-2836), computer (3570-3577), electronics (3600-3674), retailing (5200-5961), programming (7370-7379), R&D services (8731-8734), and 0 otherwise.
+
+*Operating Income
+replace uopi = 0 if uopi < 0 
+gen log_uopi = log(uopi+1)
+replace log_uopi = 0 if mi(log_uopi)
+label var log_uopi "Output level of the enterprise" // operating income
+
+* Net fixed assets
+gen log_ppent = log(ppent+1)
+label var log_ppent "Capital input"
+
+* Intermediate input
+gen lnm = log(cogs + xsga + tie - dp + 1)
+replace lnm = 0 if mi(lnm)
+label var lnm "Intermediate input"
+
+* Number of employees
+gen lemp = log(emp + 1)
+label var lemp "Number of employees"
+
+* TFP as residuals
+gen tfp = log_uopi - log_ppent - lnm - lemp
+label var tfp "Total factor productivity"
+sum tfp
+local minimum_tfp = r(min)
+replace tfp = tfp + (-1)*`minimum_tfp'
+gen log_tfp = log(tfp)
+
+	eststo clear
+eststo regression1: reghdfe log_tfp visib $control_variables, absorb(fyear ff_48) vce(cluster i.lpermno#i.fyear)
+estadd scalar ar2 = e(r2_a)
+summarize dacck
+estadd scalar ymean = r(mean)
+estadd local yearfe "Yes", replace
+estadd local indfe "Yes", replace
+
+esttab regression1 using "$output\visib_firm_productivity_tfp.tex", replace ///
+mtitles("TFP") collabels(none) booktabs label scalar(ymean) starlevels(* 0.2 ** 0.1 *** 0.02) compress style(tab) ///
+stats(yearfe indfe N ymean ar2, fmt(0 0 0 2 2) labels("Year FE" "Industry FE" "N" "Dep mean" "Adjusted R-sq")) ///
+prehead("\begin{table}\begin{center}\caption{The Effect of Visibility on Firm TFP}\label{tab: visibTFP}\tabcolsep=0.1cm\scalebox{0.9}{\begin{tabular}{lcc}\toprule")  ///
+posthead("\midrule") postfoot("\bottomrule\end{tabular}}\end{center}\footnotesize{Notes: The dependent variables are indicated at the top of each column. A description of all variables can be found in Table \ref{tab: variabledescriptions}. The dependent variables in column (1) is a firm's TFP. The control variables include: firm size, book-to-market ratio, return on assets, leverage ratio, firm age, Herfindahl–Hirschman index, loss, sales growth, and institutional ownship. Year fixed effects and industry fixed effects are included in all regressions. Standard errors are clustered at the level of firm-year. *** p < 1\%, ** p < 5\%, * p < 10\%.}\end{table}") 
+
+**# Reviewer 2 Comment 4: Add Controls (Table 5)
 global control_variables_aem size bm roa lev firm_age rank au_years oa_scale /*xrd_int*/ loss salesgrowth /*Boardindependence*/ lit InstOwn_Perc stockreturn sale_sd rem
 
 global control_variables_rem size bm roa lev firm_age rank au_years hhi_sale /*xrd_int*/ loss salesgrowth /*Boardindependence*/ lit InstOwn_Perc stockreturn sale_sd dac
@@ -2601,4 +2672,5 @@ mtitles("\makecell{AEM \\ (performance-adj.)}" "\makecell{AEM \\ (modified Jone'
 stats(yearfe indfe N ymean ar2, fmt(0 0 0 2 2) labels("Year FE" "Industry FE" "N" "Dep mean" "Adjusted R-sq")) ///
 prehead("\begin{table}\begin{center}\caption{The Effect of Visibility on Earnings Management}\label{tab: table4newcontrols}\tabcolsep=0.1cm\scalebox{0.8}{\begin{tabular}{lccccc}\toprule")  ///
 posthead("\midrule") postfoot("\bottomrule\end{tabular}}\end{center}\footnotesize{Notes: The dependent variables are indicated at the top of each column. A description of all variables can be found in Table \ref{tab: variabledescriptions}. The dependent variables in columns (1)-(3) are: a firms' accrual earnings management calculated using the performance-adjusted method, a firm's accrual earnings management calculated using the modified Jone's method, and the rank of the firm's accrual earnings management (modified Jone's), respectively. The dependent variables in columns (4)-(5) are: a firm's real earnings management, and the rank of the firm's real earnings management, respectively. Year fixed effects and industry fixed effects are included in all regressions. Standard errors are clustered at the level of firm-year. *** p < 1\%, ** p < 5\%, * p < 10\%.}\end{table}") 
+
 
