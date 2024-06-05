@@ -319,12 +319,6 @@ prehead("\begin{table}\begin{center}\caption{Propensity Score Matching Sample}\l
 posthead("\midrule \multicolumn{7}{c}{\textbf{Panel A: Descriptive Statistics for the Sample before and after PSM}}\\") ///
 postfoot("\end{tabular}}") 
 
-esttab treatall controlall diffall treatpsm controlpsm diffpsm using "$output\ttest_psm.rtf", ///
-replace cells("mean(pattern(1 1 0 1 1 0)  fmt(3)) b(star pattern(0 0 1 0 0 1) fmt(3)) ") ///
-mgroups("Pooled Sample" "PSM Sample", pattern(1 0 0 1 0 0)) ///
-label mtitles("Polluted" "Unpolluted" "Polluted-Unpolluted" "Polluted" "Unpolluted" "Polluted-Unpolluted") collabels(none) nonumbers booktabs ///
-postfoot("\end{tabular}}\end{center}\footnotesize{Notes: This table shows the univarite test of the difference between firms exposed to higher air quality and those exposed to lower air quality (defined as being lower than the median of visibility over years: 2003-2017). The first three columns show the t-test among the pooled sample, and the last three columns show the t-test among the PSM sample. A description of all variables can be found in Table \ref{tab: variabledescriptions}. *** p < 1\%, ** p < 5\%, * p < 10\%.}\end{table}") 
-
 sum _support
 keep if _support == 1 //10846
 

@@ -617,12 +617,12 @@ prehead("\begin{table}\begin{center}\caption{TheInstrumental Variable (IV-2SLS) 
 posthead("\midrule") postfoot("\bottomrule\end{tabular}}\end{center}\footnotesize{Notes: This table presents the IV-2SLS results of visibility on earnings management, where visibility is instrumented by gust (gust). The dependent variables are indicated at the top of each column. A description of all variables can be found in Table \ref{tab: variabledescriptions}. The dependent variables in columns (1)-(3) are: a firms' accrual earnings management calculated using the performance-adjusted method, a firm's accrual earnings management calculated using the modified Jone's method, and the rank of the firm's accrual earnings management (modified Jone's), respectively. The dependent variables in columns (4)-(5) are: a firm's real earnings management, and the rank of the firm's real earnings management, respectively. The control variables include: firm size, book-to-market ratio, return on assets, leverage ratio, firm age, Big N auditor, number of years that a firm was audited by the same auditor, sale loss, sale growth, board independence, litigious industry, institutional ownership, stock return, 3-year rolling standard deviation of sales, REM (for AEM), AEM (for REM), net operating assets (with dependent variable being AEM, and Herfindahl–Hirschman index (with dependent variable being REM. Year fixed effects and industry fixed effects are included in all regressions. Standard errors are clustered at the level of firm-year. *** p < 1\%, ** p < 5\%, * p < 10\%.}\end{table}") 
 
 **# Reviewer 2 Comment 7: Event
-global control_variables_aem size bm roa lev firm_age rank au_years oa_scale /*xrd_int*/ loss salesgrowth /*Boardindependence*/ /*lit*/ InstOwn_Perc_D stockreturn sale_sd rem
+global control_variables_aem fog size bm roa lev firm_age rank au_years oa_scale /*xrd_int*/ loss salesgrowth /*Boardindependence*/ /*lit*/ InstOwn_Perc_D stockreturn sale_sd rem
 
-global control_variables_rem size bm roa lev firm_age rank au_years hhi_sale /*xrd_int*/ loss salesgrowth /*Boardindependence*/ /*lit*/ InstOwn_Perc_D stockreturn sale_sd dac
+global control_variables_rem fog size bm roa lev firm_age rank au_years hhi_sale /*xrd_int*/ loss salesgrowth /*Boardindependence*/ /*lit*/ InstOwn_Perc_D stockreturn sale_sd dac
 
 use "$output\final_data_47662", replace
-
+label var fog "Fog"
 xtset lpermno fyear
 
 *ssc install rangestat

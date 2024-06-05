@@ -313,7 +313,7 @@ ereturn list
 * .rtf
 estout obs Mean std p25 p50 p75 using "$output\Word_results.rtf",  ///
 label nonumbers replace mlabels("N" "Mean" "Std. Dev." "Bottom 25%" "Median" "Top 25%") collabels(none) ///
-cells("count(pattern(1 0 0 0 0 0)) mean(pattern(0 1 0 0 0 0) fmt(2)) sd(pattern(0 0 1 0 0 0) fmt(2)) p25(pattern(0 0 0 1 0 0) fmt(2)) p50(pattern(0 0 0 0 1 0) fmt(2)) p75(pattern(0 0 0 0 0 1) fmt(2))") ///
+cells("count(pattern(1 0 0 0 0 0)) mean(pattern(0 1 0 0 0 0) fmt(3)) sd(pattern(0 0 1 0 0 0) fmt(2)) p25(pattern(0 0 0 1 0 0) fmt(2)) p50(pattern(0 0 0 0 1 0) fmt(3)) p75(pattern(0 0 0 0 0 1) fmt(2))") ///
 title("Summary Statistics of Firm Characteristics") ///
 note("Notes: This table reports the descriptive statistics of firm-level characteristics for 12,191 firm-year-station observations from 2003 to 2017. Firm characteristics are obtained from Compustat and I/B/E/S data. We restrict the sample to be within a year before the actual period end date of each firm's financial report. The characteristics include the following: AEM (performance-adjusted) is computed using the cross-sectional performance-adjusted modified Jones model as in Kothari et al.(2005); AEM (modified Jone's) is calculated following Dechow (1995); AEM Rank denotes the rank of AEM (modified Jone's) for the year and industry; REM, the aggregate measure of real earnings management, is the sum of REM_{CFO}, REM_{PROD}, and REM_{DISX}, where REM_{CFO} and REM_{DISX} are the negative values of discretionary cash flows and discretionary expenses, respectively; REM Rank represents the rank of REM for the year and industry; REM Variability indicates the standard deviation of REM across the five consecutive years prior to the firm's actual period end date; REM_{CFO} denotes abnormal cash flows from operations, which are measured as the deviation of the firm's actual cash flows from the normal level of discretionary cash flows as are predicted using the corresponding industry-year regression; REM_{PROD} denotes abnormal production costs, and is measured as the deviation of the firm's actual production costs from the normal level of production costs as are predicted using the corresponding industry-year regression; REM_{DISX}, discretionary expenses, are measured as the deviation of the firm's actual expenses from the normal level of discretionary expenses as are predicted using the corresponding industry-year regression. Size, the firm's size, is calculated as the logged value of the firm's total assets in the current fiscal year; BM, the book-to-market ratio in the current fiscal year, is calculated as the ratio of the firm's book value of equity and the market value of equity; ROA is the ratio of the firm's income before extraordinary items and total assets; Leverage, the leverage ratio in the current fiscal year, is defined as the ratio between the firm's total liabilities and total assets; Firm Age, the age of the firm, is defined as the number of years starting from the first time when the firm's stock returns are reported in the monthly stock files of the Center for Research in Security Prices (CRSP); Big N is an indicator that takes 1 if the firm was audited by a Big N CPA firm, and 0 otherwise; Auditor Tenure denotes the number of years that the firm was audited by a same auditor; NOA is the ratio between the firm's net operating assets at the beginning of the year and lagged sales during the corresponding industry-year (net operating assets are calculated using shareholders' equity less cash and marketable securities, plus total debt); HHI refers to Herfindahl–Hirschman Index; ANAL, the number of analysts following the firm in the current fiscal year, is obtained from I/B/E/S; Sales refers to the sales of the firm in the current fiscal year; Loss refers to the firm's loss; Sales growhth refers to the firm's sales growth; Litigious is an indicator for litigious industry; Institutional ownership refers to the percent of shares outstanding that is owned by institutional owners; Stock return refers to the return to the firm's stocks; and Sales rolling std. refers to the 3-year rolling standard deviation of the firm's sales. PM 2.5 refers to the weighted annual mean of PM 2.5 for each city and year. Standard deviations are in parentheses. *** p < 1%, ** p < 5%, * p < 10%.") 
 
@@ -913,3 +913,397 @@ do "$dofile\14. apde_3month_analysis_file_10883 obs.do"
 * Table OA5
 * Table OA6
 * Table OA7
+
+**# Knowledge-intensive v.s Labor-intensive
+global control_variables_aem size bm roa lev firm_age rank au_years oa_scale /*xrd_int*/
+global control_variables_rem size bm roa lev firm_age rank au_years hhi_sale /*xrd_int*/
+global control_variables size bm roa lev firm_age hhi_sale 
+
+use "$output\final_data_47662", replace
+
+	capture drop _merge
+merge m:1 sic using "$output\knowledge_intensive_industry.dta"
+	keep if _merge == 1 | _merge == 3
+	gen knowledge_intense = (_merge == 3)
+	drop _merge
+
+*==================== Regression (Signed) =============================
+preserve
+keep if knowledge_intense == 1
+	eststo clear
+eststo regression1: reghdfe dacck visib $control_variables_aem, absorb(fyear ff_48) vce(cluster i.lpermno#i.fyear)
+estadd scalar ar2 = e(r2_a)
+summarize dacck
+estadd scalar ymean = r(mean)
+estadd local yearfe "Yes", replace
+estadd local indfe "Yes", replace
+	
+eststo regression2: reghdfe dac visib $control_variables_aem, absorb(fyear ff_48) vce(cluster i.lpermno#i.fyear)
+estadd scalar ar2 = e(r2_a)
+summarize dac
+estadd scalar ymean = r(mean)
+estadd local yearfe "Yes", replace
+estadd local indfe "Yes", replace
+
+eststo regression3: reghdfe rank_dac visib $control_variables_aem, absorb(fyear ff_48) vce(cluster i.lpermno#i.fyear)
+estadd scalar ar2 = e(r2_a)
+summarize rank_dac
+estadd scalar ymean = r(mean)
+estadd local yearfe "Yes", replace
+estadd local indfe "Yes", replace
+
+eststo regression4: reghdfe rem visib $control_variables_rem, absorb(fyear ff_48) vce(cluster i.lpermno#i.fyear)
+estadd scalar ar2 = e(r2_a)
+summarize rem
+estadd scalar ymean = r(mean)
+estadd local yearfe "Yes", replace
+estadd local indfe "Yes", replace
+
+eststo regression5: reghdfe rank_rem visib $control_variables_rem, absorb(fyear ff_48) vce(cluster i.lpermno#i.fyear)
+estadd scalar ar2 = e(r2_a)
+summarize rank_rem
+estadd scalar ymean = r(mean)
+estadd local yearfe "Yes", replace
+estadd local indfe "Yes", replace
+
+esttab regression1 regression2 regression3 regression4 regression5 using "$output\table9.rtf", replace nonumbers keep(visib) ///
+mgroups("Accrual Earnings Management" "Real Earnings Management", pattern(1 0 0 1 0)) ///
+mtitles("AEM (performance-adj.)" "AEM (modified Jone's')" "AEM Rank" "REM" "REM Rank") collabels(none) label ///
+title("The Effect of Visibility on Earnings Management: Knowledge-Intensive vs. Labor-Intensive Industries Panel A: Knowledge-Intensive Industries Subsample")
+restore
+
+
+preserve
+keep if knowledge_intense == 0
+	eststo clear
+eststo regression1: reghdfe dacck visib $control_variables_aem, absorb(fyear ff_48) vce(cluster i.lpermno#i.fyear)
+estadd scalar ar2 = e(r2_a)
+summarize dacck
+estadd scalar ymean = r(mean)
+estadd local yearfe "Yes", replace
+estadd local indfe "Yes", replace
+	
+eststo regression2: reghdfe dac visib $control_variables_aem, absorb(fyear ff_48) vce(cluster i.lpermno#i.fyear)
+estadd scalar ar2 = e(r2_a)
+summarize dac
+estadd scalar ymean = r(mean)
+estadd local yearfe "Yes", replace
+estadd local indfe "Yes", replace
+
+eststo regression3: reghdfe rank_dac visib $control_variables_aem, absorb(fyear ff_48) vce(cluster i.lpermno#i.fyear)
+estadd scalar ar2 = e(r2_a)
+summarize rank_dac
+estadd scalar ymean = r(mean)
+estadd local yearfe "Yes", replace
+estadd local indfe "Yes", replace
+
+eststo regression4: reghdfe rem visib $control_variables_rem, absorb(fyear ff_48) vce(cluster i.lpermno#i.fyear)
+estadd scalar ar2 = e(r2_a)
+summarize rem
+estadd scalar ymean = r(mean)
+estadd local yearfe "Yes", replace
+estadd local indfe "Yes", replace
+
+eststo regression5: reghdfe rank_rem visib $control_variables_rem, absorb(fyear ff_48) vce(cluster i.lpermno#i.fyear)
+estadd scalar ar2 = e(r2_a)
+summarize rank_rem
+estadd scalar ymean = r(mean)
+estadd local yearfe "Yes", replace
+estadd local indfe "Yes", replace
+
+esttab regression1 regression2 regression3 regression4 regression5 using "$output\table9.rtf", append nonumbers nomtitles keep(visib) collabels(none) label ///
+title("Panel B: Non-Knowledge-Intensive Industries Subsample")
+restore
+
+gen labor_intensive = ((sic >= 100 & sic <= 999) | (sic >= 1500 & sic <= 1799) | (sic >= 2200 & sic <= 2399) | (sic >= 5200 & sic <= 5999) | (sic >= 8000 & sic <= 8399) | (sic >= 7000 & sic <= 7099) | (sic >= 7500 & sic <= 7599) | (sic >= 5800 & sic <= 5899)) if !mi(sic)
+
+	capture label drop labor_intensive
+label define labor_intensive 1 "Labor-intensive" 0 "Non-labor-intensive"
+label val labor_intensive labor_intensive
+
+*==================== Regression (Signed) =============================
+preserve
+keep if labor_intensive == 1
+	eststo clear
+eststo regression1: reghdfe dacck visib $control_variables_aem, absorb(fyear ff_48) vce(cluster i.lpermno#i.fyear)
+estadd scalar ar2 = e(r2_a)
+summarize dacck
+estadd scalar ymean = r(mean)
+estadd local yearfe "Yes", replace
+estadd local indfe "Yes", replace
+	
+eststo regression2: reghdfe dac visib $control_variables_aem, absorb(fyear ff_48) vce(cluster i.lpermno#i.fyear)
+estadd scalar ar2 = e(r2_a)
+summarize dac
+estadd scalar ymean = r(mean)
+estadd local yearfe "Yes", replace
+estadd local indfe "Yes", replace
+
+eststo regression3: reghdfe rank_dac visib $control_variables_aem, absorb(fyear ff_48) vce(cluster i.lpermno#i.fyear)
+estadd scalar ar2 = e(r2_a)
+summarize rank_dac
+estadd scalar ymean = r(mean)
+estadd local yearfe "Yes", replace
+estadd local indfe "Yes", replace
+
+eststo regression4: reghdfe rem visib $control_variables_rem, absorb(fyear ff_48) vce(cluster i.lpermno#i.fyear)
+estadd scalar ar2 = e(r2_a)
+summarize rem
+estadd scalar ymean = r(mean)
+estadd local yearfe "Yes", replace
+estadd local indfe "Yes", replace 
+
+eststo regression5: reghdfe rank_rem visib $control_variables_rem, absorb(fyear ff_48) vce(cluster i.lpermno#i.fyear)
+estadd scalar ar2 = e(r2_a)
+summarize rank_rem
+estadd scalar ymean = r(mean)
+estadd local yearfe "Yes", replace
+estadd local indfe "Yes", replace
+
+esttab regression1 regression2 regression3 regression4 regression5 using "$output\table9.rtf", append nonumbers nomtitles keep(visib) collabels(none) label ///
+title("Panel C: Labor-Intensive Industries Subsample")
+
+restore
+
+preserve
+keep if labor_intensive == 0
+	eststo clear
+eststo regression1: reghdfe dacck visib $control_variables_aem, absorb(fyear ff_48) vce(cluster i.lpermno#i.fyear)
+estadd scalar ar2 = e(r2_a)
+summarize dacck
+estadd scalar ymean = r(mean)
+estadd local yearfe "Yes", replace
+estadd local indfe "Yes", replace
+	
+eststo regression2: reghdfe dac visib $control_variables_aem, absorb(fyear ff_48) vce(cluster i.lpermno#i.fyear)
+estadd scalar ar2 = e(r2_a)
+summarize dac
+estadd scalar ymean = r(mean)
+estadd local yearfe "Yes", replace
+estadd local indfe "Yes", replace
+
+eststo regression3: reghdfe rank_dac visib $control_variables_aem, absorb(fyear ff_48) vce(cluster i.lpermno#i.fyear)
+estadd scalar ar2 = e(r2_a)
+summarize rank_dac
+estadd scalar ymean = r(mean)
+estadd local yearfe "Yes", replace
+estadd local indfe "Yes", replace
+
+eststo regression4: reghdfe rem visib $control_variables_rem, absorb(fyear ff_48) vce(cluster i.lpermno#i.fyear)
+estadd scalar ar2 = e(r2_a)
+summarize rem
+estadd scalar ymean = r(mean)
+estadd local yearfe "Yes", replace
+estadd local indfe "Yes", replace
+
+eststo regression5: reghdfe rank_rem visib $control_variables_rem, absorb(fyear ff_48) vce(cluster i.lpermno#i.fyear)
+estadd scalar ar2 = e(r2_a)
+summarize rank_rem
+estadd scalar ymean = r(mean)
+estadd local yearfe "Yes", replace
+estadd local indfe "Yes", replace
+
+esttab regression1 regression2 regression3 regression4 regression5 using "$output\table9.rtf", append nonumbers nomtitles keep(visib) collabels(none) label ///
+title("Panel D: Non-Labor-Intensive Industries Subsample")
+restore
+
+*Operating Income
+replace uopi = 0 if uopi < 0 
+gen log_uopi = log(uopi+1)
+replace log_uopi = 0 if mi(log_uopi)
+label var log_uopi "Output level of the enterprise" // operating income
+
+* Net fixed assets
+gen log_ppent = log(ppent+1)
+label var log_ppent "Capital input"
+
+* Intermediate input
+gen lnm = log(cogs + xsga + tie - dp + 1)
+replace lnm = 0 if mi(lnm)
+label var lnm "Intermediate input"
+
+* Number of employees
+gen lemp = log(emp + 1)
+label var lemp "Number of employees"
+
+* TFP as residuals
+gen tfp = log_uopi - log_ppent - lnm - lemp
+label var tfp "Total factor productivity"
+sum tfp
+local minimum_tfp = r(min)
+replace tfp = tfp + (-1)*`minimum_tfp'
+gen log_tfp = log(tfp)
+
+label var log_tfp "log(TFP)"
+label var visib "Visibility"
+label var size "Firm Size"
+label var bm "Book-to-Market Ratio"
+label var roa "ROA"
+label var lev "Leverage"
+label var firm_age "Firm Age"
+label var hhi_sale "HHI"
+ 	eststo clear
+eststo regression1: reghdfe log_tfp visib $control_variables, absorb(fyear ff_48) vce(cluster i.lpermno#i.fyear)
+estadd scalar ar2 = e(r2_a)
+summarize dacck
+estadd scalar ymean = r(mean)
+estadd local yearfe "Yes", replace
+estadd local indfe "Yes", replace
+
+esttab regression1 using "$output\table9.rtf", append label nonumbers title("Panel E: The Effect of Visibility on Managers' Productivity") note("Notes: The dependent variables are indicated at the top of each column. The dependent variables in columns 1-3 are: a firms' accrual earnings management calculated using the performance-adjusted method, a firm's accrual earnings management calculated using the modified Jone's method, and the rank of the firm's accrual earnings management (modified Jone's), respectively. The dependent variables in columns 4-5 are: a firm's real earnings management, and the rank of the firm's real earnings management, respectively. Control variables include: firm size, book-to-market ratio, return on assets, leverage ratio, firm age, Big N auditor, number of years that a firm was audited by the same auditor, net operating assets (with dependent variable being AEM, and Herfindahl–Hirschman index (with dependent variable being REM. Year fixed effects and industry fixed effects are included in all regressions. Standard errors are clustered at the level of firm-year. *** p < 1\%, ** p < 5\%, * p < 10\%.}\end{table}") 
+
+**# Table 12
+global control_variables_aem size bm roa lev firm_age rank au_years oa_scale /*xrd_int*/
+global control_variables_rem size bm roa lev firm_age rank au_years hhi_sale /*xrd_int*/
+use "$output\final_data_47662", replace
+	capture drop _merge
+	capture drop pollutant_value
+merge m:1 state city fyear using "$maindir\US_PM25_weightedannualmean.dta"
+keep if _m == 3 //3583 observations, or 762 state-city-fyears
+label var pollutant_value "PM 2.5 (Weighted Annual Mean)"
+
+global first_stage size bm roa lev firm_age rank au_years oa_scale hhi_sale /*xrd_int*/
+
+reghdfe visib pollutant_value $control_variables_aem, absorb(i.fyear i.ff_48) vce(cluster i.lpermno#i.fyear)
+predict visib_PM2_5_aem, xb
+label var visib_PM2_5_aem "Fitted visibility (AEM)"
+
+reghdfe visib pollutant_value $control_variables_rem, absorb(i.fyear i.ff_48) vce(cluster i.lpermno#i.fyear)
+predict visib_PM2_5_rem, xb
+label var visib_PM2_5_rem "Fitted visibility (REM)"
+
+reghdfe visib pollutant_value $first_stage, absorb(i.fyear i.ff_48) vce(cluster i.lpermno#i.fyear)
+predict visib_PM2_5, xb
+label var visib_PM2_5 "Fitted visibility"
+
+	eststo clear
+eststo regression1: reghdfe dacck visib_PM2_5 $control_variables_aem, absorb(i.fyear i.ff_48) vce(cluster i.lpermno#i.fyear)
+estadd scalar ar2 = e(r2_a)
+summarize dacck
+estadd scalar ymean = r(mean)
+estadd local yearfe "Yes", replace
+estadd local indfe "Yes", replace
+
+eststo regression2: reghdfe dac visib_PM2_5 $control_variables_aem, absorb(i.fyear i.ff_48) vce(cluster i.lpermno#i.fyear)
+estadd scalar ar2 = e(r2_a)
+summarize dac
+estadd scalar ymean = r(mean)
+estadd local yearfe "Yes", replace
+estadd local indfe "Yes", replace
+
+eststo regression3: reghdfe rank_dac visib_PM2_5 $control_variables_aem, absorb(i.fyear i.ff_48) vce(cluster i.lpermno#i.fyear)
+estadd scalar ar2 = e(r2_a)
+summarize rank_dac
+estadd scalar ymean = r(mean)
+estadd local yearfe "Yes", replace
+estadd local indfe "Yes", replace
+
+eststo regression4: reghdfe rem visib_PM2_5 $control_variables_rem, absorb(i.fyear i.ff_48) vce(cluster i.lpermno#i.fyear)
+estadd scalar ar2 = e(r2_a)
+summarize rem
+estadd scalar ymean = r(mean)
+estadd local yearfe "Yes", replace
+estadd local indfe "Yes", replace
+
+eststo regression5: reghdfe rank_rem visib_PM2_5 $control_variables_rem, absorb(i.fyear i.ff_48) vce(cluster i.lpermno#i.fyear)
+estadd scalar ar2 = e(r2_a)
+summarize rank_rem
+estadd scalar ymean = r(mean)
+estadd local yearfe "Yes", replace
+estadd local indfe "Yes", replace
+
+esttab regression1 regression2 regression3 regression4 regression5 using "$output\table12.rtf", replace ///
+mgroups("Accrual Earnings Management" "Real Earnings Management", pattern(1 0 0 1 0)) ///
+mtitles("AEM (performance-adj.)" "AEM (modified Jone's)" "AEM Rank" "REM" "REM Rank") nonumbers collabels(none) label keep(visib_PM2_5) ///
+title("The Effect of Visibility on Earnings Management: Using Actual Air Pollution Measures Panel A: Using Visibility Explained by PM 2.5 and Residual")  
+
+gen visib_res_aem = visib - visib_PM2_5_aem
+gen visib_res_rem = visib - visib_PM2_5_rem
+gen visib_res = visib - visib_PM2_5
+
+label var visib_res "Residual Visibility"
+	eststo clear
+eststo regression1: reghdfe dacck visib_res $control_variables_aem, absorb(i.fyear i.ff_48) vce(cluster i.lpermno#i.fyear)
+estadd scalar ar2 = e(r2_a)
+summarize dacck
+estadd scalar ymean = r(mean)
+estadd local yearfe "Yes", replace
+estadd local indfe "Yes", replace
+
+eststo regression2: reghdfe dac visib_res $control_variables_aem, absorb(i.fyear i.ff_48) vce(cluster i.lpermno#i.fyear)
+estadd scalar ar2 = e(r2_a)
+summarize dac
+estadd scalar ymean = r(mean)
+estadd local yearfe "Yes", replace
+estadd local indfe "Yes", replace
+
+eststo regression3: reghdfe rank_dac visib_res $control_variables_aem, absorb(i.fyear i.ff_48) vce(cluster i.lpermno#i.fyear)
+estadd scalar ar2 = e(r2_a)
+summarize rank_dac
+estadd scalar ymean = r(mean)
+estadd local yearfe "Yes", replace
+estadd local indfe "Yes", replace
+
+eststo regression4: reghdfe rem visib_res $control_variables_rem, absorb(i.fyear i.ff_48) vce(cluster i.lpermno#i.fyear)
+estadd scalar ar2 = e(r2_a)
+summarize rem
+estadd scalar ymean = r(mean)
+estadd local yearfe "Yes", replace
+estadd local indfe "Yes", replace
+
+eststo regression5: reghdfe rank_rem visib_res $control_variables_rem, absorb(i.fyear i.ff_48) vce(cluster i.lpermno#i.fyear)
+estadd scalar ar2 = e(r2_a)
+summarize rank_rem
+estadd scalar ymean = r(mean)
+estadd local yearfe "Yes", replace
+estadd local indfe "Yes", replace
+
+global first_stage size bm roa lev firm_age rank au_years oa_scale hhi_sale /*xrd_int*/
+
+esttab regression1 regression2 regression3 regression4 regression5 using "$output\table12.rtf", append  ///
+label nomtitles nonumbers keep(visib_res) 
+
+	eststo clear
+eststo regression1: reghdfe dacck pollutant_value $control_variables_aem, absorb(fyear ff_48) vce(cluster i.lpermno#i.fyear)
+estadd scalar ar2 = e(r2_a)
+summarize dacck
+estadd scalar ymean = r(mean)
+estadd local yearfe "Yes", replace
+estadd local indfe "Yes", replace
+estadd local firmcon "Yes", replace
+
+eststo regression2: reghdfe dac pollutant_value $control_variables_aem, absorb(fyear ff_48) vce(cluster i.lpermno#i.fyear)
+estadd scalar ar2 = e(r2_a)
+summarize dac
+estadd scalar ymean = r(mean)
+estadd local yearfe "Yes", replace
+estadd local indfe "Yes", replace
+estadd local firmcon "Yes", replace
+
+eststo regression3: reghdfe rank_dac pollutant_value $control_variables_aem, absorb(fyear ff_48) vce(cluster i.lpermno#i.fyear)
+estadd scalar ar2 = e(r2_a)
+summarize rank_dac
+estadd scalar ymean = r(mean)
+estadd local yearfe "Yes", replace
+estadd local indfe "Yes", replace
+estadd local firmcon "Yes", replace
+
+eststo regression4: reghdfe rem pollutant_value $control_variables_rem, absorb(fyear ff_48) vce(cluster i.lpermno#i.fyear)
+estadd scalar ar2 = e(r2_a)
+summarize rem
+estadd scalar ymean = r(mean)
+estadd local yearfe "Yes", replace
+estadd local indfe "Yes", replace
+estadd local firmcon "Yes", replace
+
+eststo regression5: reghdfe rank_rem pollutant_value $control_variables_rem, absorb(fyear ff_48) vce(cluster i.lpermno#i.fyear)
+estadd scalar ar2 = e(r2_a)
+summarize rank_rem
+estadd scalar ymean = r(mean)
+estadd local yearfe "Yes", replace
+estadd local indfe "Yes", replace
+estadd local firmcon "Yes", replace
+
+esttab regression1 regression2 regression3 regression4 regression5 using "$output\table12.rtf", append ///
+nomtitles collabels(none) label ///
+title("Using PM 2.5 Instead of Visibility")  

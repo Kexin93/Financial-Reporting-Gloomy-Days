@@ -310,8 +310,10 @@ esttab obs Mean std p25 p50 p75 using "$output\summ_stats_firm.tex", fragment  /
 label cells("count(pattern(1 0 0 0 0 0)) mean(pattern(0 1 0 0 0 0) fmt(3)) sd(pattern(0 0 1 0 0 0) fmt(3)) p25(pattern(0 0 0 1 0 0) fmt(3)) p50(pattern(0 0 0 0 1 0) fmt(3)) p75(pattern(0 0 0 0 0 1) fmt(3))") noobs  ///
 nonumbers replace booktabs collabels(none) mtitles("N" "Mean" "Std. Dev." "Bottom 25\%" "Median" "Top 25\%") ///
 prehead("\begin{table}\begin{center}\caption{Summary Statistics of Firm Characteristics}\label{tab: summstats1}\tabcolsep=0.1cm\scalebox{0.6}{\begin{tabular}{lcccccc}\toprule")  ///
-postfoot("\bottomrule\end{tabular}}\end{center}\footnotesize{Notes: This table reports the descriptive statistics of firm-level characteristics for 12,191 firm-year-station observations from 2003 to 2017. Firm characteristics are obtained from Compustat and I/B/E/S data. We restrict the sample to be within a year before the actual period end date of each firm's financial report. The characteristics include the following: $AEM$ (performance-adjusted) is computed using the cross-sectional performance-adjusted modified Jones model as in Kothari et al.(2005); $AEM$ (modified Jone's) is calculated following Dechow (1995); $AEM \ Rank$ denotes the rank of $AEM (modified Jone's)$ for the year and industry;  REM, the aggregate measure of real earnings management, is the sum of $REM_{CFO}$, $REM_{PROD}$, and $REM_{DISX}$, where $REM_{CFO}$ and $REM_{DISX}$ are the negative values of discretionary cash flows and discretionary expenses, respectively; $REM \ Rank$ represents the rank of $REM$ for the year and industry;  $REM \ Variability$ indicates the standard deviation of $REM$ across the five consecutive years prior to the firm's actual period end date; $REM_{CFO}$ denotes abnormal cash flows from operations, which are measured as the deviation of the firm's actual cash flows from the normal level of discretionary cash flows as are predicted using the corresponding industry-year regression; $REM_{PROD}$ denotes abnormal production costs, and is measured as the deviation of the firm's actual production costs from the normal level of production costs as are predicted using the corresponding industry-year regression; $REM_{DISX}$, discretionary expenses, are measured as the deviation of the firm's actual expenses from the normal level of discretionary expenses as are predicted using the corresponding industry-year regression. $Size$, the firm's size, is calculated as the logged value of the firm's total assets in the current fiscal year; $BM$, the book-to-market ratio in the current fiscal year, is calculated as the ratio of the firm's book value of equity and the market value of equity; $ROA$ is the ratio of the firm's income before extraordinary items and total assets; $Leverage$, the leverage ratio in the current fiscal year, is defined as the ratio between the firm's total liabilities and total assets;  $Firm \ Age$, the age of the firm, is defined as the number of years starting from the first time when the firm's stock returns are reported in the monthly stock files of the Center for Research in Security Prices (CRSP); $Big \ N$ is an indicator that takes 1 if the firm was audited by a Big N CPA firm, and 0 otherwise;  $Auditor \ Tenure$ denotes the number of years that the firm was audited by a same auditor; $NOA$ is the ratio between the firm's net operating assets at the beginning of the year and lagged sales during the corresponding industry-year (net operating assets are calculated using shareholders' equity less cash and marketable securities, plus total debt); $HHI$ refers to Herfindahl–Hirschman Index; $ANAL$, the number of analysts following the firm in the current fiscal year, is obtained from I/B/E/S; $Sales$ refers to the sales of the firm in the current fiscal year; $Loss$ refers to the firm's loss; $Sales \ growhth$ refers to the firm's sales growth; $Litigious$ is an indicator for litigious industry; $Institutional \ ownership$ refers to the percent of shares outstanding that is owned by institutional owners; $Stock \ return$ refers to the return to the firm's stocks; and $Sales \ rolling \ std.$ refers to the 3-year rolling standard deviation of the firm's sales. $PM \ 2.5$ refers to the weighted annual mean of PM 2.5 for each city and year. Standard deviations are in parentheses. *** p < 1\%, ** p < 5\%, * p < 10\%.}\end{table}") 
+postfoot("\bottomrule\end{tabular}}\end{center}\footnotesize{Notes: This table reports the descriptive statistics of firm-level characteristics for 12,191 firm-year-station observations from 2003 to 2017. Firm characteristics are obtained from Compustat and I/B/E/S data. We restrict the sample to be within a year before the actual period end date of each firm's financial report. Descriptions of each variable can be found in Table \ref{tab: variabledescriptions}.}\end{table}") 
 
+
+* Note: The characteristics include the following: $AEM$ (performance-adjusted) is computed using the cross-sectional performance-adjusted modified Jones model as in Kothari et al.(2005); $AEM$ (modified Jone's) is calculated following Dechow (1995); $AEM \ Rank$ denotes the rank of $AEM (modified Jone's)$ for the year and industry;  REM, the aggregate measure of real earnings management, is the sum of $REM_{CFO}$, $REM_{PROD}$, and $REM_{DISX}$, where $REM_{CFO}$ and $REM_{DISX}$ are the negative values of discretionary cash flows and discretionary expenses, respectively; $REM \ Rank$ represents the rank of $REM$ for the year and industry;  $REM \ Variability$ indicates the standard deviation of $REM$ across the five consecutive years prior to the firm's actual period end date; $REM_{CFO}$ denotes abnormal cash flows from operations, which are measured as the deviation of the firm's actual cash flows from the normal level of discretionary cash flows as are predicted using the corresponding industry-year regression; $REM_{PROD}$ denotes abnormal production costs, and is measured as the deviation of the firm's actual production costs from the normal level of production costs as are predicted using the corresponding industry-year regression; $REM_{DISX}$, discretionary expenses, are measured as the deviation of the firm's actual expenses from the normal level of discretionary expenses as are predicted using the corresponding industry-year regression. $Size$, the firm's size, is calculated as the logged value of the firm's total assets in the current fiscal year; $BM$, the book-to-market ratio in the current fiscal year, is calculated as the ratio of the firm's book value of equity and the market value of equity; $ROA$ is the ratio of the firm's income before extraordinary items and total assets; $Leverage$, the leverage ratio in the current fiscal year, is defined as the ratio between the firm's total liabilities and total assets;  $Firm \ Age$, the age of the firm, is defined as the number of years starting from the first time when the firm's stock returns are reported in the monthly stock files of the Center for Research in Security Prices (CRSP); $Big \ N$ is an indicator that takes 1 if the firm was audited by a Big N CPA firm, and 0 otherwise;  $Auditor \ Tenure$ denotes the number of years that the firm was audited by a same auditor; $NOA$ is the ratio between the firm's net operating assets at the beginning of the year and lagged sales during the corresponding industry-year (net operating assets are calculated using shareholders' equity less cash and marketable securities, plus total debt); $HHI$ refers to Herfindahl–Hirschman Index; $ANAL$, the number of analysts following the firm in the current fiscal year, is obtained from I/B/E/S; $Sales$ refers to the sales of the firm in the current fiscal year; $Loss$ refers to the firm's loss; $Sales \ growhth$ refers to the firm's sales growth; $Litigious$ is an indicator for litigious industry; $Institutional \ ownership$ refers to the percent of shares outstanding that is owned by institutional owners; $Stock \ return$ refers to the return to the firm's stocks; and $Sales \ rolling \ std.$ refers to the 3-year rolling standard deviation of the firm's sales. $PM \ 2.5$ refers to the weighted annual mean of PM 2.5 for each city and year. Standard deviations are in parentheses. *** p < 1\%, ** p < 5\%, * p < 10\%.
 **# Table 3
 
 * ==============================================================================
@@ -339,7 +341,18 @@ global summ_vars_weather temp dewp slp visib wdsp ///
 				 gust mxspd prcp sndp max min fog rain snow   ///
 				  hail thunder tornado
 				  
-* Summary statistics continued
+* Summary statistics of weather variables at the station-year level (Panel A)
+	capture drop _merge
+merge 1:m lpermno fyear using "E:\21. Air Pollution and Accounting\DATA\Analysis_102148 observations\firm_year_stations_48332"
+	keep if _merge == 3
+	drop _merge
+	capture drop dup
+bysort lpermno fyear (station): gen dup = _n
+	drop if dup == 2
+
+bysort station fyear: gen number = _n
+preserve
+	keep if number == 1 //4089
 	eststo clear
 eststo summ_stats: estpost sum $summ_vars_weather
 
@@ -374,9 +387,50 @@ ereturn list
 * .tex
 esttab obs Mean std p25 p50 p75 using "$output\summ_stats_weather.tex", fragment  ///
 label cells("count(pattern(1 0 0 0 0 0)) mean(pattern(0 1 0 0 0 0) fmt(3)) sd(pattern(0 0 1 0 0 0) fmt(3)) p25(pattern(0 0 0 1 0 0) fmt(3)) p50(pattern(0 0 0 0 1 0) fmt(3)) p75(pattern(0 0 0 0 0 1) fmt(3))") noobs  ///
+prehead("\begin{table}\begin{center}\caption{Summary Statistics of Weather-related Characteristics}\label{tab: summ_stats_weather}\tabcolsep=0.1cm\scalebox{0.65}{\begin{tabular}{lcccccc}\toprule")  ///
 nonumbers replace booktabs collabels(none) mtitles("N" "Mean" "Std. Dev." "Bottom 25\%" "Median" "Top 25\%") ///
-prehead("\begin{table}\begin{center}\caption{Summary Statistics of Weather-related Characteristics}\label{tab: summstats2}\tabcolsep=0.1cm\scalebox{0.67}{\begin{tabular}{lcccccc}\toprule")  ///
-postfoot("\bottomrule\end{tabular}}\end{center}\footnotesize{Notes: This table reports the descriptive statistics of weather-related characteristics for 12,191 firm-year-station observations from 2003 to 2017. Weather-related characterstics are: temp, mean temperature for the day in degrees Fahrenheit; dewp, mean dew point for the day in degrees Fahrenheit to tenths; slp, mean sea level pressure for the day in millibars to tenths; visib, mean visibility for the day in millibars to tenths; wdsp, mean wind speed for the day in knots to tenths; gust, maximum wind gust reported for the day in knots to tenths; mxspd, maximum sustained wind speed reported for the day in knots to tenths; prcp, total precipitation (rain and/or melted snow) reported during the day in inches and hundredths; sndp, snow depth in inches to tenths, and will be the last report for the day if reported more than once; max, maximum temperature reported during the day in Fahrenheit; min, minimum temperature reported during the day in Fahrenheit; rain, an indicator that takes 1 during the day of rain or drizzle; fog, an indicator that takes 1 during the day of fog; snow, an indicator that takes 1 during the day of snow or ice pellets; thunder, an indicator that takes 1 during the day of thunder; hail, an indicator during the day of hail; tornado, an indicator that takes 1 during the day of tornado or funnel cloud. Details of each weather-related variable, including the definition, unit, can be found in Table \ref{tab: variabledescriptions2}. Standard deviations are in parentheses. *** p < 1\%, ** p < 5\%, * p < 10\%.}\end{table}") 
+posthead("\midrule \textbf{Panel A: Station-year level}\\") ///
+postfoot("\midrule")
+restore
+
+* Summary statistics of weather variables at the firm-year level (Panel B)
+	eststo clear
+eststo summ_stats: estpost sum $summ_vars_weather
+
+eststo obs: estpost summarize $summ_vars_weather
+
+ereturn list 
+
+eststo Mean: estpost summarize $summ_vars_weather
+
+ereturn list 
+
+eststo p25: estpost summarize $summ_vars_weather, detail
+
+ereturn list 
+
+eststo p50: estpost summarize $summ_vars_weather, detail
+
+ereturn list 
+
+eststo p75: estpost summarize $summ_vars_weather, detail
+
+ereturn list 
+
+eststo std: estpost summarize $summ_vars_weather
+
+ereturn list 
+
+eststo Median: estpost summarize $summ_vars_weather
+
+ereturn list 
+
+* .tex
+esttab obs Mean std p25 p50 p75 using "$output\summ_stats_weather.tex", fragment  ///
+label cells("count(pattern(1 0 0 0 0 0)) mean(pattern(0 1 0 0 0 0) fmt(3)) sd(pattern(0 0 1 0 0 0) fmt(3)) p25(pattern(0 0 0 1 0 0) fmt(3)) p50(pattern(0 0 0 0 1 0) fmt(3)) p75(pattern(0 0 0 0 0 1) fmt(3))") noobs  ///
+nonumbers append booktabs collabels(none) mtitles("N" "Mean" "Std. Dev." "Bottom 25\%" "Median" "Top 25\%") ///
+posthead("\midrule \textbf{Panel B: Firm-year level} \\") ///
+postfoot("\bottomrule\end{tabular}}\end{center}\footnotesize{Notes: This table reports the descriptive statistics of weather-related characteristics for 4,089 station-year observations and 12,191 firm-year observations from 2003 to 2017. Details of each weather-related variable, including the definition, unit, can be found in Table \ref{tab: variabledescriptions2}.}\end{table}") 
 
 **# Table 4
 *========= t-test table ========================
