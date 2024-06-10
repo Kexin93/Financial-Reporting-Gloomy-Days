@@ -344,6 +344,8 @@ global control_variables_aem fog size bm roa lev firm_age rank au_years loss sal
 
 global control_variables_rem fog size bm roa lev firm_age rank au_years loss salesgrowth lit InstOwn_Perc stockreturn sale_sd hhi_sale dac
 
+global control_variables_aem size bm roa lev firm_age rank au_years oa_scale loss salesgrowth lit InstOwn_Perc stockreturn sale_sd rem
+
 sort cloud_cover
 xtile cloud_cover_tercile = cloud_cover, nq(3)
 label var cloud_cover "Cloud cover"
@@ -406,18 +408,18 @@ estadd local firmcont "Yes", replace
 esttab regressionT1_1 regressionT1_2 regressionT1_3 regressionT1_4 regressionT1_5 using "$output\table_CloudCoverTercile.tex", replace fragment label nolines  ///
 mgroups("Accrual Earnings Management" "Real Earnings Management", pattern(1 0 0 1 0) prefix(\multicolumn{@span}{c}{) suffix(}) span erepeat(\cmidrule(lr){@span})) keep(visib) ///
 mtitles("\makecell{AEM \\ (performance- \\ adj.)}" "\makecell{AEM \\ (modified \\ Jones')}" "\makecell{AEM \\ Rank}" "REM" "\makecell{REM \\ Rank}") collabels(none) booktabs ///
-stats(firmcont yearfe indfe N ymean ar2, fmt(0 0 0 0 2 2) labels("Baseline Controls" "Year FE" "Industry FE" "N" "Dep mean" "Adjusted R-sq")) ///
+stats(firmcont yearfe indfe N ar2, fmt(0 0 0 0 2) labels("Baseline Controls" "Year FE" "Industry FE" "N" "Adjusted R-sq")) ///
 prehead("\begin{table}\begin{center}\caption{\textbf{The Effect of Visibility on Earnings Management by Terciles of Cloud Cover}}\label{tab: CloudCoverTercile}\tabcolsep=0.1cm\scalebox{0.8}{\begin{tabular}{lccccc}\toprule") ///
 posthead("\midrule\multicolumn{6}{c}{\textbf{First Tercile}}\\") 
 
 esttab regressionT2_1 regressionT2_2 regressionT2_3 regressionT2_4 regressionT2_5 using "$output\table_CloudCoverTercile.tex", append fragment label nolines ///
-stats(firmcont yearfe indfe N ymean ar2, fmt(0 0 0 0 2 2) labels("Baseline Controls" "Year FE" "Industry FE" "N" "Dep mean" "Adjusted R-sq")) ///
+stats(firmcont yearfe indfe N ar2, fmt(0 0 0 0 2) labels("Baseline Controls" "Year FE" "Industry FE" "N" "Adjusted R-sq")) ///
 posthead("\midrule\multicolumn{6}{c}{\textbf{Second Tercile}} \\") keep(visib) nonumbers nomtitles
 
 esttab regressionT3_1 regressionT3_2 regressionT3_3 regressionT3_4 regressionT3_5 using "$output\table_CloudCoverTercile.tex", append fragment label nolines ///
 posthead("\midrule \multicolumn{6}{c}{\textbf{Third Tercile}} \\") keep(visib) nonumbers nomtitles ///
-stats(firmcont yearfe indfe N ymean ar2, fmt(0 0 0 0 2 2) labels("Baseline Controls" "Year FE" "Industry FE" "N" "Dep mean" "Adjusted R-sq")) ///
-postfoot("\bottomrule\end{tabular}}\end{center}\footnotesize{Notes: The sample is divided into three subsamples by the magnitude of cloud cover over the 12 months prior to each firm's fiscal year end, namely, the first tercile, second tercile, and the third tercile. The dependent variables are indicated at the top of each column. The same set of baseline control variables are included as in Table 5 of the manuscript. The dependent variables in columns 1-3 are: a firms' accrual earnings management calculated using the performance-adjusted method, a firm's accrual earnings management calculated using the modified Jones method, and the rank of the firm's accrual earnings management (modified Jones), respectively. The dependent variables in columns 4-5 are: a firm's real earnings management, and the rank of the firm's real earnings management, respectively. Year fixed effects and industry fixed effects are included in all regressions. Refer to Appendices A to C for detailed variable definitions and measurements. A description of all variables can be found in Table A1 in the main manuscript. Standard errors are clustered at the level of firm-year. *** p < 1\%, ** p < 5\%, * p < 10\%.}\end{table}") 
+stats(firmcont yearfe indfe N ar2, fmt(0 0 0 0 2) labels("Baseline Controls" "Year FE" "Industry FE" "N" "Adjusted R-sq")) ///
+postfoot("\bottomrule\end{tabular}}\end{center}\end{table}") 
 exit
 
 **# Include cloud cover as an additional control variable
@@ -461,7 +463,7 @@ estadd local indfe "Yes", replace
 esttab regression1 regression2 regression3 regression4 regression5 using "$output\table4_cloud_cover_newcontrols.tex", replace ///
 mgroups("Accrual Earnings Management" "Real Earnings Management", pattern(1 0 0 1 0) prefix(\multicolumn{@span}{c}{) suffix(}) span erepeat(\cmidrule(lr){@span})) ///
 mtitles("\makecell{AEM \\ (performance-adj.)}" "\makecell{AEM \\ (modified Jones')}" "\makecell{AEM \\ Rank}" "REM" "\makecell{REM \\ Rank}") collabels(none) booktabs label scalar(ymean) ///
-stats(yearfe indfe N ymean ar2, fmt(0 0 0 2 2) labels("Year FE" "Industry FE" "N" "Dep mean" "Adjusted R-sq")) ///
-prehead("\begin{table}\begin{center}\caption{The Effect of Visibility on Earnings Management}\label{tab: table4newcontrols}\tabcolsep=0.1cm\scalebox{0.8}{\begin{tabular}{lccccc}\toprule")  ///
-posthead("\midrule") postfoot("\bottomrule\end{tabular}}\end{center}\footnotesize{Notes: The dependent variables are indicated at the top of each column. A description of all variables can be found in Table \ref{tab: variabledescriptions}. The dependent variables in columns (1)-(3) are: a firms' accrual earnings management calculated using the performance-adjusted method, a firm's accrual earnings management calculated using the modified Jones method, and the rank of the firm's accrual earnings management (modified Jones), respectively. The dependent variables in columns (4)-(5) are: a firm's real earnings management, and the rank of the firm's real earnings management, respectively. The control variables include: firm size, book-to-market ratio, return on assets, leverage ratio, firm age, Big N auditor, number of years that a firm was audited by the same auditor, sale loss, sale growth, board independence, litigious industry, institutional ownership, stock return, 3-year rolling standard deviation of sales, REM (for AEM), AEM (for REM), net operating assets (with dependent variable being AEM, and Herfindahl–Hirschman index (with dependent variable being REM. Year fixed effects and industry fixed effects are included in all regressions. Standard errors are clustered at the level of firm-year. *** p < 1\%, ** p < 5\%, * p < 10\%.}\end{table}") 
+stats(yearfe indfe N ar2, fmt(0 0 0 2) labels("Year FE" "Industry FE" "N" "Adjusted R-sq")) ///
+prehead("\begin{table}\begin{center}\caption{The Effect of Visibility on Earnings Management after Controlling for Weather-Induced Mood}\label{tab: table4newcontrols}\tabcolsep=0.1cm\scalebox{0.65}{\begin{tabular}{lccccc}\toprule")  ///
+posthead("\midrule") postfoot("\bottomrule\end{tabular}}\end{center}\end{table}") 
 

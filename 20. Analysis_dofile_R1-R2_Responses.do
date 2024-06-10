@@ -108,9 +108,10 @@ estadd local indfe "Yes", replace
 esttab regressionT1_1 regressionT1_2 regressionT1_3 regressionT1_4 regressionT1_5 using "$output\table_Bottom_fogQuintile.tex", replace fragment label nolines  ///
 mgroups("Accrual Earnings Management" "Real Earnings Management", pattern(1 0 0 1 0) prefix(\multicolumn{@span}{c}{) suffix(}) span erepeat(\cmidrule(lr){@span})) ///
 mtitles("\makecell{AEM \\ (performance- \\ adj.)}" "\makecell{AEM \\ (modified \\ Jones)}" "\makecell{AEM \\ Rank}" "REM" "\makecell{REM \\ Rank}") collabels(none) booktabs ///
-stats(yearfe indfe N ymean ar2, fmt(0 0 0 2 2) labels("Year FE" "Industry FE" "N" "Dep mean" "Adjusted R-sq")) ///
+stats(yearfe indfe N ar2, fmt(0 0 0 2) labels("Year FE" "Industry FE" "N" "Adjusted R-sq")) ///
 prehead("\begin{table}\begin{center}\caption{\textbf{The Effect of Visibility on AEM/REM When Fog Does Not Exist (in the Bottom Fog Quintile)}}\label{tab: fogTercile}\tabcolsep=0.1cm\scalebox{0.55}{\begin{tabular}{lccccc}\toprule") ///
-posthead("\midrule") postfoot("\bottomrule\end{tabular}}\end{center}\footnotesize{Notes: The sample is divided into five subsamples by the magnitude of fog and we run our main regression in the bottom quintile (the first quintile). The dependent variables are indicated at the top of each column. The same set of control variables are included as in Table 5 in the main text. A description of all variables can be found in Table A1 and Table A2 of the main manuscript. The dependent variables in columns 1-3 are: a firms' accrual earnings management calculated using the performance-adjusted method, a firm's accrual earnings management calculated using the modified Jones method, and the rank of the firm's accrual earnings management (modified Jones), respectively. The dependent variables in columns 4-5 are: a firm's real earnings management, and the rank of the firm's real earnings management, respectively. Year fixed effects and industry fixed effects are included in all regressions. Standard errors are clustered at the level of firm-year. *** p < 1\%, ** p < 5\%, * p < 10\%.}\end{table}") 
+posthead("\midrule") postfoot("\bottomrule\end{tabular}}\end{center}\end{table}")
+exit
 
 **# Cloud Cover
 * See do-file 18
@@ -139,9 +140,9 @@ estadd local indfe "Yes", replace
 
 esttab regression1 regression2  using "$output\visib_stock_compensation.tex", replace ///
 mtitles("\makecell{Stock compensation \\ balance}" "\makecell{After-tax \\ Stock Compensation}") collabels(none) booktabs label scalar(ymean) ///
-stats(yearfe indfe N ymean ar2, fmt(0 0 0 2 2) labels("Year FE" "Industry FE" "N" "Dep mean" "Adjusted R-sq")) ///
+stats(yearfe indfe N /*ymean*/ ar2, fmt(0 0 0 /*2*/ 2) labels("Year FE" "Industry FE" "N" /*"Dep mean"*/ "Adjusted R-sq")) ///
 prehead("\begin{table}\begin{center}\caption{\textbf{The Effect of Visibility on Managers' Productivity}}\label{tab: visib_firmprod}\tabcolsep=0.1cm\scalebox{0.75}{\begin{tabular}{lcc}\toprule")  ///
-posthead("\midrule") postfoot("\bottomrule\end{tabular}}\end{center}\footnotesize{Notes: The dependent variables are indicated at the top of each column. The dependent variables in columns 1-2 are: a firm's stock compensation and a firm's after-tex stock compensation. A description of all regressors can be found in Table A1 in the main manuscript. Year fixed effects and industry fixed effects are included in all regressions. Standard errors are clustered at the level of firm-year. *** p < 1\%, ** p < 5\%, * p < 10\%.}\end{table}") 
+posthead("\midrule") postfoot("\bottomrule\end{tabular}}\end{center}\end{table}") 
 
 **# 2) Table B2
 global control_variables_aem fog size bm roa lev firm_age rank au_years oa_scale /*xrd_int*/ loss salesgrowth Boardindependence lit InstOwn_Perc stockreturn sale_sd rem
@@ -176,6 +177,7 @@ label var sale_sd "StdSales"
 label var sale "Sales"
 label var cover "ANAL"
 label var hhi_sale "HHI"
+label var fog "Fog"
 
 *==================== Regression (Signed) =============================
 	eststo clear
@@ -216,9 +218,9 @@ estadd local indfe "Yes", replace
 
 esttab regression1 regression2 regression3 regression4 regression5 using "$output\table4_newcontrols_boardind.tex", replace ///
 mgroups("Accrual Earnings Management" "Real Earnings Management", pattern(1 0 0 1 0) prefix(\multicolumn{@span}{c}{) suffix(}) span erepeat(\cmidrule(lr){@span})) ///
-mtitles("\makecell{AEM \\ (performance-adj.)}" "\makecell{AEM \\ (modified Jones)}" "\makecell{AEM \\ Rank}" "REM" "\makecell{REM \\ Rank}") collabels(none) booktabs label stats(yearfe indfe N ymean ar2, fmt(0 0 0 2 2) labels("Year FE" "Industry FE" "N" "Dep mean" "Adjusted R-sq")) ///
+mtitles("\makecell{AEM \\ (performance-adj.)}" "\makecell{AEM \\ (modified Jones)}" "\makecell{AEM \\ Rank}" "REM" "\makecell{REM \\ Rank}") collabels(none) booktabs label stats(yearfe indfe N /*ymean*/ ar2, fmt(0 0 0 /*2*/ 2) labels("Year FE" "Industry FE" "N" /*"Dep mean"*/ "Adjusted R-sq")) ///
 prehead("\begin{table}\begin{center}\caption{\textbf{The Effect of Visibility on AEM/REM with Additional Control of Board Independence}}\label{tab: table4newcontrols}\tabcolsep=0.1cm\scalebox{0.55}{\begin{tabular}{lccccc}\toprule")  ///
-posthead("\midrule") postfoot("\bottomrule\end{tabular}}\end{center}\footnotesize{Notes: The dependent variables are indicated at the top of each column. The dependent variables in columns 1-3 are: a firms' accrual earnings management calculated using the performance-adjusted method, a firm's accrual earnings management calculated using the modified Jones method, and the rank of the firm's accrual earnings management (modified Jones), respectively. The dependent variables in columns 4-5 are: a firm's real earnings management, and the rank of the firm's real earnings management, respectively. A description of all regressors can be found in Table A1 in the main manuscript. Year fixed effects and industry fixed effects are included in all regressions. Standard errors are clustered at the level of firm-year. *** p < 1\%, ** p < 5\%, * p < 10\%.}\end{table}") 
+posthead("\midrule") postfoot("\bottomrule\end{tabular}}\end{center}\end{table}") 
 
 **# 3) Table B3
 global control_variables_aem /*fog*/ size bm roa lev firm_age rank au_years oa_scale /*xrd_int*/ loss salesgrowth /*Boardindependence*/ /*lit*/ InstOwn_Perc_D stockreturn sale_sd rem
@@ -314,9 +316,9 @@ estadd local indfe "Yes", replace
 esttab regression0 regression1 regression2 regression3 regression4 regression5 using "$output\results_event.tex", replace ///
 mgroups("Visibility" "Accrual Earnings Management" "Real Earnings Management", pattern(1 1 0 0 1 0) prefix(\multicolumn{@span}{c}{) suffix(}) span erepeat(\cmidrule(lr){@span})) starlevels(* 0.2 ** 0.1 *** 0.02)  ///
 mtitles("Visibility" "\makecell{AEM \\ (performance-adj.)}" "\makecell{AEM \\ (modified Jones)}" "\makecell{AEM \\ Rank}" "REM" "\makecell{REM \\ Rank}") collabels(none) booktabs label scalar(ymean) ///
-stats(yearfe indfe N ymean ar2, fmt(0 0 0 2 2) labels("Year FE" "Industry FE" "N" "Dep mean" "Adjusted R-sq")) ///
+stats(yearfe indfe N /*ymean*/ ar2, fmt(0 0 0 /*2*/ 2) labels("Year FE" "Industry FE" "N" /*"Dep mean"*/ "Adjusted R-sq")) ///
 prehead("\begin{table}\begin{center}\caption{\textbf{Addressing Endogeneity Using a Policy Event – Clean Air Act Amendment}}\label{tab: table4}\tabcolsep=0.1cm\scalebox{0.55}{\begin{tabular}{lcccccc}\toprule")  ///
-posthead("\midrule") postfoot("\bottomrule\end{tabular}}\end{center}\footnotesize{Notes: The dependent variables are indicated at the top of each column. The dependent variable in column 1 is visibility. The dependent variables in columns 2-4 are: a firms' accrual earnings management calculated using the performance-adjusted method, a firm's accrual earnings management calculated using the modified Jones method, and the rank of the firm's accrual earnings management (modified Jones), respectively. The dependent variables in columns 5-6 are: a firm's real earnings management, and the rank of the firm's real earnings management, respectively. A description of all regressors can be found in Table A1 in the manuscript. Industry fixed effects are included in all regressions. Standard errors are clustered at the level of firm-year. *** p < 1\%, ** p < 5\%, * p < 10\%.}\end{table}") 
+posthead("\midrule") postfoot("\bottomrule\end{tabular}}\end{center}\end{table}") 
 
 **# 4) Table B4
 global control_variables_aem fog size bm roa lev firm_age rank au_years oa_scale /*xrd_int*/ loss salesgrowth /*Boardindependence*/ lit InstOwn_Perc stockreturn sale_sd rem
@@ -642,7 +644,7 @@ global control_variables_aem fog size bm roa lev firm_age rank au_years oa_scale
 global control_variables_rem fog size bm roa lev firm_age rank au_years hhi_sale /*xrd_int*/ loss salesgrowth /*Boardindependence*/ lit InstOwn_Perc stockreturn sale_sd dac
 
 use "$output\final_data_47662", replace
-
+label var fog "Fog"
 xtset lpermno fyear
 
 *ssc install rangestat
@@ -715,8 +717,8 @@ estadd local indfe "Yes", replace
 
 esttab regressionT10_1 regressionT10_2 regressionT10_3 regressionT10_4 regressionT10_5 using "$output\table_visibDecile.tex", replace fragment label nolines ///
 posthead("\midrule") nonumbers ///
-stats(yearfe indfe N ymean ar2, fmt(0 0 0 2 2) labels("Year FE" "Industry FE" "N" "Dep mean" "Adjusted R-sq")) ///
+stats(yearfe indfe N /*ymean*/ ar2, fmt(0 0 0 /*2*/ 2) labels("Year FE" "Industry FE" "N" /*"Dep mean"*/ "Adjusted R-sq")) ///
 prehead("\begin{table}\begin{center}\caption{\textbf{The Effect of Visibility on AEM/REM – Extreme Level of Visibility (Top Decile)}}\label{tab: visbTercile}\tabcolsep=0.1cm\scalebox{0.6}{\begin{tabular}{lccccc}\toprule") ///
 mgroups("Accrual Earnings Management" "Real Earnings Management", pattern(1 0 0 1 0) prefix(\multicolumn{@span}{c}{) suffix(}) span erepeat(\cmidrule(lr){@span})) ///
 mtitles("\makecell{AEM \\ (performance- \\ adj.)}" "\makecell{AEM \\ (modified \\ Jones)}" "\makecell{AEM \\ Rank}" "REM" "\makecell{REM \\ Rank}") collabels(none) booktabs ///
-postfoot("\bottomrule\end{tabular}}\end{center}\footnotesize{Notes: The sample is divided into ten subsamples by the magnitude of visibility, and we conduct our main analysis in the top decile. The dependent variables are indicated at the top of each column. The dependent variables in columns 1-3 are: a firms' accrual earnings management calculated using the performance-adjusted method, a firm's accrual earnings management calculated using the modified Jones method, and the rank of the firm's accrual earnings management (modified Jones), respectively. The dependent variables in columns 4-5 are: a firm's real earnings management, and the rank of the firm's real earnings management, respectively. A description of all regressors can be found in Table A1 in the manuscript. Year fixed effects and industry fixed effects are included in all regressions. Standard errors are clustered at the level of firm-year. *** p < 1\%, ** p < 5\%, * p < 10\%.}\end{table}") 
+postfoot("\bottomrule\end{tabular}}\end{center}\end{table}") 
