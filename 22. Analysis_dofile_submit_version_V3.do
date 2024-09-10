@@ -282,33 +282,33 @@ bysort station fyear (lpermno): gen number = _n
 preserve
 	keep if number == 1 //4089
 	eststo clear
-eststo summ_stats: estpost sum $summ_vars_weather
+eststo summ_stats: estpost sum $summ_vars_weather pollutant_value
 
-eststo obs: estpost summarize $summ_vars_weather
-
-ereturn list 
-
-eststo Mean: estpost summarize $summ_vars_weather
+eststo obs: estpost summarize $summ_vars_weather pollutant_value
 
 ereturn list 
 
-eststo p25: estpost summarize $summ_vars_weather, detail
+eststo Mean: estpost summarize $summ_vars_weather pollutant_value
 
 ereturn list 
 
-eststo p50: estpost summarize $summ_vars_weather, detail
+eststo p25: estpost summarize $summ_vars_weather pollutant_value, detail
 
 ereturn list 
 
-eststo p75: estpost summarize $summ_vars_weather, detail
+eststo p50: estpost summarize $summ_vars_weather pollutant_value, detail
 
 ereturn list 
 
-eststo std: estpost summarize $summ_vars_weather
+eststo p75: estpost summarize $summ_vars_weather pollutant_value, detail
 
 ereturn list 
 
-eststo Median: estpost summarize $summ_vars_weather
+eststo std: estpost summarize $summ_vars_weather pollutant_value 
+
+ereturn list 
+
+eststo Median: estpost summarize $summ_vars_weather pollutant_value
 
 ereturn list 
 
@@ -323,33 +323,33 @@ restore
 
 * Summary statistics of weather variables at the firm-year level (Panel B)
 	eststo clear
-eststo summ_stats: estpost sum $summ_vars_weather
+eststo summ_stats: estpost sum $summ_vars_weather pollutant_value
 
-eststo obs: estpost summarize $summ_vars_weather
-
-ereturn list 
-
-eststo Mean: estpost summarize $summ_vars_weather
+eststo obs: estpost summarize $summ_vars_weather pollutant_value
 
 ereturn list 
 
-eststo p25: estpost summarize $summ_vars_weather, detail
+eststo Mean: estpost summarize $summ_vars_weather pollutant_value
 
 ereturn list 
 
-eststo p50: estpost summarize $summ_vars_weather, detail
+eststo p25: estpost summarize $summ_vars_weather pollutant_value, detail
 
 ereturn list 
 
-eststo p75: estpost summarize $summ_vars_weather, detail
+eststo p50: estpost summarize $summ_vars_weather pollutant_value, detail
 
 ereturn list 
 
-eststo std: estpost summarize $summ_vars_weather
+eststo p75: estpost summarize $summ_vars_weather pollutant_value, detail
 
 ereturn list 
 
-eststo Median: estpost summarize $summ_vars_weather
+eststo std: estpost summarize $summ_vars_weather pollutant_value
+
+ereturn list 
+
+eststo Median: estpost summarize $summ_vars_weather pollutant_value
 
 ereturn list 
 
