@@ -184,6 +184,7 @@ merge 1:1 tic fyear using "$output\board_characteristics"
 	capture drop _merge
 merge 1:1 cusip8 fyear using "$output\institutional_ownership_x.dta"
 	keep if _merge == 1 | _merge == 3
+	replace InstOwn_Perc = 1 if InstOwn_Perc > 1
 
 	capture drop lit
 gen lit = 1 if (sic >= 2833 & sic <= 2836) | (sic >= 3570 & sic <= 3577) | (sic >= 3600 & sic <=3674) | (sic >= 5200 & sic <= 5961) | (sic >= 7370 & sic <= 7379) | (sic >= 8731 & sic <= 8734)

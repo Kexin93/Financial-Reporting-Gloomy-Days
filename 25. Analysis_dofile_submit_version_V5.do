@@ -157,6 +157,37 @@ rename year fyear
 
 save "$output\CEO_duality_x.dta", replace
 
+* 8) Credit ratings
+use "E:\21. Air Pollution and Accounting\DATA\credit_ratings", replace
+	gen fyear = year(datadate)
+	gen fyr = month(datadate)
+	rename cusip cusip8
+	foreach var of varlist *{
+	    di "`var'"
+	    count if !mi(`var')
+	}
+	
+	keep tic cusip8 fyear fyr splticrm spsticrm spsdrm
+	drop if mi(cusip8) & mi(tic)
+	drop if mi(tic)
+	
+	bysort tic fyear fyr: gen dup = _n
+	bysort tic fyear fyr: egen dup_max = max(dup)
+	drop dup dup_max
+	
+	preserve 
+	use "$output\final_data_47662", replace
+	keep tic fyear fyr
+	tempfile original_data
+	save `original_data'
+	restore
+	
+	merge 1:1 tic fyear fyr using `original_data'
+	keep if _merge == 2 | _merge ==3
+	drop _merge
+	gen withCreditRating = (!mi(splticrm))
+save "$output\m_creditratings.dta", replace
+	
 **# Define control variables
 global summ_vars dacck dac rank_dac rem rank_rem stdz_rem d_cfo_neg rank_d_cfo_neg d_prod rank_d_prod ///
 d_discexp_neg rank_d_discexp_neg size bm roa lev firm_age rank au_years loss sale salesgrowth lit InstOwn_Perc   stockreturn sale_sd oa_scale hhi_sale cover pollutant_value
@@ -184,7 +215,11 @@ merge 1:1 tic fyear using "$output\board_characteristics"
 	capture drop _merge
 merge 1:1 cusip8 fyear using "$output\institutional_ownership_x.dta"
 	keep if _merge == 1 | _merge == 3
-
+	capture drop _merge
+	replace InstOwn_Perc = 1 if InstOwn_Perc > 1
+merge 1:1 tic fyear fyr using "$output\m_creditratings.dta"
+	keep if _merge == 1 | _merge == 3
+	
 	capture drop lit
 gen lit = 1 if (sic >= 2833 & sic <= 2836) | (sic >= 3570 & sic <= 3577) | (sic >= 3600 & sic <=3674) | (sic >= 5200 & sic <= 5961) | (sic >= 7370 & sic <= 7379) | (sic >= 8731 & sic <= 8734)
 replace lit = 0 if mi(lit) & !mi(sic)
@@ -484,8 +519,10 @@ posthead("\midrule") postfoot("\bottomrule\end{tabular}}\end{center}\footnotesiz
 
 global control_variables_aem_t78 size bm roa lev firm_age rank au_years oa_scale /*xrd_int*/
 global control_variables_rem_t78 size bm roa lev firm_age rank au_years hhi_sale /*xrd_int*/
+
 **# Table 7
 *================================== External Monitoring? Analyst ================================
+*** Panel A: Analyst Following
 	eststo clear
 eststo regression1: reghdfe dacck visib cover c.visib#c.cover $control_variables_aem_t78, absorb(fyear ff_48) vce(cluster i.lpermno#i.fyear) //c.?
 estadd scalar ar2 = e(r2_a)
@@ -529,10 +566,104 @@ estadd local firmcont "Yes", replace
 
 esttab regression1 regression2 regression3 regression4 regression5 using "$output\table8.tex", replace ///
 mgroups("Accrual Earnings Management" "Real Earnings Management", pattern(1 0 0 1 0) prefix(\multicolumn{@span}{c}{) suffix(}) span erepeat(\cmidrule(lr){@span})) drop($control_variables_rem_t78 $control_variables_aem_t78) ///
-mtitles("\makecell{AEM \\ (performance-adj.)}" "\makecell{AEM \\ (modified Jones)}" "\makecell{AEM \\ Rank}" "REM" "\makecell{REM \\ Rank}") collabels(none) booktabs label scalar(ymean) order(visib cover c.visib#c.cover) starlevels(* 0.2 ** 0.1 *** 0.02) ///
+mtitles("\makecell{AEM \\ (performance-adj.)}" "\makecell{AEM \\ (modified Jones)}" "\makecell{AEM \\ Rank}" "REM" "\makecell{REM \\ Rank}") collabels(none) fragment booktabs label scalar(ymean) order(visib cover c.visib#c.cover) starlevels(* 0.2 ** 0.1 *** 0.02) ///
 stats(firmcont yearfe indfe N ar2, fmt(0 0 0 0 2 2) labels("Baseline Controls" "Year FE" "Industry FE" "N" "Adjusted R-sq")) ///
-prehead("\begin{table}\begin{center}\caption{The Mediating Effect of Analyst Coverage on the Relation between Visibility and Earnings Management}\label{tab: table8}\tabcolsep=0.1cm\scalebox{0.82}{\begin{tabular}{lccccc}\toprule")  ///
-posthead("\midrule") postfoot("\bottomrule\end{tabular}}\end{center}\footnotesize{Notes: This table presents the regression results to test the mediating effect of analyst following on the relation between Visibility and AEM/REM. See Appendix A for detailed variable definitions. Numbers in parentheses represent t-statistics calculated based on standard errors clustered at the industry-year level. ***, **, and * indicate statistical significance at the 1\%, 5\%, and 10\% levels, respectively.}\end{table}") 
+prehead("\begin{table}\begin{center}\caption{The Moderating Effect of External Monitoring on the Relation between Visibility and Earnings Management}\label{tab: table8}\tabcolsep=0.1cm\scalebox{0.82}{\begin{tabular}{lccccc}\toprule")  ///
+posthead("\midrule &\multicolumn{5}{c}{\textbf{Panel A: Number of Analysts Following}}") 
+
+** Credit Rating
+	eststo clear
+eststo regression1: reghdfe dacck visib withCreditRating c.visib#c.withCreditRating $control_variables_aem_t78, absorb(fyear ff_48) vce(cluster i.lpermno#i.fyear) //c.?
+estadd scalar ar2 = e(r2_a)
+summarize dacck
+estadd scalar ymean = r(mean)
+estadd local yearfe "Yes", replace
+estadd local indfe "Yes", replace
+estadd local firmcont "Yes", replace	
+
+eststo regression2: reghdfe dac visib withCreditRating c.visib#c.withCreditRating $control_variables_aem_t78, absorb(fyear ff_48) vce(cluster i.lpermno#i.fyear) //c.?
+estadd scalar ar2 = e(r2_a)
+summarize dac
+estadd scalar ymean = r(mean)
+estadd local yearfe "Yes", replace
+estadd local indfe "Yes", replace
+estadd local firmcont "Yes", replace
+
+eststo regression3: reghdfe rank_dac visib withCreditRating c.visib#c.withCreditRating $control_variables_aem_t78, absorb(fyear ff_48) vce(cluster i.lpermno#i.fyear) //c.?
+estadd scalar ar2 = e(r2_a)
+summarize dac
+estadd scalar ymean = r(mean)
+estadd local yearfe "Yes", replace
+estadd local indfe "Yes", replace
+estadd local firmcont "Yes", replace
+
+eststo regression4: reghdfe rem visib withCreditRating c.visib#c.withCreditRating $control_variables_rem_t78, absorb(fyear ff_48) vce(cluster i.lpermno#i.fyear)
+estadd scalar ar2 = e(r2_a)
+summarize rem
+estadd scalar ymean = r(mean)
+estadd local yearfe "Yes", replace
+estadd local indfe "Yes", replace
+estadd local firmcont "Yes", replace
+
+eststo regression5: reghdfe rank_rem visib withCreditRating c.visib#c.withCreditRating $control_variables_rem_t78, absorb(fyear ff_48) vce(cluster i.lpermno#i.fyear)
+estadd scalar ar2 = e(r2_a)
+summarize rem
+estadd scalar ymean = r(mean)
+estadd local yearfe "Yes", replace
+estadd local indfe "Yes", replace
+estadd local firmcont "Yes", replace
+
+esttab regression1 regression2 regression3 regression4 regression5 using "$output\table8.tex", append ///
+drop($control_variables_rem_t78 $control_variables_aem_t78) ///
+fragment nomtitles collabels(none) booktabs label scalar(ymean) order(visib withCreditRating c.visib#c.withCreditRating) starlevels(* 0.2 ** 0.1 *** 0.02) ///
+stats(firmcont yearfe indfe N ar2, fmt(0 0 0 0 2 2) labels("Baseline Controls" "Year FE" "Industry FE" "N" "Adjusted R-sq")) posthead("\midrule &\multicolumn{5}{c}{\textbf{Panel B: Credit Rating}\\}") 
+
+** Institutional Ownership
+	eststo clear
+eststo regression1: reghdfe dacck visib InstOwn_Perc c.visib#c.InstOwn_Perc $control_variables_aem_t78, absorb(fyear ff_48) vce(cluster i.lpermno#i.fyear) //c.?
+estadd scalar ar2 = e(r2_a)
+summarize dacck
+estadd scalar ymean = r(mean)
+estadd local yearfe "Yes", replace
+estadd local indfe "Yes", replace
+estadd local firmcont "Yes", replace	
+
+eststo regression2: reghdfe dac visib InstOwn_Perc c.visib#c.InstOwn_Perc $control_variables_aem_t78, absorb(fyear ff_48) vce(cluster i.lpermno#i.fyear) //c.?
+estadd scalar ar2 = e(r2_a)
+summarize dac
+estadd scalar ymean = r(mean)
+estadd local yearfe "Yes", replace
+estadd local indfe "Yes", replace
+estadd local firmcont "Yes", replace
+
+eststo regression3: reghdfe rank_dac visib InstOwn_Perc c.visib#c.InstOwn_Perc $control_variables_aem_t78, absorb(fyear ff_48) vce(cluster i.lpermno#i.fyear) //c.?
+estadd scalar ar2 = e(r2_a)
+summarize dac
+estadd scalar ymean = r(mean)
+estadd local yearfe "Yes", replace
+estadd local indfe "Yes", replace
+estadd local firmcont "Yes", replace
+
+eststo regression4: reghdfe rem visib InstOwn_Perc c.visib#c.InstOwn_Perc $control_variables_rem_t78, absorb(fyear ff_48) vce(cluster i.lpermno#i.fyear)
+estadd scalar ar2 = e(r2_a)
+summarize rem
+estadd scalar ymean = r(mean)
+estadd local yearfe "Yes", replace
+estadd local indfe "Yes", replace
+estadd local firmcont "Yes", replace
+
+eststo regression5: reghdfe rank_rem visib InstOwn_Perc c.visib#c.InstOwn_Perc $control_variables_rem_t78, absorb(fyear ff_48) vce(cluster i.lpermno#i.fyear)
+estadd scalar ar2 = e(r2_a)
+summarize rem
+estadd scalar ymean = r(mean)
+estadd local yearfe "Yes", replace
+estadd local indfe "Yes", replace
+estadd local firmcont "Yes", replace
+
+esttab regression1 regression2 regression3 regression4 regression5 using "$output\table8.tex", append ///
+drop($control_variables_rem_t78 $control_variables_aem_t78) ///
+fragment nomtitles collabels(none) booktabs label scalar(ymean) order(visib InstOwn_Perc c.visib#c.InstOwn_Perc) starlevels(* 0.2 ** 0.1 *** 0.02) ///
+stats(firmcont yearfe indfe N ar2, fmt(0 0 0 0 2 2) labels("Baseline Controls" "Year FE" "Industry FE" "N" "Adjusted R-sq")) posthead("\midrule &\multicolumn{5}{c}{\textbf{Panel C: Institutional Ownership}\\}") postfoot("\bottomrule\end{tabular}}\end{center}\footnotesize{Notes: This table presents the regression results to test the moderating effect of the degree of external monitoring on the relation between Visibility and AEM/REM. See Appendix A for detailed variable definitions. The measures for external monitoring in Panel A-C are: the number of analysts following, an indicator for whether a firm has a credit rating, and percentage of institutional ownership, respectively. Numbers in parentheses represent t-statistics calculated based on standard errors clustered at the industry-year level. ***, **, and * indicate statistical significance at the 1\%, 5\%, and 10\% levels, respectively.}\end{table}") 
 
 **# Table 8
 global control_variables_aem fog size bm roa lev firm_age rank au_years loss salesgrowth lit InstOwn_Perc stockreturn sale_sd oa_scale rem
@@ -598,7 +729,7 @@ estadd local firmcont "Yes", replace
 esttab regression1 regression2 regression3 regression4 regression5 regression6 using "$output\table15_panelAB.tex", replace fragment ///
 mgroups("Accrual Earnings Management" "Real Earnings Management", pattern(1 0 0 0 1 0) prefix(\multicolumn{@span}{c}{) suffix(}) span erepeat(\cmidrule(lr){@span})) drop($control_variables_rem_t78 $control_variables_aem_t78) mtitles("\makecell{AEM \\ (performance-adj.)}" "\makecell{AEM \\ (performance-adj.)}" "\makecell{AEM \\ (modified Jones)}" "\makecell{AEM \\ (modified Jones)}" "REM" "REM") collabels(none) booktabs label scalar(ymean) order(visib CGOV_str_num c.visib#c.CGOV_str_num CGOV_con_num c.visib#c.CGOV_con_num) starlevels(* 0.2 ** 0.1 *** 0.02) ///
 stats(firmcont yearfe indfe N ar2, fmt(0 0 0 0 2 2) labels("Baseline Controls" "Year FE" "Industry FE" "N" "Adjusted R-sq")) ///
-prehead("\begin{table}\begin{center}\caption{The Mediating Effect of Corporate Governance on the Relation between Visibility and Earnings Management}\label{tab: table15}\tabcolsep=0.1cm\scalebox{0.65}{\begin{tabular}{lcccccc}\toprule") posthead("\midrule&\multicolumn{6}{c}{\textbf{Panel A: CG =  CG Strengths and Concerns}}\\")
+prehead("\begin{table}\begin{center}\caption{The Moderating Effect of Corporate Governance on the Relation between Visibility and Earnings Management}\label{tab: table15}\tabcolsep=0.1cm\scalebox{0.65}{\begin{tabular}{lcccccc}\toprule") posthead("\midrule&\multicolumn{6}{c}{\textbf{Panel A: CG =  CG Strengths and Concerns}}\\")
 
 * Panel B
 label var boarddiversity "Female Board\%"
@@ -784,7 +915,7 @@ esttab regression1 regression2 regression3 regression4 regression5 regression6 u
 drop($control_variables_rem $control_variables_aem) ///
 mtitles("Duality 1" "Duality 2" "Duality 1" "Duality 2" "Duality 1" "Duality 2") nonumbers collabels(none) booktabs label order(visib CEOduality c.visib#c.CEOduality dual_max c.visib#c.dual_max) ///
 stats(firmcont yearfe indfe N ar2, fmt(0 0 0 0 2 2) labels("Baseline Controls" "Year FE" "Industry FE" "N" "Adjusted R-sq")) starlevels(* 0.2 ** 0.1 *** 0.02) ///
-posthead("\midrule&\multicolumn{6}{c}{\textbf{Panel D: CG = CEO-Chairman Duality}}\\") postfoot("\bottomrule\end{tabular}}\end{center}\footnotesize{Notes: This table presents the regression results to test the mediating effect of corporate governance on the relation between Visibility and AEM/REM. We use CG Strengths and CG Concerns in Panel A, Board Independence and Female Ratio on Boards in Panel B, Golden Parachute and Poison Pill in Panel C, and CEO-Chairman Duality in Panel D, respectively, as the proxy for corporate governance. See Appendix A for detailed variable definitions. Numbers in parentheses represent t-statistics calculated based on standard errors clustered at the industry-year level. ***, **, and * indicate statistical significance at the 1\%, 5\%, and 10\% levels, respectively.}\end{table}") 
+posthead("\midrule&\multicolumn{6}{c}{\textbf{Panel D: CG = CEO-Chairman Duality}}\\") postfoot("\bottomrule\end{tabular}}\end{center}\footnotesize{Notes: This table presents the regression results to test the moderating effect of corporate governance on the relation between Visibility and AEM/REM. We use CG Strengths and CG Concerns in Panel A, Board Independence and Female Ratio on Boards in Panel B, Golden Parachute and Poison Pill in Panel C, and CEO-Chairman Duality in Panel D, respectively, as the proxy for corporate governance. See Appendix A for detailed variable definitions. Numbers in parentheses represent t-statistics calculated based on standard errors clustered at the industry-year level. ***, **, and * indicate statistical significance at the 1\%, 5\%, and 10\% levels, respectively.}\end{table}") 
 
 **# Table 9
 	capture drop _merge
