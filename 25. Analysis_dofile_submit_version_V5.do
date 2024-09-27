@@ -615,7 +615,7 @@ estadd local firmcont "Yes", replace
 
 esttab regression1 regression2 regression3 regression4 regression5 using "$output\table8.tex", append ///
 drop($control_variables_rem_t78 $control_variables_aem_t78) ///
-fragment nomtitles collabels(none) booktabs label scalar(ymean) order(visib withCreditRating c.visib#c.withCreditRating) starlevels(* 0.2 ** 0.1 *** 0.02) ///
+fragment nonumbers nomtitles collabels(none) booktabs label scalar(ymean) order(visib withCreditRating c.visib#c.withCreditRating) starlevels(* 0.2 ** 0.1 *** 0.02) ///
 stats(firmcont yearfe indfe N ar2, fmt(0 0 0 0 2 2) labels("Baseline Controls" "Year FE" "Industry FE" "N" "Adjusted R-sq")) posthead("\midrule &\multicolumn{5}{c}{\textbf{Panel B: Credit Rating}\\}") 
 
 ** Institutional Ownership
@@ -662,7 +662,7 @@ estadd local firmcont "Yes", replace
 
 esttab regression1 regression2 regression3 regression4 regression5 using "$output\table8.tex", append ///
 drop($control_variables_rem_t78 $control_variables_aem_t78) ///
-fragment nomtitles collabels(none) booktabs label scalar(ymean) order(visib InstOwn_Perc c.visib#c.InstOwn_Perc) starlevels(* 0.2 ** 0.1 *** 0.02) ///
+fragment nonumbers nomtitles collabels(none) booktabs label scalar(ymean) order(visib InstOwn_Perc c.visib#c.InstOwn_Perc) starlevels(* 0.2 ** 0.1 *** 0.02) ///
 stats(firmcont yearfe indfe N ar2, fmt(0 0 0 0 2 2) labels("Baseline Controls" "Year FE" "Industry FE" "N" "Adjusted R-sq")) posthead("\midrule &\multicolumn{5}{c}{\textbf{Panel C: Institutional Ownership}\\}") postfoot("\bottomrule\end{tabular}}\end{center}\footnotesize{Notes: This table presents the regression results to test the moderating effect of the degree of external monitoring on the relation between Visibility and AEM/REM. See Appendix A for detailed variable definitions. The measures for external monitoring in Panel A-C are: the number of analysts following, an indicator for whether a firm has a credit rating, and percentage of institutional ownership, respectively. Numbers in parentheses represent t-statistics calculated based on standard errors clustered at the industry-year level. ***, **, and * indicate statistical significance at the 1\%, 5\%, and 10\% levels, respectively.}\end{table}") 
 
 **# Table 8
