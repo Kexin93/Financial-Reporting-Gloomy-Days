@@ -1301,55 +1301,9 @@ estadd local firmcon "Yes", replace
 global first_stage size bm roa lev firm_age rank au_years oa_scale hhi_sale /*xrd_int*/
 
 esttab regression1 regression2 regression3 regression4 regression5 using "$output\table12_PM25.tex", append  ///
-booktabs label scalar(ymean) nomtitles nonumbers fragment nolines keep(visib_res) posthead("\midrule") postfoot("\midrule") ///
-stats(firmcon yearfe indfe N ar2, fmt(0 0 0 0 2 2) labels("Baseline Controls" "Year FE" "Industry FE" "N" "Adjusted R-sq")) 
-
-	eststo clear
-eststo regression1: reghdfe dacck pollutant_value $control_variables_aem, absorb(fyear ff_48) vce(cluster i.lpermno#i.fyear)
-estadd scalar ar2 = e(r2_a)
-summarize dacck
-estadd scalar ymean = r(mean)
-estadd local yearfe "Yes", replace
-estadd local indfe "Yes", replace
-estadd local firmcon "Yes", replace
-
-eststo regression2: reghdfe dac pollutant_value $control_variables_aem, absorb(fyear ff_48) vce(cluster i.lpermno#i.fyear)
-estadd scalar ar2 = e(r2_a)
-summarize dac
-estadd scalar ymean = r(mean)
-estadd local yearfe "Yes", replace
-estadd local indfe "Yes", replace
-estadd local firmcon "Yes", replace
-
-eststo regression3: reghdfe rank_dac pollutant_value $control_variables_aem, absorb(fyear ff_48) vce(cluster i.lpermno#i.fyear)
-estadd scalar ar2 = e(r2_a)
-summarize rank_dac
-estadd scalar ymean = r(mean)
-estadd local yearfe "Yes", replace
-estadd local indfe "Yes", replace
-estadd local firmcon "Yes", replace
-
-eststo regression4: reghdfe rem pollutant_value $control_variables_rem, absorb(fyear ff_48) vce(cluster i.lpermno#i.fyear)
-estadd scalar ar2 = e(r2_a)
-summarize rem
-estadd scalar ymean = r(mean)
-estadd local yearfe "Yes", replace
-estadd local indfe "Yes", replace
-estadd local firmcon "Yes", replace
-
-eststo regression5: reghdfe rank_rem pollutant_value $control_variables_rem, absorb(fyear ff_48) vce(cluster i.lpermno#i.fyear)
-estadd scalar ar2 = e(r2_a)
-summarize rank_rem
-estadd scalar ymean = r(mean)
-estadd local yearfe "Yes", replace
-estadd local indfe "Yes", replace
-estadd local firmcon "Yes", replace
-
-esttab regression1 regression2 regression3 regression4 regression5 using "$output\table12_PM25.tex", append fragment ///
-nomtitles nonumbers collabels(none) booktabs label ///
-stats(firmcon yearfe indfe N ar2, fmt(0 0 0 0 2 2) labels("Baseline Controls" "Year FE" "Industry FE" "N" "Adjusted R-sq")) keep(pollutant_value) ///
-posthead("&\multicolumn{5}{c}{\textbf{Panel B: Using PM 2.5 Instead of Visibility}} \\") ///
-postfoot("\bottomrule\end{tabular}}\end{center}\footnotesize{Notes: This table presents the regression results to test the effect of unpleasant air quality on AEM and REM using actual air pollution measures. We use the fitted value of $Visibility$ and the residual from the regression of $Visibility$ on PM 2.5 in Panel A, and use PM 2.5 in Panel B, respectively, as the main test variable. See Appendix A for detailed variable definitions. Numbers in parentheses represent t-statistics calculated based on standard errors clustered at the industry-year level. ***, **, and * indicate statistical significance at the 1\%, 5\%, and 10\% levels, respectively.}\end{table}") 
+booktabs label scalar(ymean) nomtitles nonumbers fragment nolines keep(visib_res) posthead("")  ///
+stats(firmcon yearfe indfe N ar2, fmt(0 0 0 0 2 2) labels("Baseline Controls" "Year FE" "Industry FE" "N" "Adjusted R-sq")) ///
+postfoot("\bottomrule\end{tabular}}\end{center}\footnotesize{Notes: This table presents the regression results to test the effect of unpleasant air quality on AEM and REM using actual air pollution measures. We use the fitted value of $Visibility$ and the residual from the regression of $Visibility$ on PM 2.5, as the main test variable. See Appendix A for detailed variable definitions. Numbers in parentheses represent t-statistics calculated based on standard errors clustered at the industry-year level. ***, **, and * indicate statistical significance at the 1\%, 5\%, and 10\% levels, respectively.}\end{table}") 
 exit
 
 **# Table D1
