@@ -234,7 +234,7 @@ eststo Median: estpost summarize $summ_vars
 ereturn list 
 
 * .tex
-esttab obs Mean std p25 p50 p75 using "$output\summ_stats_firm.tex", fragment  ///
+esttab obs Mean std p25 p50 p75 using "$output\summ_stats_firm_PM25.tex", fragment  ///
 label cells("count(pattern(1 0 0 0 0 0)) mean(pattern(0 1 0 0 0 0) fmt(3)) sd(pattern(0 0 1 0 0 0) fmt(3)) p25(pattern(0 0 0 1 0 0) fmt(3)) p50(pattern(0 0 0 0 1 0) fmt(3)) p75(pattern(0 0 0 0 0 1) fmt(3))") noobs  ///
 nonumbers replace booktabs collabels(none) mtitles("N" "Mean" "Std. Dev." "Bottom 25\%" "Median" "Top 25\%") ///
 prehead("\begin{table}\begin{center}\caption{Summary Statistics of Firm Characteristics}\label{tab: summstats1}\tabcolsep=0.1cm\scalebox{0.8}{\begin{tabular}{lcccccc}\toprule")  ///
@@ -313,7 +313,7 @@ eststo Median: estpost summarize $summ_vars_weather pollutant_value
 ereturn list 
 
 * .tex
-esttab obs Mean std p25 p50 p75 using "$output\summ_stats_weather.tex", fragment  ///
+esttab obs Mean std p25 p50 p75 using "$output\summ_stats_weather_PM25.tex", fragment  ///
 label cells("count(pattern(1 0 0 0 0 0)) mean(pattern(0 1 0 0 0 0) fmt(3)) sd(pattern(0 0 1 0 0 0) fmt(3)) p25(pattern(0 0 0 1 0 0) fmt(3)) p50(pattern(0 0 0 0 1 0) fmt(3)) p75(pattern(0 0 0 0 0 1) fmt(3))") noobs  ///
 prehead("\begin{table}\begin{center}\caption{Summary Statistics of Weather-Related Characteristics}\label{tab: summ_stats_weather}\tabcolsep=0.1cm\scalebox{0.65}{\begin{tabular}{lcccccc}\toprule")  ///
 nonumbers replace booktabs collabels(none) mtitles("N" "Mean" "Std. Dev." "Bottom 25\%" "Median" "Top 25\%") ///
@@ -354,7 +354,7 @@ eststo Median: estpost summarize $summ_vars_weather pollutant_value
 ereturn list 
 
 * .tex
-esttab obs Mean std p25 p50 p75 using "$output\summ_stats_weather.tex", fragment  ///
+esttab obs Mean std p25 p50 p75 using "$output\summ_stats_weather_PM25.tex", fragment  ///
 label cells("count(pattern(1 0 0 0 0 0)) mean(pattern(0 1 0 0 0 0) fmt(3)) sd(pattern(0 0 1 0 0 0) fmt(3)) p25(pattern(0 0 0 1 0 0) fmt(3)) p50(pattern(0 0 0 0 1 0) fmt(3)) p75(pattern(0 0 0 0 0 1) fmt(3))") noobs  ///
 nonumbers append booktabs collabels(none) mtitles("N" "Mean" "Std. Dev." "Bottom 25\%" "Median" "Top 25\%") ///
 posthead("\midrule \textbf{Panel B: Firm-Year Level} \\") ///
@@ -378,7 +378,7 @@ eststo unpolluted_sample: estpost summarize $summ_vars if polluted == 0
 gen unpolluted = -polluted
 eststo difference:  estpost ttest $summ_vars, by(unpolluted)
 
-esttab allsample polluted_sample unpolluted_sample difference using "$output\ttest.tex", ///
+esttab allsample polluted_sample unpolluted_sample difference using "$output\ttest_PM25.tex", ///
 replace cells("mean(pattern(1 1 1 0)  fmt(3)) b(star pattern(0 0 0 1) fmt(3)) ") ///
 label mtitles("All" "Polluted" "Unpolluted" "Polluted-Unpolluted") collabels(none) nonumbers booktabs ///
 prehead("\begin{table}\begin{center}\caption{Univariate Test}\label{tab: ttest}\tabcolsep=0.1cm\begin{tabular}{lcccc}\toprule")  ///
@@ -424,7 +424,7 @@ estadd scalar ymean = r(mean)
 estadd local yearfe "Yes", replace
 estadd local indfe "Yes", replace
 
-esttab regression1 regression2 regression3 regression4 regression5 using "$output\table4.tex", replace ///
+esttab regression1 regression2 regression3 regression4 regression5 using "$output\table4_PM25.tex", replace ///
 mgroups("Accrual Earnings Management" "Real Earnings Management", pattern(1 0 0 1 0) prefix(\multicolumn{@span}{c}{) suffix(}) span erepeat(\cmidrule(lr){@span})) ///
 mtitles("\makecell{AEM \\ (performance-adj.)}" "\makecell{AEM \\ (modified Jones)}" "\makecell{AEM \\ Rank}" "REM" "\makecell{REM \\ Rank}") collabels(none) booktabs label scalar(ymean) ///
 stats(yearfe indfe N ar2, fmt(0 0 0 2 2) labels("Year FE" "Industry FE" "N" "Adjusted R-sq")) ///
@@ -475,7 +475,7 @@ estadd scalar ymean = r(mean)
 estadd local yearfe "Yes", replace
 estadd local indfe "Yes", replace
 
-esttab sales1 sales2 overprod1 overprod2 expenditure1 expenditure2 using "$output\table5.tex", replace ///
+esttab sales1 sales2 overprod1 overprod2 expenditure1 expenditure2 using "$output\table5_PM25.tex", replace ///
 depvars collabels(none) booktabs label scalar(ymean) ///
 stats(yearfe indfe N ar2, fmt(0 0 0 2 2) labels("Year FE" "Industry FE" "N" "Adjusted R-sq")) ///
 prehead("\begin{table}\begin{center}\caption{The Effect of Air Pollution on Individual REM Measures}\label{tab: table5}\tabcolsep=0.1cm\scalebox{0.62}{\begin{tabular}{lcccccc}\toprule")  ///
@@ -526,7 +526,7 @@ estadd local yearfe "Yes", replace
 estadd local indfe "Yes", replace
 estadd local firmcont "Yes", replace
 
-esttab regression1 regression2 regression3 regression4 regression5 using "$output\table8.tex", replace ///
+esttab regression1 regression2 regression3 regression4 regression5 using "$output\table8_PM25.tex", replace ///
 mgroups("Accrual Earnings Management" "Real Earnings Management", pattern(1 0 0 1 0) prefix(\multicolumn{@span}{c}{) suffix(}) span erepeat(\cmidrule(lr){@span})) drop($control_variables_rem_t78 $control_variables_aem_t78) ///
 mtitles("\makecell{AEM \\ (performance-adj.)}" "\makecell{AEM \\ (modified Jones)}" "\makecell{AEM \\ Rank}" "REM" "\makecell{REM \\ Rank}") collabels(none) booktabs label scalar(ymean) order(pollutant_value cover c.pollutant_value#c.cover) starlevels(* 0.2 ** 0.1 *** 0.02) ///
 stats(firmcont yearfe indfe N ar2, fmt(0 0 0 0 2 2) labels("Baseline Controls" "Year FE" "Industry FE" "N" "Adjusted R-sq")) ///
@@ -594,7 +594,7 @@ estadd local yearfe "Yes", replace
 estadd local indfe "Yes", replace
 estadd local firmcont "Yes", replace
 
-esttab regression1 regression2 regression3 regression4 regression5 regression6 using "$output\table15_panelAB.tex", replace fragment ///
+esttab regression1 regression2 regression3 regression4 regression5 regression6 using "$output\table15_panelAB_PM25.tex", replace fragment ///
 mgroups("Accrual Earnings Management" "Real Earnings Management", pattern(1 0 0 0 1 0) prefix(\multicolumn{@span}{c}{) suffix(}) span erepeat(\cmidrule(lr){@span})) drop($control_variables_rem_t78 $control_variables_aem_t78) mtitles("\makecell{AEM \\ (performance-adj.)}" "\makecell{AEM \\ (performance-adj.)}" "\makecell{AEM \\ (modified Jones)}" "\makecell{AEM \\ (modified Jones)}" "REM" "REM") collabels(none) booktabs label scalar(ymean) order(pollutant_value CGOV_str_num c.pollutant_value#c.CGOV_str_num CGOV_con_num c.pollutant_value#c.CGOV_con_num) starlevels(* 0.2 ** 0.1 *** 0.02) ///
 stats(firmcont yearfe indfe N ar2, fmt(0 0 0 0 2 2) labels("Baseline Controls" "Year FE" "Industry FE" "N" "Adjusted R-sq")) ///
 prehead("\begin{table}\begin{center}\caption{The Mediating Effect of Corporate Governance on the Relation between Air Pollution and Earnings Management}\label{tab: table15}\tabcolsep=0.1cm\scalebox{0.65}{\begin{tabular}{lcccccc}\toprule") posthead("\midrule&\multicolumn{6}{c}{\textbf{Panel A: CG =  CG Strengths and Concerns}}\\")
@@ -651,7 +651,7 @@ estadd local yearfe "Yes", replace
 estadd local indfe "Yes", replace
 estadd local firmcont "Yes", replace
 
-esttab regression1 regression2 regression3 regression4 regression5 regression6 using "$output\table15_panelAB.tex", append fragment ///
+esttab regression1 regression2 regression3 regression4 regression5 regression6 using "$output\table15_panelAB_PM25.tex", append fragment ///
 drop($control_variables_rem $control_variables_aem) ///
 nomtitles nonumbers collabels(none) booktabs label order(pollutant_value Boardindependence c.pollutant_value#c.Boardindependence boarddiversity c.pollutant_value#c.boarddiversity) starlevels(* 0.2 ** 0.1 *** 0.02) ///
 stats(firmcont yearfe indfe N ar2, fmt(0 0 0 0 2 2) labels("Baseline Controls" "Year FE" "Industry FE" "N" "Adjusted R-sq")) ///
@@ -717,7 +717,7 @@ estadd local yearfe "Yes", replace
 estadd local indfe "Yes", replace
 estadd local firmcont "Yes", replace
 
-esttab regression1 regression2 regression3 regression4 regression5 regression6 using "$output\table15_panelCD.tex", replace fragment ///
+esttab regression1 regression2 regression3 regression4 regression5 regression6 using "$output\table15_panelCD_PM25.tex", replace fragment ///
 mgroups("Accrual Earnings Management" "Real Earnings Management", pattern(1 0 0 0 1 0) prefix(\multicolumn{@span}{c}{) suffix(}) span erepeat(\cmidrule(lr){@span})) drop($control_variables_rem_t78 $control_variables_aem_t78) mtitles("\makecell{AEM \\ (performance-adj.)}" "\makecell{AEM \\ (performance-adj.)}" "\makecell{AEM \\ (modified Jones)}" "\makecell{AEM \\ (modified Jones)}" "REM" "REM")  collabels(none) booktabs label stats(firmcont yearfe indfe N ar2, fmt(0 0 0 0 2 2) labels("Baseline Controls" "Year FE" "Industry FE" "N" "Adjusted R-sq")) order(pollutant_value gparachute c.pollutant_value#c.gparachute ppill c.pollutant_value#c.ppill) prehead("\begin{table}\begin{center}\scalebox{0.6}{\begin{tabular}{lcccccc}\toprule") posthead("\midrule&\multicolumn{6}{c}{\textbf{Panel C: CG = Golden Parachute or Poison Pill}}\\") /*starlevels(* 0.2 ** 0.1 *** 0.02)*/
 
 * Panel D
@@ -779,7 +779,7 @@ estadd local yearfe "Yes", replace
 estadd local indfe "Yes", replace
 estadd local firmcont "Yes", replace
 
-esttab regression1 regression2 regression3 regression4 regression5 regression6 using "$output\table15_panelCD.tex", append fragment ///
+esttab regression1 regression2 regression3 regression4 regression5 regression6 using "$output\table15_panelCD_PM25.tex", append fragment ///
 drop($control_variables_rem $control_variables_aem) ///
 mtitles("Duality 1" "Duality 2" "Duality 1" "Duality 2" "Duality 1" "Duality 2") nonumbers collabels(none) booktabs label order(pollutant_value CEOduality c.pollutant_value#c.CEOduality dual_max c.pollutant_value#c.dual_max) ///
 stats(firmcont yearfe indfe N ar2, fmt(0 0 0 0 2 2) labels("Baseline Controls" "Year FE" "Industry FE" "N" "Adjusted R-sq")) starlevels(* 0.2 ** 0.1 *** 0.02) ///
@@ -837,7 +837,7 @@ estadd local yearfe "Yes", replace
 estadd local indfe "Yes", replace
 estadd local firmcont "Yes", replace
 
-esttab regression1 regression2 regression3 regression4 regression5 using "$output\table9_panelAB.tex", replace fragment keep(pollutant_value) ///
+esttab regression1 regression2 regression3 regression4 regression5 using "$output\table9_panelAB_PM25.tex", replace fragment keep(pollutant_value) ///
 mgroups("Accrual Earnings Management" "Real Earnings Management", pattern(1 0 0 1 0) prefix(\multicolumn{@span}{c}{) suffix(}) span erepeat(\cmidrule(lr){@span})) ///
 mtitles("\makecell{AEM \\ (performance-adj.)}" "\makecell{AEM \\ (modified Jones)}" "\makecell{AEM \\ Rank}" "REM" "\makecell{REM \\ Rank}") collabels(none) booktabs label ///
 stats(firmcon yearfe indfe N ar2, fmt(0 0 0 0 2 2) labels("Baseline Controls" "Year FE" "Industry FE" "N" "Adjusted R-sq")) ///
@@ -887,7 +887,7 @@ estadd local yearfe "Yes", replace
 estadd local indfe "Yes", replace
 estadd local firmcont "Yes", replace
 
-esttab regression1 regression2 regression3 regression4 regression5 using "$output\table9_panelAB.tex", append fragment keep(pollutant_value) ///
+esttab regression1 regression2 regression3 regression4 regression5 using "$output\table9_panelAB_PM25.tex", append fragment keep(pollutant_value) ///
 nomtitles nonumbers collabels(none) booktabs label ///
 stats(firmcon yearfe indfe N ar2, fmt(0 0 0 0 2 2) labels("Baseline Controls" "Year FE" "Industry FE" "N" "Adjusted R-sq")) posthead("\midrule& \multicolumn{5}{c}{\textbf{Panel B: Non-Knowledge-Intensive Industries Subsample}}\\") ///
 postfoot("\bottomrule\end{tabular}}\end{center}\end{table}") 
@@ -943,7 +943,7 @@ estadd local yearfe "Yes", replace
 estadd local indfe "Yes", replace
 estadd local firmcont "Yes", replace
 
-esttab regression1 regression2 regression3 regression4 regression5 using "$output\table9_panelCD.tex", replace fragment keep(pollutant_value) /// 
+esttab regression1 regression2 regression3 regression4 regression5 using "$output\table9_panelCD_PM25.tex", replace fragment keep(pollutant_value) /// 
 mgroups("Accrual Earnings Management" "Real Earnings Management", pattern(1 0 0 1 0) prefix(\multicolumn{@span}{c}{) suffix(}) span erepeat(\cmidrule(lr){@span})) ///
 mtitles("\makecell{AEM \\ (performance-adj.)}" "\makecell{AEM \\ (modified Jones)}" "\makecell{AEM \\ Rank}" "REM" "\makecell{REM \\ Rank}") collabels(none) booktabs label ///
 stats(firmcon yearfe indfe N ar2, fmt(0 0 0 0 2 2) labels("Baseline Controls" "Year FE" "Industry FE" "N" "Adjusted R-sq")) ///
@@ -993,7 +993,7 @@ estadd local yearfe "Yes", replace
 estadd local indfe "Yes", replace
 estadd local firmcont "Yes", replace
 
-esttab regression1 regression2 regression3 regression4 regression5 using "$output\table9_panelCD.tex", append fragment keep(pollutant_value) ///
+esttab regression1 regression2 regression3 regression4 regression5 using "$output\table9_panelCD_PM25.tex", append fragment keep(pollutant_value) ///
 nomtitles nonumbers collabels(none) booktabs label ///
 stats(firmcon yearfe indfe N ar2, fmt(0 0 0 0 2 2) labels("Baseline Controls" "Year FE" "Industry FE" "N" "Adjusted R-sq")) posthead("\midrule& \multicolumn{5}{c}{\textbf{Panel D: Non-Labor-Intensive Industries Subsample}}\\") ///
 postfoot("\bottomrule\end{tabular}}\end{center}\end{table}") 
@@ -1052,7 +1052,7 @@ estadd local yearfe "Yes", replace
 estadd local indfe "Yes", replace
 estadd local firmcont "Yes", replace
 
-esttab regression3 using "$output\table9_panelE.tex", replace fragment ///
+esttab regression3 using "$output\table9_panelE_PM25.tex", replace fragment ///
 nomtitles collabels(none) booktabs label ///
 stats(yearfe indfe N ar2, fmt(0 0 0 0 2) labels("Year FE" "Industry FE" "N" "Adjusted R-sq")) ///
 prehead("\begin{table}\begin{center}\tabcolsep=0.1cm\scalebox{0.9}{\begin{tabular}{lccc}\toprule") /*starlevels(* 0.2 ** 0.1 *** 0.02)*/ compress style(tab) posthead("\midrule &\multicolumn{1}{c}{\textbf{Panel E: The Effect of Air Pollution on Managers' Productivity}}\\") postfoot("\bottomrule\end{tabular}}\end{center}\footnotesize{Notes: Panels A to D of this table present the regression results to test the effect of the level of PM 2.5 on AEM and REM using subsamples. Our sample is divided into two subsamples based on knowledge-intensive vs. non-knowledge-intensive industries in Panels A and B, and based on labor-intensive vs. non-labor-intensive industries in Panels C and D. Panel E presents the regression results to test the effect of the level of PM 2.5 on Total Factor Productivity. See Appendix A for detailed variable definitions. Numbers in parentheses represent t-statistics calculated based on standard errors clustered at the industry-year level. ***, **, and * indicate statistical significance at the 1\%, 5\%, and 10\% levels, respectively.}\end{table}") 
@@ -1176,7 +1176,7 @@ estadd local yearfe "Yes", replace
 estadd local indfe "Yes", replace
 estadd local blcontrols "Yes", replace
 		
-esttab regression1 regression2 regression3 regression4 regression5 regression6 using "$output\table22.tex", replace ///
+esttab regression1 regression2 regression3 regression4 regression5 regression6 using "$output\table22_PM25.tex", replace ///
 mgroups("Real Earnings Management" "Rank of Real Earnings Management", pattern(1 0 0 1 0 0) prefix(\multicolumn{@span}{c}{) suffix(}) span erepeat(\cmidrule(lr){@span})) ///
 nomtitles collabels(none) booktabs label scalar(ymean) drop($control_variables_rem) ///
 stats(blcontrols yearfe indfe N ar2, fmt(0 0 0 0 2 2) labels("Baseline Controls" "Year FE" "Industry FE" "N" "Adjusted R-sq")) ///
@@ -1245,7 +1245,7 @@ estadd local yearfe "Yes", replace
 estadd local indfe "Yes", replace
 estadd local firmcont "Yes", replace
 
-esttab regression1 regression2 regression3 regression4 regression5 using "$output\table12.tex", replace fragment ///
+esttab regression1 regression2 regression3 regression4 regression5 using "$output\table12_PM25.tex", replace fragment ///
 mgroups("Accrual Earnings Management" "Real Earnings Management", pattern(1 0 0 1 0) prefix(\multicolumn{@span}{c}{) suffix(}) span erepeat(\cmidrule(lr){@span})) ///
 mtitles("\makecell{AEM \\ (performance \\ -adj.)}" "\makecell{AEM \\ (modified \\ Jones)}" "\makecell{AEM \\ Rank}" "REM" "\makecell{REM \\ Rank}") nonumbers collabels(none) nolines booktabs label keep(visib_PM2_5) postfoot("\midrule") ///
 stats(firmcont yearfe indfe N ar2, fmt(0 0 0 0 2 2) labels("Baseline Controls" "Year FE" "Industry FE" "N" "Adjusted R-sq")) ///
@@ -1300,7 +1300,7 @@ estadd local firmcon "Yes", replace
 
 global first_stage size bm roa lev firm_age rank au_years oa_scale hhi_sale /*xrd_int*/
 
-esttab regression1 regression2 regression3 regression4 regression5 using "$output\table12.tex", append  ///
+esttab regression1 regression2 regression3 regression4 regression5 using "$output\table12_PM25.tex", append  ///
 booktabs label scalar(ymean) nomtitles nonumbers fragment nolines keep(visib_res) posthead("\midrule") postfoot("\midrule") ///
 stats(firmcon yearfe indfe N ar2, fmt(0 0 0 0 2 2) labels("Baseline Controls" "Year FE" "Industry FE" "N" "Adjusted R-sq")) 
 
@@ -1345,11 +1345,12 @@ estadd local yearfe "Yes", replace
 estadd local indfe "Yes", replace
 estadd local firmcon "Yes", replace
 
-esttab regression1 regression2 regression3 regression4 regression5 using "$output\table12.tex", append fragment ///
+esttab regression1 regression2 regression3 regression4 regression5 using "$output\table12_PM25.tex", append fragment ///
 nomtitles nonumbers collabels(none) booktabs label ///
 stats(firmcon yearfe indfe N ar2, fmt(0 0 0 0 2 2) labels("Baseline Controls" "Year FE" "Industry FE" "N" "Adjusted R-sq")) keep(pollutant_value) ///
 posthead("&\multicolumn{5}{c}{\textbf{Panel B: Using PM 2.5 Instead of Visibility}} \\") ///
 postfoot("\bottomrule\end{tabular}}\end{center}\footnotesize{Notes: This table presents the regression results to test the effect of unpleasant air quality on AEM and REM using actual air pollution measures. We use the fitted value of $Visibility$ and the residual from the regression of $Visibility$ on PM 2.5 in Panel A, and use PM 2.5 in Panel B, respectively, as the main test variable. See Appendix A for detailed variable definitions. Numbers in parentheses represent t-statistics calculated based on standard errors clustered at the industry-year level. ***, **, and * indicate statistical significance at the 1\%, 5\%, and 10\% levels, respectively.}\end{table}") 
+exit
 
 **# Table D1
 *======== Correlation Table ==============================
@@ -1488,7 +1489,7 @@ estadd local yearfe "Yes", replace
 estadd local indfe "Yes", replace
 estadd local firmcont "Yes", replace
 
-esttab regression1 regression2 regression3 regression4  regression5 regression6 regression7 regression8 regression9 using "$output\table7.tex", replace  drop($control_variables_rem) ///
+esttab regression1 regression2 regression3 regression4  regression5 regression6 regression7 regression8 regression9 using "$output\table7_PM25.tex", replace  drop($control_variables_rem) ///
 nomtitles collabels(none) booktabs label scalar(ymean) stats(firmcont yearfe indfe N ar2, fmt(0 0 0 0 2 2) labels("Baseline Controls"  "Year FE" "Industry FE" "N" "Adjusted R-sq")) ///
 prehead("\begin{table}\begin{center}\caption{Controlling for Additional Measures of Unpleasant Weather}\label{tab: table7}\tabcolsep=0.1cm\scalebox{0.65}{\begin{tabular}{lcccccccccc}\toprule") starlevels(* 0.2 ** 0.1 *** 0.02)  ///
 posthead("\midrule") postfoot("\bottomrule\end{tabular}}\end{center}\footnotesize{Notes: This table presents the regression results to test the effect of $Visibility$ on REM after controlling for various weather variables. See Appendices A and B for detailed variable definitions and descriptions. Numbers in parentheses represent t-statistics calculated based on standard errors clustered at the industry-year level. ***, **, and * indicate statistical significance at the 1\%, 5\%, and 10\% levels, respectively.}\end{table}")
@@ -1555,7 +1556,7 @@ eststo treatpsm: estpost sum $control_variables_psm if pollutant_value > polluta
 eststo controlpsm: estpost sum $control_variables_psm if pollutant_value <= pollutant_value_median  & _support == 1
 eststo diffpsm: estpost ttest $control_variables_psm if _support == 1, by(pollutant_value_binary_neg) 
 
-esttab treatall controlall diffall treatpsm controlpsm diffpsm using "$output\ttest_psm1.tex", ///
+esttab treatall controlall diffall treatpsm controlpsm diffpsm using "$output\ttest_psm1_PM25.tex", ///
 replace cells("mean(pattern(1 1 0 1 1 0)  fmt(3)) b(star pattern(0 0 1 0 0 1) fmt(3)) ") ///
 mgroups("Pooled Sample" "PSM Sample", pattern(1 0 0 1 0 0) prefix(\multicolumn{@span}{c}{) suffix(}) span erepeat(\cmidrule(lr){@span})) ///
 label mtitles("More Polluted" "Less Polluted" "Difference" "More Polluted" "Less Polluted" "Difference") collabels(none) nonumbers booktabs ///
@@ -1604,7 +1605,7 @@ estadd scalar ymean = r(mean)
 estadd local yearfe "Yes", replace
 estadd local indfe "Yes", replace
 
-esttab regression1 regression2 regression3 regression4 regression5 using "$output\ttest_psm2.tex", replace ///
+esttab regression1 regression2 regression3 regression4 regression5 using "$output\ttest_psm2_PM25.tex", replace ///
 mgroups("Accrual Earnings Management" "Real Earnings Management", pattern(1 0 0 1 0) prefix(\multicolumn{@span}{c}{) suffix(}) span erepeat(\cmidrule(lr){@span})) ///
 mtitles("\makecell{AEM \\ (performance-adj.)}" "\makecell{AEM \\ (modified Jones)}" "AEM Rank" "REM" "REM Rank") collabels(none) booktabs label scalar(ymean) starlevels(* 0.2 ** 0.1 *** 0.02) ///
 stats(yearfe indfe N ar2, fmt(0 0 0 2 2) labels("Year FE" "Industry FE" "N" "Adjusted R-sq")) ///
@@ -1794,7 +1795,7 @@ eststo Median: estpost summarize $summ_vars
 ereturn list 
 
 * .tex
-esttab obs Mean std p25 p50 p75 using "$output\summ_stats_firm_8294.tex", fragment  ///
+esttab obs Mean std p25 p50 p75 using "$output\summ_stats_firm_8294_PM25.tex", fragment  ///
 label cells("count(pattern(1 0 0 0 0 0)) mean(pattern(0 1 0 0 0 0) fmt(3)) sd(pattern(0 0 1 0 0 0) fmt(3)) p25(pattern(0 0 0 1 0 0) fmt(3)) p50(pattern(0 0 0 0 1 0) fmt(3)) p75(pattern(0 0 0 0 0 1) fmt(3))") noobs  ///
 nonumbers replace booktabs collabels(none) mtitles("N" "Mean" "Std. Dev." "Bottom 25\%" "Median" "Top 25\%") ///
 prehead("\begin{table}\begin{center}\caption{Summary Statistics of Firm Characteristics (three months after fiscal year-end)}\label{tab: summstats18294}\tabcolsep=0.1cm\scalebox{0.67}{\begin{tabular}{lcccccc}\toprule")  ///
@@ -1855,8 +1856,8 @@ eststo Median: estpost summarize $summ_vars_weather
 
 ereturn list 
 
-* .tex
-esttab obs Mean std p25 p50 p75 using "$output\summ_stats_weather_8294.tex", fragment  ///
+* _PM25.tex
+esttab obs Mean std p25 p50 p75 using "$output\summ_stats_weather_8294_PM25.tex", fragment  ///
 label cells("count(pattern(1 0 0 0 0 0)) mean(pattern(0 1 0 0 0 0) fmt(3)) sd(pattern(0 0 1 0 0 0) fmt(3)) p25(pattern(0 0 0 1 0 0) fmt(3)) p50(pattern(0 0 0 0 1 0) fmt(3)) p75(pattern(0 0 0 0 0 1) fmt(3))") noobs  ///
 nonumbers replace booktabs collabels(none) mtitles("N" "Mean" "Std. Dev." "Bottom 25\%" "Median" "Top 25\%") ///
 prehead("\begin{table}\begin{center}\caption{Summary Statistics of Weather-Related Characteristics (three months after fiscal year-end)}\label{tab: summstats28294}\tabcolsep=0.1cm\scalebox{0.67}{\begin{tabular}{lcccccc}\toprule")  ///
@@ -1886,7 +1887,7 @@ estadd scalar ymean = r(mean)
 estadd local yearfe "Yes", replace
 estadd local indfe "Yes", replace
 
-esttab regression1 regression2 regression3 using "$output\table4_8294.tex", replace ///
+esttab regression1 regression2 regression3 using "$output\table4_8294_PM25.tex", replace ///
 mtitles("\makecell{AEM \\ (performance-adj.)}" "\makecell{AEM \\ (modified Jones)}" "\makecell{AEM \\ Rank}") collabels(none) booktabs label scalar(ymean) ///
 stats(yearfe indfe N ar2, fmt(0 0 0 2 2) labels("Year FE" "Industry FE" "N" "Adjusted R-sq")) ///
 prehead("\begin{table}\begin{center}\caption{The Effect of Visibility on AEM (three months after fiscal year-end)}\label{tab: table48294}\tabcolsep=0.1cm\scalebox{0.6}{\begin{tabular}{lccc}\toprule")  ///
@@ -1981,7 +1982,7 @@ eststo Median: estpost summarize $summ_vars
 ereturn list 
 
 * .tex
-esttab obs Mean std p25 p50 p75 using "$output\summ_stats_firm_11283.tex", fragment  ///
+esttab obs Mean std p25 p50 p75 using "$output\summ_stats_firm_11283_PM25.tex", fragment  ///
 label cells("count(pattern(1 0 0 0 0 0)) mean(pattern(0 1 0 0 0 0) fmt(3)) sd(pattern(0 0 1 0 0 0) fmt(3)) p25(pattern(0 0 0 1 0 0) fmt(3)) p50(pattern(0 0 0 0 1 0) fmt(3)) p75(pattern(0 0 0 0 0 1) fmt(3))") noobs  ///
 nonumbers replace booktabs collabels(none) mtitles("N" "Mean" "Std. Dev." "Bottom 25\%" "Median" "Top 25\%") ///
 prehead("\begin{table}\begin{center}\caption{Summary Statistics of Firm Characteristics (one year before actual end date)}\label{tab: summstats111283}\tabcolsep=0.1cm\scalebox{0.67}{\begin{tabular}{lcccccc}\toprule")  ///
@@ -2043,7 +2044,7 @@ eststo Median: estpost summarize $summ_vars_weather
 ereturn list 
 
 * .tex
-esttab obs Mean std p25 p50 p75 using "$output\summ_stats_weather_11283.tex", fragment  ///
+esttab obs Mean std p25 p50 p75 using "$output\summ_stats_weather_11283_PM25.tex", fragment  ///
 label cells("count(pattern(1 0 0 0 0 0)) mean(pattern(0 1 0 0 0 0) fmt(3)) sd(pattern(0 0 1 0 0 0) fmt(3)) p25(pattern(0 0 0 1 0 0) fmt(3)) p50(pattern(0 0 0 0 1 0) fmt(3)) p75(pattern(0 0 0 0 0 1) fmt(3))") noobs  ///
 nonumbers replace booktabs collabels(none) mtitles("N" "Mean" "Std. Dev." "Bottom 25\%" "Median" "Top 25\%") ///
 prehead("\begin{table}\begin{center}\caption{Summary Statistics of Weather-Related Characteristics (one year before actual end date)}\label{tab: summstats211283}\tabcolsep=0.1cm\scalebox{0.67}{\begin{tabular}{lcccccc}\toprule")  ///
@@ -2086,7 +2087,7 @@ estadd scalar ymean = r(mean)
 estadd local yearfe "Yes", replace
 estadd local indfe "Yes", replace
 
-esttab regression1 regression2 regression3 regression4 regression5 using "$output\table4_11283.tex", replace ///
+esttab regression1 regression2 regression3 regression4 regression5 using "$output\table4_11283_PM25.tex", replace ///
 mgroups("Accrual Earnings Management" "Real Earnings Management", pattern(1 0 0 1 0) prefix(\multicolumn{@span}{c}{) suffix(}) span erepeat(\cmidrule(lr){@span})) ///
 mtitles("\makecell{AEM \\ (performance-adj.)}" "\makecell{AEM \\ (modified Jones)}" "\makecell{AEM \\ Rank}" "REM" "\makecell{REM \\ Rank}") collabels(none) booktabs label ///
 stats(yearfe indfe N ar2, fmt(0 0 0 2 2) labels("Year FE" "Industry FE" "N" "Adjusted R-sq")) ///
@@ -2191,7 +2192,7 @@ eststo Median: estpost summarize $summ_vars
 ereturn list 
 
 * .tex
-esttab obs Mean std p25 p50 p75 using "$output\summ_stats_firm_10883.tex", fragment  ///
+esttab obs Mean std p25 p50 p75 using "$output\summ_stats_firm_10883_PM25.tex", fragment  ///
 label cells("count(pattern(1 0 0 0 0 0)) mean(pattern(0 1 0 0 0 0) fmt(3)) sd(pattern(0 0 1 0 0 0) fmt(3)) p25(pattern(0 0 0 1 0 0) fmt(3)) p50(pattern(0 0 0 0 1 0) fmt(3)) p75(pattern(0 0 0 0 0 1) fmt(3))") noobs  ///
 nonumbers replace booktabs collabels(none) mtitles("N" "Mean" "Std. Dev." "Bottom 25\%" "Median" "Top 25\%") ///
 prehead("\begin{table}\begin{center}\caption{Summary Statistics of Firm Characteristics (three months before actual period end date)}\label{tab: summstats110883}\tabcolsep=0.1cm\scalebox{0.67}{\begin{tabular}{lcccccc}\toprule")  ///
@@ -2253,7 +2254,7 @@ eststo Median: estpost summarize $summ_vars_weather
 ereturn list 
 
 * .tex
-esttab obs Mean std p25 p50 p75 using "$output\summ_stats_weather_10883.tex", fragment  ///
+esttab obs Mean std p25 p50 p75 using "$output\summ_stats_weather_10883_PM25.tex", fragment  ///
 label cells("count(pattern(1 0 0 0 0 0)) mean(pattern(0 1 0 0 0 0) fmt(3)) sd(pattern(0 0 1 0 0 0) fmt(3)) p25(pattern(0 0 0 1 0 0) fmt(3)) p50(pattern(0 0 0 0 1 0) fmt(3)) p75(pattern(0 0 0 0 0 1) fmt(3))") noobs  ///
 nonumbers replace booktabs collabels(none) mtitles("N" "Mean" "Std. Dev." "Bottom 25\%" "Median" "Top 25\%") ///
 prehead("\begin{table}\begin{center}\caption{Summary Statistics of Weather-Related Characteristics (three months before actual period end date)}\label{tab: summstats210883}\tabcolsep=0.1cm\scalebox{0.67}{\begin{tabular}{lcccccc}\toprule")  ///
@@ -2296,7 +2297,7 @@ estadd scalar ymean = r(mean)
 estadd local yearfe "Yes", replace
 estadd local indfe "Yes", replace
 
-esttab regression1 regression2 regression3 regression4 regression5 using "$output\table4_10883.tex", replace ///
+esttab regression1 regression2 regression3 regression4 regression5 using "$output\table4_10883_PM25.tex", replace ///
 mgroups("Accrual Earnings Management" "Real Earnings Management", pattern(1 0 0 1 0) prefix(\multicolumn{@span}{c}{) suffix(}) span erepeat(\cmidrule(lr){@span})) ///
 mtitles("\makecell{AEM \\ (performance-adj.)}" "\makecell{AEM \\ (modified Jones)}" "\makecell{AEM \\ Rank}" "REM" "\makecell{REM \\ Rank}") collabels(none) booktabs label  ///
 stats(yearfe indfe N ar2, fmt(0 0 0 2 2) labels("Year FE" "Industry FE" "N" "Adjusted R-sq")) ///
