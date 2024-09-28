@@ -186,17 +186,22 @@ use "E:\21. Air Pollution and Accounting\DATA\credit_ratings", replace
 	keep if _merge == 2 | _merge ==3
 	drop _merge
 	gen withCreditRating = (!mi(splticrm))
+	label var withCreditRating "Credit Rating"
 save "$output\m_creditratings.dta", replace
 	
 **# Define control variables
 global summ_vars dacck dac rank_dac rem rank_rem stdz_rem d_cfo_neg rank_d_cfo_neg d_prod rank_d_prod ///
-d_discexp_neg rank_d_discexp_neg size bm roa lev firm_age rank au_years loss sale salesgrowth lit InstOwn_Perc   stockreturn sale_sd oa_scale hhi_sale cover pollutant_value
+d_discexp_neg rank_d_discexp_neg size bm roa lev firm_age rank au_years loss sale salesgrowth lit InstOwn_Perc withCreditRating stockreturn sale_sd oa_scale hhi_sale cover pollutant_value
 
 global control_variables_aem fog size bm roa lev firm_age rank au_years loss salesgrowth lit InstOwn_Perc stockreturn sale_sd oa_scale rem
 
 global control_variables_rem fog size bm roa lev firm_age rank au_years loss salesgrowth lit InstOwn_Perc stockreturn sale_sd hhi_sale dac
 
 global control_variables fog size bm roa lev firm_age /*rank au_years oa_scale*/ hhi_sale loss salesgrowth /*lit*/ InstOwn_Perc /*sale_sd*/ 
+
+global control_variables_aem_PM25 size bm roa lev firm_age rank au_years loss salesgrowth lit InstOwn_Perc stockreturn sale_sd oa_scale rem
+
+global control_variables_rem_PM25 size bm roa lev firm_age rank au_years loss salesgrowth lit InstOwn_Perc stockreturn sale_sd hhi_sale dac
 
 use "$output\final_data_47662", replace
 	capture drop _merge
@@ -217,6 +222,8 @@ merge 1:1 cusip8 fyear using "$output\institutional_ownership_x.dta"
 	keep if _merge == 1 | _merge == 3
 	capture drop _merge
 	replace InstOwn_Perc = 1 if InstOwn_Perc > 1
+	replace InstOwn_Perc = 0 if mi(InstOwn_Perc)
+	
 merge 1:1 tic fyear fyr using "$output\m_creditratings.dta"
 	keep if _merge == 1 | _merge == 3
 	
@@ -225,8 +232,6 @@ gen lit = 1 if (sic >= 2833 & sic <= 2836) | (sic >= 3570 & sic <= 3577) | (sic 
 replace lit = 0 if mi(lit) & !mi(sic)
 
 label var lit "Litigious"
-replace InstOwn_Perc = 0 if mi(InstOwn_Perc)
-
 label var loss "Loss"
 label var salesgrowth "Sales Growth"
 label var lit "Litigious"
@@ -238,6 +243,8 @@ label var cover "ANAL"
 label var hhi_sale "HHI"
 
 gen finance_industry = (inrange(sic, 6011, 6099) | inrange(sic, 6111, 6163) | sic == 6211 | sic == 6712) if !mi(sic)
+
+gen utilities_industry = (inrange(sic, 4900, 4999)) if !mi(sic)
 
 **# Table 2
 eststo summ_stats: estpost sum $summ_vars
@@ -399,7 +406,7 @@ postfoot("\bottomrule\end{tabular}}\end{center}\footnotesize{Notes: This table p
 
 **# Table 4
 global summ_vars dacck dac rank_dac rem rank_rem d_cfo_neg rank_d_cfo_neg d_prod rank_d_prod ///
-d_discexp_neg rank_d_discexp_neg size bm roa lev firm_age rank au_years loss sale salesgrowth lit InstOwn_Perc   stockreturn sale_sd oa_scale hhi_sale cover pollutant_value
+d_discexp_neg rank_d_discexp_neg size bm roa lev firm_age rank au_years loss sale salesgrowth lit InstOwn_Perc withCreditRating stockreturn sale_sd oa_scale hhi_sale cover pollutant_value
 
 *========= t-test table ========================
 summarize visib if !mi(visib), d
@@ -569,7 +576,7 @@ mgroups("Accrual Earnings Management" "Real Earnings Management", pattern(1 0 0 
 mtitles("\makecell{AEM \\ (performance-adj.)}" "\makecell{AEM \\ (modified Jones)}" "\makecell{AEM \\ Rank}" "REM" "\makecell{REM \\ Rank}") collabels(none) fragment booktabs label scalar(ymean) order(visib cover c.visib#c.cover) starlevels(* 0.2 ** 0.1 *** 0.02) ///
 stats(firmcont yearfe indfe N ar2, fmt(0 0 0 0 2 2) labels("Baseline Controls" "Year FE" "Industry FE" "N" "Adjusted R-sq")) ///
 prehead("\begin{table}\begin{center}\caption{The Moderating Effect of External Monitoring on the Relation between Visibility and Earnings Management}\label{tab: table8}\tabcolsep=0.1cm\scalebox{0.82}{\begin{tabular}{lccccc}\toprule")  ///
-posthead("\midrule &\multicolumn{5}{c}{\textbf{Panel A: Number of Analysts Following}}") 
+posthead("\midrule &\multicolumn{5}{c}{\textbf{Panel A: Number of Analysts Following}}\\") 
 
 ** Credit Rating
 	eststo clear
@@ -616,7 +623,7 @@ estadd local firmcont "Yes", replace
 esttab regression1 regression2 regression3 regression4 regression5 using "$output\table8.tex", append ///
 drop($control_variables_rem_t78 $control_variables_aem_t78) ///
 fragment nonumbers nomtitles collabels(none) booktabs label scalar(ymean) order(visib withCreditRating c.visib#c.withCreditRating) starlevels(* 0.2 ** 0.1 *** 0.02) ///
-stats(firmcont yearfe indfe N ar2, fmt(0 0 0 0 2 2) labels("Baseline Controls" "Year FE" "Industry FE" "N" "Adjusted R-sq")) posthead("\midrule &\multicolumn{5}{c}{\textbf{Panel B: Credit Rating}\\}") 
+stats(firmcont yearfe indfe N ar2, fmt(0 0 0 0 2 2) labels("Baseline Controls" "Year FE" "Industry FE" "N" "Adjusted R-sq")) posthead("\midrule &\multicolumn{5}{c}{\textbf{Panel B: Credit Rating}}\\") 
 
 ** Institutional Ownership
 	eststo clear
@@ -663,7 +670,7 @@ estadd local firmcont "Yes", replace
 esttab regression1 regression2 regression3 regression4 regression5 using "$output\table8.tex", append ///
 drop($control_variables_rem_t78 $control_variables_aem_t78) ///
 fragment nonumbers nomtitles collabels(none) booktabs label scalar(ymean) order(visib InstOwn_Perc c.visib#c.InstOwn_Perc) starlevels(* 0.2 ** 0.1 *** 0.02) ///
-stats(firmcont yearfe indfe N ar2, fmt(0 0 0 0 2 2) labels("Baseline Controls" "Year FE" "Industry FE" "N" "Adjusted R-sq")) posthead("\midrule &\multicolumn{5}{c}{\textbf{Panel C: Institutional Ownership}\\}") postfoot("\bottomrule\end{tabular}}\end{center}\footnotesize{Notes: This table presents the regression results to test the moderating effect of the degree of external monitoring on the relation between Visibility and AEM/REM. See Appendix A for detailed variable definitions. The measures for external monitoring in Panel A-C are: the number of analysts following, an indicator for whether a firm has a credit rating, and percentage of institutional ownership, respectively. Numbers in parentheses represent t-statistics calculated based on standard errors clustered at the industry-year level. ***, **, and * indicate statistical significance at the 1\%, 5\%, and 10\% levels, respectively.}\end{table}") 
+stats(firmcont yearfe indfe N ar2, fmt(0 0 0 0 2 2) labels("Baseline Controls" "Year FE" "Industry FE" "N" "Adjusted R-sq")) posthead("\midrule &\multicolumn{5}{c}{\textbf{Panel C: Institutional Ownership}}\\") postfoot("\bottomrule\end{tabular}}\end{center}\footnotesize{Notes: This table presents the regression results to test the moderating effect of the degree of external monitoring on the relation between Visibility and AEM/REM. See Appendix A for detailed variable definitions. The measures for external monitoring in Panel A-C are: the number of analysts following, an indicator for whether a firm has a credit rating, and percentage of institutional ownership, respectively. Numbers in parentheses represent t-statistics calculated based on standard errors clustered at the industry-year level. ***, **, and * indicate statistical significance at the 1\%, 5\%, and 10\% levels, respectively.}\end{table}") 
 
 **# Table 8
 global control_variables_aem fog size bm roa lev firm_age rank au_years loss salesgrowth lit InstOwn_Perc stockreturn sale_sd oa_scale rem
@@ -751,7 +758,7 @@ estadd local yearfe "Yes", replace
 estadd local indfe "Yes", replace
 estadd local firmcont "Yes", replace
 
-eststo regression3: reghdfe dac visib Boardindependence c.visib#c.Boardindependence $control_variables_aem_t78, absorb(fyear ff_48) vce(cluster i.lpermno#i.fyear) 
+eststo regression3: reghdfe dac visib Boardindependence c.visib#c.Boardindependence $control_variables_aem, absorb(fyear ff_48) vce(cluster i.lpermno#i.fyear) 
 estadd scalar ar2 = e(r2_a)
 summarize dac
 estadd scalar ymean = r(mean)
@@ -1186,7 +1193,7 @@ estadd local firmcont "Yes", replace
 esttab regression3 using "$output\table9_panelE.tex", replace fragment ///
 nomtitles collabels(none) booktabs label ///
 stats(yearfe indfe N ar2, fmt(0 0 0 0 2) labels("Year FE" "Industry FE" "N" "Adjusted R-sq")) ///
-prehead("\begin{table}\begin{center}\tabcolsep=0.1cm\scalebox{0.9}{\begin{tabular}{lccc}\toprule") /*starlevels(* 0.2 ** 0.1 *** 0.02)*/ compress style(tab) posthead("\midrule &\multicolumn{1}{c}{\textbf{Panel E: The Effect of Visibility on Managers' Productivity}}\\") postfoot("\bottomrule\end{tabular}}\end{center}\footnotesize{Notes: Panels A to D of this table present the regression results to test the effect of $Visibility$ on AEM and REM using subsamples. Our sample is divided into two subsamples based on knowledge-intensive vs. non-knowledge-intensive industries in Panels A and B, and based on labor-intensive vs. non-labor-intensive industries in Panels C and D. Panel E presents the regression results to test the effect of $Visibility$ on Total Factor Productivity. See Appendix A for detailed variable definitions. Numbers in parentheses represent t-statistics calculated based on standard errors clustered at the industry-year level. ***, **, and * indicate statistical significance at the 1\%, 5\%, and 10\% levels, respectively.}\end{table}") 
+prehead("\begin{table}\begin{center}\tabcolsep=0.1cm\scalebox{0.9}{\begin{tabular}{lccc}\toprule") starlevels(* 0.2 ** 0.1 *** 0.02) compress style(tab) posthead("\midrule &\multicolumn{1}{c}{\textbf{Panel E: The Effect of Visibility on Managers' Productivity}}\\") postfoot("\bottomrule\end{tabular}}\end{center}\footnotesize{Notes: Panels A to D of this table present the regression results to test the effect of $Visibility$ on AEM and REM using subsamples. Our sample is divided into two subsamples based on knowledge-intensive vs. non-knowledge-intensive industries in Panels A and B, and based on labor-intensive vs. non-labor-intensive industries in Panels C and D. Panel E presents the regression results to test the effect of $Visibility$ on Total Factor Productivity. See Appendix A for detailed variable definitions. Numbers in parentheses represent t-statistics calculated based on standard errors clustered at the industry-year level. ***, **, and * indicate statistical significance at the 1\%, 5\%, and 10\% levels, respectively.}\end{table}") 
 
 **# Table 11
 preserve
@@ -1323,11 +1330,11 @@ label var pollutant_value "PM 2.5 (Weighted Annual Mean)"
 
 global first_stage size bm roa lev firm_age rank au_years oa_scale hhi_sale /*xrd_int*/
 
-reghdfe visib pollutant_value $control_variables_aem, absorb(i.fyear i.ff_48) vce(cluster i.lpermno#i.fyear)
+reghdfe visib pollutant_value $control_variables_aem_PM25, absorb(i.fyear i.ff_48) vce(cluster i.lpermno#i.fyear)
 predict visib_PM2_5_aem, xb
 label var visib_PM2_5_aem "Fitted visibility (AEM)"
 
-reghdfe visib pollutant_value $control_variables_rem, absorb(i.fyear i.ff_48) vce(cluster i.lpermno#i.fyear)
+reghdfe visib pollutant_value $control_variables_rem_PM25, absorb(i.fyear i.ff_48) vce(cluster i.lpermno#i.fyear)
 predict visib_PM2_5_rem, xb
 label var visib_PM2_5_rem "Fitted visibility (REM)"
 
@@ -1336,7 +1343,7 @@ predict visib_PM2_5, xb
 label var visib_PM2_5 "Fitted visibility"
 
 	eststo clear
-eststo regression1: reghdfe dacck visib_PM2_5 $control_variables_aem, absorb(i.fyear i.ff_48) vce(cluster i.lpermno#i.fyear)
+eststo regression1: reghdfe dacck visib_PM2_5 $control_variables_aem_PM25, absorb(i.fyear i.ff_48) vce(cluster i.lpermno#i.fyear)
 estadd scalar ar2 = e(r2_a)
 summarize dacck
 estadd scalar ymean = r(mean)
@@ -1344,7 +1351,7 @@ estadd local yearfe "Yes", replace
 estadd local indfe "Yes", replace
 estadd local firmcont "Yes", replace
 
-eststo regression2: reghdfe dac visib_PM2_5 $control_variables_aem, absorb(i.fyear i.ff_48) vce(cluster i.lpermno#i.fyear)
+eststo regression2: reghdfe dac visib_PM2_5 $control_variables_aem_PM25, absorb(i.fyear i.ff_48) vce(cluster i.lpermno#i.fyear)
 estadd scalar ar2 = e(r2_a)
 summarize dac
 estadd scalar ymean = r(mean)
@@ -1352,7 +1359,7 @@ estadd local yearfe "Yes", replace
 estadd local indfe "Yes", replace
 estadd local firmcont "Yes", replace
 
-eststo regression3: reghdfe rank_dac visib_PM2_5 $control_variables_aem, absorb(i.fyear i.ff_48) vce(cluster i.lpermno#i.fyear)
+eststo regression3: reghdfe rank_dac visib_PM2_5 $control_variables_aem_PM25, absorb(i.fyear i.ff_48) vce(cluster i.lpermno#i.fyear)
 estadd scalar ar2 = e(r2_a)
 summarize rank_dac
 estadd scalar ymean = r(mean)
@@ -1360,7 +1367,7 @@ estadd local yearfe "Yes", replace
 estadd local indfe "Yes", replace
 estadd local firmcont "Yes", replace
 
-eststo regression4: reghdfe rem visib_PM2_5 $control_variables_rem, absorb(i.fyear i.ff_48) vce(cluster i.lpermno#i.fyear)
+eststo regression4: reghdfe rem visib_PM2_5 $control_variables_rem_PM25, absorb(i.fyear i.ff_48) vce(cluster i.lpermno#i.fyear)
 estadd scalar ar2 = e(r2_a)
 summarize rem
 estadd scalar ymean = r(mean)
@@ -1368,7 +1375,7 @@ estadd local yearfe "Yes", replace
 estadd local indfe "Yes", replace
 estadd local firmcont "Yes", replace
 
-eststo regression5: reghdfe rank_rem visib_PM2_5 $control_variables_rem, absorb(i.fyear i.ff_48) vce(cluster i.lpermno#i.fyear)
+eststo regression5: reghdfe rank_rem visib_PM2_5 $control_variables_rem_PM25, absorb(i.fyear i.ff_48) vce(cluster i.lpermno#i.fyear)
 estadd scalar ar2 = e(r2_a)
 summarize rank_rem
 estadd scalar ymean = r(mean)
@@ -1389,7 +1396,7 @@ gen visib_res = visib - visib_PM2_5
 
 label var visib_res "Residual Visibility"
 	eststo clear
-eststo regression1: reghdfe dacck visib_res $control_variables_aem, absorb(i.fyear i.ff_48) vce(cluster i.lpermno#i.fyear)
+eststo regression1: reghdfe dacck visib_res $control_variables_aem_PM25, absorb(i.fyear i.ff_48) vce(cluster i.lpermno#i.fyear)
 estadd scalar ar2 = e(r2_a)
 summarize dacck
 estadd scalar ymean = r(mean)
@@ -1397,7 +1404,7 @@ estadd local yearfe "Yes", replace
 estadd local indfe "Yes", replace
 estadd local firmcon "Yes", replace
 
-eststo regression2: reghdfe dac visib_res $control_variables_aem, absorb(i.fyear i.ff_48) vce(cluster i.lpermno#i.fyear)
+eststo regression2: reghdfe dac visib_res $control_variables_aem_PM25, absorb(i.fyear i.ff_48) vce(cluster i.lpermno#i.fyear)
 estadd scalar ar2 = e(r2_a)
 summarize dac
 estadd scalar ymean = r(mean)
@@ -1405,7 +1412,7 @@ estadd local yearfe "Yes", replace
 estadd local indfe "Yes", replace
 estadd local firmcon "Yes", replace
 
-eststo regression3: reghdfe rank_dac visib_res $control_variables_aem, absorb(i.fyear i.ff_48) vce(cluster i.lpermno#i.fyear)
+eststo regression3: reghdfe rank_dac visib_res $control_variables_aem_PM25, absorb(i.fyear i.ff_48) vce(cluster i.lpermno#i.fyear)
 estadd scalar ar2 = e(r2_a)
 summarize rank_dac
 estadd scalar ymean = r(mean)
@@ -1413,7 +1420,7 @@ estadd local yearfe "Yes", replace
 estadd local indfe "Yes", replace
 estadd local firmcon "Yes", replace
 
-eststo regression4: reghdfe rem visib_res $control_variables_rem, absorb(i.fyear i.ff_48) vce(cluster i.lpermno#i.fyear)
+eststo regression4: reghdfe rem visib_res $control_variables_rem_PM25, absorb(i.fyear i.ff_48) vce(cluster i.lpermno#i.fyear)
 estadd scalar ar2 = e(r2_a)
 summarize rem
 estadd scalar ymean = r(mean)
@@ -1421,7 +1428,7 @@ estadd local yearfe "Yes", replace
 estadd local indfe "Yes", replace
 estadd local firmcon "Yes", replace
 
-eststo regression5: reghdfe rank_rem visib_res $control_variables_rem, absorb(i.fyear i.ff_48) vce(cluster i.lpermno#i.fyear)
+eststo regression5: reghdfe rank_rem visib_res $control_variables_rem_PM25, absorb(i.fyear i.ff_48) vce(cluster i.lpermno#i.fyear)
 estadd scalar ar2 = e(r2_a)
 summarize rank_rem
 estadd scalar ymean = r(mean)
@@ -1436,7 +1443,7 @@ booktabs label scalar(ymean) nomtitles nonumbers fragment nolines keep(visib_res
 stats(firmcon yearfe indfe N ar2, fmt(0 0 0 0 2 2) labels("Baseline Controls" "Year FE" "Industry FE" "N" "Adjusted R-sq")) 
 
 	eststo clear
-eststo regression1: reghdfe dacck pollutant_value $control_variables_aem, absorb(fyear ff_48) vce(cluster i.lpermno#i.fyear)
+eststo regression1: reghdfe dacck pollutant_value $control_variables_aem_PM25, absorb(fyear ff_48) vce(cluster i.lpermno#i.fyear)
 estadd scalar ar2 = e(r2_a)
 summarize dacck
 estadd scalar ymean = r(mean)
@@ -1444,7 +1451,7 @@ estadd local yearfe "Yes", replace
 estadd local indfe "Yes", replace
 estadd local firmcon "Yes", replace
 
-eststo regression2: reghdfe dac pollutant_value $control_variables_aem, absorb(fyear ff_48) vce(cluster i.lpermno#i.fyear)
+eststo regression2: reghdfe dac pollutant_value $control_variables_aem_PM25, absorb(fyear ff_48) vce(cluster i.lpermno#i.fyear)
 estadd scalar ar2 = e(r2_a)
 summarize dac
 estadd scalar ymean = r(mean)
@@ -1452,7 +1459,7 @@ estadd local yearfe "Yes", replace
 estadd local indfe "Yes", replace
 estadd local firmcon "Yes", replace
 
-eststo regression3: reghdfe rank_dac pollutant_value $control_variables_aem, absorb(fyear ff_48) vce(cluster i.lpermno#i.fyear)
+eststo regression3: reghdfe rank_dac pollutant_value $control_variables_aem_PM25, absorb(fyear ff_48) vce(cluster i.lpermno#i.fyear)
 estadd scalar ar2 = e(r2_a)
 summarize rank_dac
 estadd scalar ymean = r(mean)
@@ -1460,7 +1467,7 @@ estadd local yearfe "Yes", replace
 estadd local indfe "Yes", replace
 estadd local firmcon "Yes", replace
 
-eststo regression4: reghdfe rem pollutant_value $control_variables_rem, absorb(fyear ff_48) vce(cluster i.lpermno#i.fyear)
+eststo regression4: reghdfe rem pollutant_value $control_variables_rem_PM25, absorb(fyear ff_48) vce(cluster i.lpermno#i.fyear)
 estadd scalar ar2 = e(r2_a)
 summarize rem
 estadd scalar ymean = r(mean)
@@ -1468,7 +1475,7 @@ estadd local yearfe "Yes", replace
 estadd local indfe "Yes", replace
 estadd local firmcon "Yes", replace
 
-eststo regression5: reghdfe rank_rem pollutant_value $control_variables_rem, absorb(fyear ff_48) vce(cluster i.lpermno#i.fyear)
+eststo regression5: reghdfe rank_rem pollutant_value $control_variables_rem_PM25, absorb(fyear ff_48) vce(cluster i.lpermno#i.fyear)
 estadd scalar ar2 = e(r2_a)
 summarize rank_rem
 estadd scalar ymean = r(mean)
@@ -1481,7 +1488,7 @@ nomtitles nonumbers collabels(none) booktabs label ///
 stats(firmcon yearfe indfe N ar2, fmt(0 0 0 0 2 2) labels("Baseline Controls" "Year FE" "Industry FE" "N" "Adjusted R-sq")) keep(pollutant_value) ///
 posthead("&\multicolumn{5}{c}{\textbf{Panel B: Using PM 2.5 Instead of Visibility}} \\") ///
 postfoot("\bottomrule\end{tabular}}\end{center}\footnotesize{Notes: This table presents the regression results to test the effect of unpleasant air quality on AEM and REM using actual air pollution measures. We use the fitted value of $Visibility$ and the residual from the regression of $Visibility$ on PM 2.5 in Panel A, and use PM 2.5 in Panel B, respectively, as the main test variable. See Appendix A for detailed variable definitions. Numbers in parentheses represent t-statistics calculated based on standard errors clustered at the industry-year level. ***, **, and * indicate statistical significance at the 1\%, 5\%, and 10\% levels, respectively.}\end{table}") 
-
+exit
 **# Table D1
 *======== Correlation Table ==============================
 
@@ -1509,14 +1516,14 @@ merge 1:1 tic fyear using "$output\board_characteristics"
 	capture drop _merge
 merge 1:1 cusip8 fyear using "$output\institutional_ownership_x.dta"
 	keep if _merge == 1 | _merge == 3
+	replace InstOwn_Perc = 1 if InstOwn_Perc > 1
+	replace InstOwn_Perc = 0 if mi(InstOwn_Perc)
 
 	capture drop lit
 gen lit = 1 if (sic >= 2833 & sic <= 2836) | (sic >= 3570 & sic <= 3577) | (sic >= 3600 & sic <=3674) | (sic >= 5200 & sic <= 5961) | (sic >= 7370 & sic <= 7379) | (sic >= 8731 & sic <= 8734)
 replace lit = 0 if mi(lit) & !mi(sic)
 
 label var lit "Litigious"
-replace InstOwn_Perc = 0 if mi(InstOwn_Perc)
-
 label var loss "Loss"
 label var salesgrowth "Sales Growth"
 label var lit "Litigious"
@@ -1642,14 +1649,14 @@ merge 1:1 tic fyear using "$output\board_characteristics"
 	capture drop _merge
 merge 1:1 cusip8 fyear using "$output\institutional_ownership_x.dta"
 	keep if _merge == 1 | _merge == 3
+	replace InstOwn_Perc = 1 if InstOwn_Perc > 1
+	replace InstOwn_Perc = 0 if mi(InstOwn_Perc)
 
 	capture drop lit
 gen lit = 1 if (sic >= 2833 & sic <= 2836) | (sic >= 3570 & sic <= 3577) | (sic >= 3600 & sic <=3674) | (sic >= 5200 & sic <= 5961) | (sic >= 7370 & sic <= 7379) | (sic >= 8731 & sic <= 8734)
 replace lit = 0 if mi(lit) & !mi(sic)
 
 label var lit "Litigious"
-replace InstOwn_Perc = 0 if mi(InstOwn_Perc)
-
 label var loss "Loss"
 label var salesgrowth "Sales Growth"
 label var lit "Litigious"
@@ -1742,6 +1749,7 @@ stats(yearfe indfe N ar2, fmt(0 0 0 2 2) labels("Year FE" "Industry FE" "N" "Adj
 prehead("\begin{table}\begin{center}\caption{Propensity Score Matching Sample}\label{tab: ttestpsm}\tabcolsep=0.1cm\scalebox{0.6}{\begin{tabular}{lcccccc}\toprule") posthead("\midrule") ///
 postfoot("\bottomrule\end{tabular}}\end{center}\footnotesize{Notes: This table presents the main regression results to test our hypotheses on the effect of Visibility on AEM and REM using the Propensity Score Matched sample. See Appendix A for detailed variable definitions. Numbers in parentheses represent t-statistics calculated based on standard errors clustered at the industry-year level. ***, **, and * indicate statistical significance at the 1\%, 5\%, and 10\% levels, respectively.}\end{table}") 
 
+exit
 **# Table OA2-OA4
 global summ_vars dacck dac rank_dac rem rank_rem d_cfo_neg rank_d_cfo_neg d_prod rank_d_prod ///
 d_discexp_neg rank_d_discexp_neg size bm roa lev firm_age rank au_years loss sale salesgrowth lit InstOwn_Perc   stockreturn sale_sd oa_scale hhi_sale cover pollutant_value

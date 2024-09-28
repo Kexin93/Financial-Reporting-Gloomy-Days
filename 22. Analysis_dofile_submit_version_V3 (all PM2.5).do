@@ -185,14 +185,13 @@ merge 1:1 tic fyear using "$output\board_characteristics"
 merge 1:1 cusip8 fyear using "$output\institutional_ownership_x.dta"
 	keep if _merge == 1 | _merge == 3
 	replace InstOwn_Perc = 1 if InstOwn_Perc > 1
-
+	replace InstOwn_Perc = 0 if mi(InstOwn_Perc)
+	
 	capture drop lit
 gen lit = 1 if (sic >= 2833 & sic <= 2836) | (sic >= 3570 & sic <= 3577) | (sic >= 3600 & sic <=3674) | (sic >= 5200 & sic <= 5961) | (sic >= 7370 & sic <= 7379) | (sic >= 8731 & sic <= 8734)
 replace lit = 0 if mi(lit) & !mi(sic)
 
 label var lit "Litigious"
-replace InstOwn_Perc = 0 if mi(InstOwn_Perc)
-
 label var loss "Loss"
 label var salesgrowth "Sales Growth"
 label var lit "Litigious"
@@ -620,7 +619,7 @@ estadd local yearfe "Yes", replace
 estadd local indfe "Yes", replace
 estadd local firmcont "Yes", replace
 
-eststo regression3: reghdfe dac pollutant_value Boardindependence c.pollutant_value#c.Boardindependence $control_variables_aem_t78, absorb(fyear ff_48) vce(cluster i.lpermno#i.fyear) 
+eststo regression3: reghdfe dac pollutant_value Boardindependence c.pollutant_value#c.Boardindependence $control_variables_aem, absorb(fyear ff_48) vce(cluster i.lpermno#i.fyear) 
 estadd scalar ar2 = e(r2_a)
 summarize dac
 estadd scalar ymean = r(mean)
@@ -1056,7 +1055,7 @@ estadd local firmcont "Yes", replace
 esttab regression3 using "$output\table9_panelE_PM25.tex", replace fragment ///
 nomtitles collabels(none) booktabs label ///
 stats(yearfe indfe N ar2, fmt(0 0 0 0 2) labels("Year FE" "Industry FE" "N" "Adjusted R-sq")) ///
-prehead("\begin{table}\begin{center}\tabcolsep=0.1cm\scalebox{0.9}{\begin{tabular}{lccc}\toprule") /*starlevels(* 0.2 ** 0.1 *** 0.02)*/ compress style(tab) posthead("\midrule &\multicolumn{1}{c}{\textbf{Panel E: The Effect of Air Pollution on Managers' Productivity}}\\") postfoot("\bottomrule\end{tabular}}\end{center}\footnotesize{Notes: Panels A to D of this table present the regression results to test the effect of the level of PM 2.5 on AEM and REM using subsamples. Our sample is divided into two subsamples based on knowledge-intensive vs. non-knowledge-intensive industries in Panels A and B, and based on labor-intensive vs. non-labor-intensive industries in Panels C and D. Panel E presents the regression results to test the effect of the level of PM 2.5 on Total Factor Productivity. See Appendix A for detailed variable definitions. Numbers in parentheses represent t-statistics calculated based on standard errors clustered at the industry-year level. ***, **, and * indicate statistical significance at the 1\%, 5\%, and 10\% levels, respectively.}\end{table}") 
+prehead("\begin{table}\begin{center}\tabcolsep=0.1cm\scalebox{0.9}{\begin{tabular}{lccc}\toprule") starlevels(* 0.2 ** 0.1 *** 0.02) compress style(tab) posthead("\midrule &\multicolumn{1}{c}{\textbf{Panel E: The Effect of Air Pollution on Managers' Productivity}}\\") postfoot("\bottomrule\end{tabular}}\end{center}\footnotesize{Notes: Panels A to D of this table present the regression results to test the effect of the level of PM 2.5 on AEM and REM using subsamples. Our sample is divided into two subsamples based on knowledge-intensive vs. non-knowledge-intensive industries in Panels A and B, and based on labor-intensive vs. non-labor-intensive industries in Panels C and D. Panel E presents the regression results to test the effect of the level of PM 2.5 on Total Factor Productivity. See Appendix A for detailed variable definitions. Numbers in parentheses represent t-statistics calculated based on standard errors clustered at the industry-year level. ***, **, and * indicate statistical significance at the 1\%, 5\%, and 10\% levels, respectively.}\end{table}") 
 
 **# Table 11
 preserve
@@ -1251,7 +1250,7 @@ mgroups("Accrual Earnings Management" "Real Earnings Management", pattern(1 0 0 
 mtitles("\makecell{AEM \\ (performance \\ -adj.)}" "\makecell{AEM \\ (modified \\ Jones)}" "\makecell{AEM \\ Rank}" "REM" "\makecell{REM \\ Rank}") nonumbers collabels(none) nolines booktabs label keep(visib_PM2_5) postfoot("\midrule") ///
 stats(firmcont yearfe indfe N ar2, fmt(0 0 0 0 2 2) labels("Baseline Controls" "Year FE" "Industry FE" "N" "Adjusted R-sq")) ///
 prehead("\begin{table}\begin{center}\caption{The Effect of Visibility on Earnings Management: Using Actual Air Pollution Measures}\label{tab: table12}\tabcolsep=0.3cm\scalebox{0.8}{\begin{tabular}{lccccc}\toprule")  ///
-posthead("\midrule &\multicolumn{5}{c}{\textbf{Panel A: Using Visibility Explained by PM 2.5 and Residual}} \\")
+posthead("\midrule &\multicolumn{5}{c}{\textbf{Panel A: Using Visibility Explained by PM 2.5}} \\")
 
 gen visib_res_aem = visib - visib_PM2_5_aem
 gen visib_res_rem = visib - visib_PM2_5_rem
@@ -1302,10 +1301,8 @@ estadd local firmcon "Yes", replace
 global first_stage size bm roa lev firm_age rank au_years oa_scale hhi_sale /*xrd_int*/
 
 esttab regression1 regression2 regression3 regression4 regression5 using "$output\table12_PM25.tex", append  ///
-booktabs label scalar(ymean) nomtitles nonumbers fragment nolines keep(visib_res) posthead("")  ///
-stats(firmcon yearfe indfe N ar2, fmt(0 0 0 0 2 2) labels("Baseline Controls" "Year FE" "Industry FE" "N" "Adjusted R-sq")) ///
-postfoot("\bottomrule\end{tabular}}\end{center}\footnotesize{Notes: This table presents the regression results to test the effect of unpleasant air quality on AEM and REM using actual air pollution measures. We use the fitted value of $Visibility$ and the residual from the regression of $Visibility$ on PM 2.5, as the main test variable. See Appendix A for detailed variable definitions. Numbers in parentheses represent t-statistics calculated based on standard errors clustered at the industry-year level. ***, **, and * indicate statistical significance at the 1\%, 5\%, and 10\% levels, respectively.}\end{table}") 
-exit
+booktabs label scalar(ymean) nomtitles nonumbers fragment nolines keep(visib_res) ///
+stats(firmcon yearfe indfe N ar2, fmt(0 0 0 0 2 2) labels("Baseline Controls" "Year FE" "Industry FE" "N" "Adjusted R-sq")) posthead("\midrule &\multicolumn{5}{c}{\textbf{Panel B: Using Visibility Explained by Residual}} \\") postfoot("\bottomrule\end{tabular}}\end{center}\footnotesize{Notes: This table presents the regression results to test the effect of unpleasant air quality on AEM and REM using actual air pollution measures. We use the fitted value of $Visibility$ and the residual from the regression of $Visibility$ on PM 2.5, as the main test variable. See Appendix A for detailed variable definitions. Numbers in parentheses represent t-statistics calculated based on standard errors clustered at the industry-year level. ***, **, and * indicate statistical significance at the 1\%, 5\%, and 10\% levels, respectively.}\end{table}") 
 
 **# Table D1
 *======== Correlation Table ==============================
@@ -1334,14 +1331,14 @@ merge 1:1 tic fyear using "$output\board_characteristics"
 	capture drop _merge
 merge 1:1 cusip8 fyear using "$output\institutional_ownership_x.dta"
 	keep if _merge == 1 | _merge == 3
+	replace InstOwn_Perc = 1 if InstOwn_Perc>1
+	replace InstOwn_Perc = 0 if mi(InstOwn_Perc)
 
 	capture drop lit
 gen lit = 1 if (sic >= 2833 & sic <= 2836) | (sic >= 3570 & sic <= 3577) | (sic >= 3600 & sic <=3674) | (sic >= 5200 & sic <= 5961) | (sic >= 7370 & sic <= 7379) | (sic >= 8731 & sic <= 8734)
 replace lit = 0 if mi(lit) & !mi(sic)
 
 label var lit "Litigious"
-replace InstOwn_Perc = 0 if mi(InstOwn_Perc)
-
 label var loss "Loss"
 label var salesgrowth "Sales Growth"
 label var lit "Litigious"
@@ -1467,14 +1464,14 @@ merge 1:1 tic fyear using "$output\board_characteristics"
 	capture drop _merge
 merge 1:1 cusip8 fyear using "$output\institutional_ownership_x.dta"
 	keep if _merge == 1 | _merge == 3
+	replace InstOwn_Perc = 0 if mi(InstOwn_Perc)
+	replace InstOwn_Perc = 1 if InstOwn_Perc > 1
 
 	capture drop lit
 gen lit = 1 if (sic >= 2833 & sic <= 2836) | (sic >= 3570 & sic <= 3577) | (sic >= 3600 & sic <=3674) | (sic >= 5200 & sic <= 5961) | (sic >= 7370 & sic <= 7379) | (sic >= 8731 & sic <= 8734)
 replace lit = 0 if mi(lit) & !mi(sic)
 
 label var lit "Litigious"
-replace InstOwn_Perc = 0 if mi(InstOwn_Perc)
-
 label var loss "Loss"
 label var salesgrowth "Sales Growth"
 label var lit "Litigious"
@@ -1567,6 +1564,7 @@ stats(yearfe indfe N ar2, fmt(0 0 0 2 2) labels("Year FE" "Industry FE" "N" "Adj
 prehead("\begin{table}\begin{center}\caption{Propensity Score Matching Sample}\label{tab: ttestpsm}\tabcolsep=0.1cm\scalebox{0.6}{\begin{tabular}{lcccccc}\toprule") posthead("\midrule") ///
 postfoot("\bottomrule\end{tabular}}\end{center}\footnotesize{Notes: This table presents the main regression results to test our hypotheses on the effect of air pollution on AEM and REM using the Propensity Score Matched sample. See Appendix A for detailed variable definitions. Numbers in parentheses represent t-statistics calculated based on standard errors clustered at the industry-year level. ***, **, and * indicate statistical significance at the 1\%, 5\%, and 10\% levels, respectively.}\end{table}") 
 
+exit
 **# Table OA2-OA4
 global summ_vars dacck dac rank_dac rem rank_rem d_cfo_neg rank_d_cfo_neg d_prod rank_d_prod ///
 d_discexp_neg rank_d_discexp_neg size bm roa lev firm_age rank au_years loss sale salesgrowth lit InstOwn_Perc   stockreturn sale_sd oa_scale hhi_sale cover pollutant_value

@@ -106,12 +106,15 @@ label var visib_PM2_5_rem "Fitted visibility (REM)"
 
 reghdfe visib pollutant_value_PM25 pollutant_value_PM10 /*pollutant_value_NO2*/ pollutant_value_O3 pollutant_value_SO2 $first_stage, absorb(i.fyear i.ff_48) vce(cluster i.lpermno#i.fyear)
 predict visib_pollutants1, xb
+label var visib_pollutants1 "Fitted Visibility"
 
 reghdfe visib pollutant_value_PM25 pollutant_value_PM10 /*pollutant_value_NO2*/ pollutant_value_O3 /*pollutant_value_SO2*/ $first_stage, absorb(i.fyear i.ff_48) vce(cluster i.lpermno#i.fyear)
 predict visib_pollutants2, xb
+label var visib_pollutants2 "Fitted Visibility"
 
 reghdfe visib pollutant_value_PM25 pollutant_value_PM10 /*pollutant_value_NO2 pollutant_value_O3 pollutant_value_SO2*/ $first_stage, absorb(i.fyear i.ff_48) vce(cluster i.lpermno#i.fyear)
 predict visib_pollutants3, xb
+label var visib_pollutants3 "Fitted Visibility"
 
 **# Table 5
 label var dac "AEM"
@@ -198,7 +201,7 @@ estadd scalar ymean = r(mean)
 estadd local yearfe "Yes", replace
 estadd local indfe "Yes", replace
 
-esttab regression1 regression2 regression3 regression4 regression5 using "$output\table4_alternativePollutionM.tex", append fragment nomtitles collabels(none) booktabs label scalar(ymean) keep(visib_pollutants2) ///
+esttab regression1 regression2 regression3 regression4 regression5 using "$output\table4_alternativePollutionM.tex", append nonumbers fragment nomtitles collabels(none) booktabs label scalar(ymean) keep(visib_pollutants2) ///
 stats(yearfe indfe N ar2, fmt(0 0 0 2 2) labels("Year FE" "Industry FE" "N" "Adjusted R-sq")) posthead("\midrule &\multicolumn{5}{c}{\textbf{Panel B: Fitted Visibility using PM 2.5, PM 10, and O3}}\\") 
 
 *==================== Regression (Signed) =============================
