@@ -202,6 +202,10 @@ label var sale "Sales"
 label var cover "ANAL"
 label var hhi_sale "HHI"
 
+gen utilities_industry = (inrange(sic, 4900, 4999)) if !mi(sic)
+
+drop if utilities_industry == 1
+
 **# Table 2
 eststo summ_stats: estpost sum $summ_vars
 

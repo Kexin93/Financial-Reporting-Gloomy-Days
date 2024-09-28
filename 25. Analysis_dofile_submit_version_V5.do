@@ -246,6 +246,8 @@ gen finance_industry = (inrange(sic, 6011, 6099) | inrange(sic, 6111, 6163) | si
 
 gen utilities_industry = (inrange(sic, 4900, 4999)) if !mi(sic)
 
+drop if utilities_industry == 1
+
 **# Table 2
 eststo summ_stats: estpost sum $summ_vars
 

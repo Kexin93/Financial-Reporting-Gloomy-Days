@@ -104,6 +104,10 @@ predict visib_PM2_5_rem, xb
 label var visib_PM2_5_rem "Fitted visibility (REM)"
 */
 
+gen utilities_industry = (inrange(sic, 4900, 4999)) if !mi(sic)
+
+drop if utilities_industry == 1
+
 reghdfe visib pollutant_value_PM25 pollutant_value_PM10 /*pollutant_value_NO2*/ pollutant_value_O3 pollutant_value_SO2 $first_stage, absorb(i.fyear i.ff_48) vce(cluster i.lpermno#i.fyear)
 predict visib_pollutants1, xb
 label var visib_pollutants1 "Fitted Visibility"
