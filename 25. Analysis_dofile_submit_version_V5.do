@@ -224,6 +224,7 @@ merge 1:1 cusip8 fyear using "$output\institutional_ownership_x.dta"
 	replace InstOwn_Perc = 1 if InstOwn_Perc > 1
 	replace InstOwn_Perc = 0 if mi(InstOwn_Perc)
 	
+	capture drop _merge
 merge 1:1 tic fyear fyr using "$output\m_creditratings.dta"
 	keep if _merge == 1 | _merge == 3
 	
@@ -1490,7 +1491,7 @@ nomtitles nonumbers collabels(none) booktabs label ///
 stats(firmcon yearfe indfe N ar2, fmt(0 0 0 0 2 2) labels("Baseline Controls" "Year FE" "Industry FE" "N" "Adjusted R-sq")) keep(pollutant_value) ///
 posthead("&\multicolumn{5}{c}{\textbf{Panel B: Using PM 2.5 Instead of Visibility}} \\") ///
 postfoot("\bottomrule\end{tabular}}\end{center}\footnotesize{Notes: This table presents the regression results to test the effect of unpleasant air quality on AEM and REM using actual air pollution measures. We use the fitted value of $Visibility$ and the residual from the regression of $Visibility$ on PM 2.5 in Panel A, and use PM 2.5 in Panel B, respectively, as the main test variable. See Appendix A for detailed variable definitions. Numbers in parentheses represent t-statistics calculated based on standard errors clustered at the industry-year level. ***, **, and * indicate statistical significance at the 1\%, 5\%, and 10\% levels, respectively.}\end{table}") 
-exit
+
 **# Table D1
 *======== Correlation Table ==============================
 
@@ -1554,6 +1555,9 @@ label var hail  "Hail"
 label var tornado "Tornado"
 
 replace prcp = . if prcp > 99
+gen utilities_industry = (inrange(sic, 4900, 4999)) if !mi(sic)
+
+drop if utilities_industry == 1
 
 	eststo clear
 eststo regression1: reghdfe rem visib $control_variables_rem, absorb(fyear ff_48) vce(cluster i.lpermno#i.fyear)
@@ -1754,7 +1758,7 @@ postfoot("\bottomrule\end{tabular}}\end{center}\footnotesize{Notes: This table p
 exit
 **# Table OA2-OA4
 global summ_vars dacck dac rank_dac rem rank_rem d_cfo_neg rank_d_cfo_neg d_prod rank_d_prod ///
-d_discexp_neg rank_d_discexp_neg size bm roa lev firm_age rank au_years loss sale salesgrowth lit InstOwn_Perc   stockreturn sale_sd oa_scale hhi_sale cover pollutant_value
+d_discexp_neg rank_d_discexp_neg size bm roa lev firm_age rank au_years loss sale salesgrowth lit InstOwn_Perc withCreditRating stockreturn sale_sd oa_scale hhi_sale cover pollutant_value
 
 use "$output\convk.dta", replace
 keep fyear lpermno dacck
@@ -1784,12 +1788,17 @@ label var sale_sd "StdSales"
 label var sale "Sales"
 label var cover "ANAL"
 
+	capture drop _merge
+merge 1:1 tic fyear fyr using "$output\m_creditratings.dta"
+	keep if _merge == 1 | _merge == 3
+
 destring sic, replace
 gen lit = 1 if (sic >= 2833 & sic <= 2836) | (sic >= 3570 & sic <= 3577) | (sic >= 3600 & sic <=3674) | (sic >= 5200 & sic <= 5961) | (sic >= 7370 & sic <= 7379) | (sic >= 8731 & sic <= 8734)
 replace lit = 0 if mi(lit) & !mi(sic)
 
 label var lit "Litigious"
-replace InstOwn_Perc = 0 if mi(InstOwn_Perc)
+	replace InstOwn_Perc = 0 if mi(InstOwn_Perc)
+	replace InstOwn_Perc = 1 if InstOwn_Perc > 1
 
 capture drop _merge
 merge m:1 state city fyear using "$maindir\US_PM25_weightedannualmean.dta"
@@ -1821,6 +1830,9 @@ label var hhi_sale "HHI index"
 
 label var dacck "AEM (performance-adjusted)"
 
+gen utilities_industry = (inrange(sic, 4900, 4999)) if !mi(sic)
+
+drop if utilities_industry == 1
 
 * Firm age
 	preserve
@@ -2044,6 +2056,10 @@ save `convk', replace
 
 use "$output\OLD DOCUMENTS\final_data_11283.dta", replace
 
+gen utilities_industry = (inrange(sic, 4900, 4999)) if !mi(sic)
+
+drop if utilities_industry == 1
+
 hhi5 sale, by(ff_48 fyear) //hhi_sale
 label var hhi_sale "HHI index"		
 
@@ -2072,6 +2088,11 @@ replace lit = 0 if mi(lit) & !mi(sic)
 
 label var lit "Litigious"
 replace InstOwn_Perc = 0 if mi(InstOwn_Perc)
+replace InstOwn_Perc = 1 if InstOwn_Perc > 1
+
+	capture drop _merge
+merge 1:1 tic fyear fyr using "$output\m_creditratings.dta"
+	keep if _merge == 1 | _merge == 3
 
 label var loss "Loss"
 label var salesgrowth "Sales Growth"
@@ -2271,6 +2292,15 @@ replace lit = 0 if mi(lit) & !mi(sic)
 
 label var lit "Litigious"
 replace InstOwn_Perc = 0 if mi(InstOwn_Perc)
+replace InstOwn_Perc = 1 if InstOwn_Perc > 1
+
+	capture drop _merge
+merge 1:1 tic fyear fyr using "$output\m_creditratings.dta"
+	keep if _merge == 1 | _merge == 3
+	
+gen utilities_industry = (inrange(sic, 4900, 4999)) if !mi(sic)
+
+drop if utilities_industry == 1
 
 capture drop _merge
 merge m:1 state city fyear using "$maindir\US_PM25_weightedannualmean.dta"
