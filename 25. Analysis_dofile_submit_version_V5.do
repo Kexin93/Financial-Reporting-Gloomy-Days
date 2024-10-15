@@ -1639,6 +1639,11 @@ posthead("\midrule") postfoot("\bottomrule\end{tabular}}\end{center}\footnotesiz
 
 **# Table 10: PSM (last)
 use "$output\final_data_47662", replace
+
+gen utilities_industry = (inrange(sic, 4900, 4999)) if !mi(sic)
+
+drop if utilities_industry == 1
+
 	capture drop _merge
 merge m:1 state city fyear using "$maindir\US_PM25_weightedannualmean.dta"
 keep if _m == 1 | _m == 3 //3583 observations, or 762 state-city-fyears
@@ -1755,7 +1760,6 @@ stats(yearfe indfe N ar2, fmt(0 0 0 2 2) labels("Year FE" "Industry FE" "N" "Adj
 prehead("\begin{table}\begin{center}\caption{Propensity Score Matching Sample}\label{tab: ttestpsm}\tabcolsep=0.1cm\scalebox{0.6}{\begin{tabular}{lcccccc}\toprule") posthead("\midrule") ///
 postfoot("\bottomrule\end{tabular}}\end{center}\footnotesize{Notes: This table presents the main regression results to test our hypotheses on the effect of Visibility on AEM and REM using the Propensity Score Matched sample. See Appendix A for detailed variable definitions. Numbers in parentheses represent t-statistics calculated based on standard errors clustered at the industry-year level. ***, **, and * indicate statistical significance at the 1\%, 5\%, and 10\% levels, respectively.}\end{table}") 
 
-exit
 **# Table OA2-OA4
 global summ_vars dacck dac rank_dac rem rank_rem d_cfo_neg rank_d_cfo_neg d_prod rank_d_prod ///
 d_discexp_neg rank_d_discexp_neg size bm roa lev firm_age rank au_years loss sale salesgrowth lit InstOwn_Perc withCreditRating stockreturn sale_sd oa_scale hhi_sale cover pollutant_value

@@ -32,12 +32,18 @@ global control_variables_rem fog size bm roa lev firm_age rank au_years loss sal
 global control_variables fog size bm roa lev firm_age /*rank au_years oa_scale*/ hhi_sale loss salesgrowth /*lit*/ InstOwn_Perc /*sale_sd*/ 
 
 use "$output\final_data_47662", replace
+gen utilities_industry = (inrange(sic, 4900, 4999)) if !mi(sic)
+
+drop if utilities_industry == 1
+
 	capture drop _merge
 merge m:1 state city fyear using "$maindir\US_PM25_weightedannualmean.dta"
 keep if _m == 1 | _m == 3 //3583 observations, or 762 state-city-fyears
 label var pollutant_value "PM 2.5"
 rename pollutant_value pollutant_value_PM25
 
+pwcorr visib pollutant_value
+exit
 	capture drop _merge
 merge m:1 state city fyear using "$maindir\US_PM10_2ndMax.dta"
 keep if _m == 1 | _m == 3 //3583 observations, or 762 state-city-fyears
@@ -103,10 +109,6 @@ reghdfe visib pollutant_value $control_variables_rem, absorb(i.fyear i.ff_48) vc
 predict visib_PM2_5_rem, xb
 label var visib_PM2_5_rem "Fitted visibility (REM)"
 */
-
-gen utilities_industry = (inrange(sic, 4900, 4999)) if !mi(sic)
-
-drop if utilities_industry == 1
 
 reghdfe visib pollutant_value_PM25 pollutant_value_PM10 /*pollutant_value_NO2*/ pollutant_value_O3 pollutant_value_SO2 $first_stage, absorb(i.fyear i.ff_48) vce(cluster i.lpermno#i.fyear)
 predict visib_pollutants1, xb
