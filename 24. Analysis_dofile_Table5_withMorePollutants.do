@@ -43,7 +43,7 @@ label var pollutant_value "PM 2.5"
 rename pollutant_value pollutant_value_PM25
 
 pwcorr visib pollutant_value
-exit
+
 	capture drop _merge
 merge m:1 state city fyear using "$maindir\US_PM10_2ndMax.dta"
 keep if _m == 1 | _m == 3 //3583 observations, or 762 state-city-fyears
@@ -113,14 +113,18 @@ label var visib_PM2_5_rem "Fitted visibility (REM)"
 reghdfe visib pollutant_value_PM25 pollutant_value_PM10 /*pollutant_value_NO2*/ pollutant_value_O3 pollutant_value_SO2 $first_stage, absorb(i.fyear i.ff_48) vce(cluster i.lpermno#i.fyear)
 predict visib_pollutants1, xb
 label var visib_pollutants1 "Fitted Visibility"
+pwcorr visib visib_pollutants1
 
 reghdfe visib pollutant_value_PM25 pollutant_value_PM10 /*pollutant_value_NO2*/ pollutant_value_O3 /*pollutant_value_SO2*/ $first_stage, absorb(i.fyear i.ff_48) vce(cluster i.lpermno#i.fyear)
 predict visib_pollutants2, xb
 label var visib_pollutants2 "Fitted Visibility"
+pwcorr visib visib_pollutants2
 
 reghdfe visib pollutant_value_PM25 pollutant_value_PM10 /*pollutant_value_NO2 pollutant_value_O3 pollutant_value_SO2*/ $first_stage, absorb(i.fyear i.ff_48) vce(cluster i.lpermno#i.fyear)
 predict visib_pollutants3, xb
 label var visib_pollutants3 "Fitted Visibility"
+pwcorr visib visib_pollutants3
+exit
 
 **# Table 5
 label var dac "AEM"

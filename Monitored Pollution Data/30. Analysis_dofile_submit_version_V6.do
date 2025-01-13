@@ -157,6 +157,8 @@ rename year fyear
 
 save "$output\CEO_duality_x.dta", replace
 
+capture log close
+log using "$output\log.log", replace
 **# Define control variables
 global summ_vars dacck dac rank_dac rem rank_rem stdz_rem d_cfo_neg rank_d_cfo_neg d_prod rank_d_prod ///
 d_discexp_neg rank_d_discexp_neg size bm roa lev firm_age rank au_years loss sale salesgrowth lit InstOwn_Perc   stockreturn sale_sd oa_scale hhi_sale cover pollutant_value
@@ -168,6 +170,7 @@ global control_variables_rem size bm roa lev firm_age rank au_years loss salesgr
 global control_variables size bm roa lev firm_age /*rank au_years oa_scale*/ hhi_sale loss salesgrowth /*lit*/ InstOwn_Perc /*sale_sd*/ 
 
  use "$maindir\PMdata\final_data_47662_withMonitored.dta", replace
+ 
 	capture drop _merge
 merge m:1 state city fyear using "$maindir\US_PM25_weightedannualmean.dta"
 keep if _m == 1 | _m == 3 //3583 observations, or 762 state-city-fyears
@@ -2256,3 +2259,4 @@ mtitles("\makecell{AEM \\ (performance-adj.)}" "\makecell{AEM \\ (modified Jones
 stats(yearfe indfe N ar2, fmt(0 0 0 2 2) labels("Year FE" "Industry FE" "N" "Adjusted R-sq")) ///
 prehead("\begin{table}\begin{center}\caption{The Effect of Visibility on Earnings Management (three months before actual period end date)}\label{tab: table410883}\tabcolsep=0.1cm\scalebox{0.57}{\begin{tabular}{lccccc}\toprule")  ///
 posthead("\midrule") postfoot("\bottomrule\end{tabular}}\end{center}\footnotesize{This table presents the regression results to test the effect of $Visibility$ on AEM and REM when $Visibility$ is measured for three months before the actual fiscal year end date. See Appendix A for detailed variable definitions. Numbers in parentheses represent t-statistics calculated based on standard errors clustered at the industry-year level. ***, **, and * indicate statistical significance at the 1\%, 5\%, and 10\% levels, respectively.}\end{table}") 
+log close
