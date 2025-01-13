@@ -281,7 +281,7 @@ eststo Median: estpost summarize $summ_vars
 ereturn list 
 
 * .tex
-esttab obs Mean std p25 p50 p75 using "$output\summ_stats_firm.rtf",   ///
+esttab obs Mean std p25 p50 p75 using "$output\Word_Results.rtf",   ///
 label cells("count(pattern(1 0 0 0 0 0)) mean(pattern(0 1 0 0 0 0) fmt(3)) sd(pattern(0 0 1 0 0 0) fmt(3)) p25(pattern(0 0 0 1 0 0) fmt(3)) p50(pattern(0 0 0 0 1 0) fmt(3)) p75(pattern(0 0 0 0 0 1) fmt(3))") noobs  ///
 nonumbers replace collabels(none) mtitles("N" "Mean" "Std. Dev." "Bottom 25\%" "Median" "Top 25\%") ///
 title(Summary Statistics of Firm Characteristics) ///
@@ -360,12 +360,11 @@ eststo Median: estpost summarize $summ_vars_weather
 ereturn list 
 
 * .tex
-esttab obs Mean std p25 p50 p75 using "$output\summ_stats_weather.tex", fragment  ///
+esttab obs Mean std p25 p50 p75 using "$output\Word_Results.rtf", ///
 label cells("count(pattern(1 0 0 0 0 0)) mean(pattern(0 1 0 0 0 0) fmt(3)) sd(pattern(0 0 1 0 0 0) fmt(3)) p25(pattern(0 0 0 1 0 0) fmt(3)) p50(pattern(0 0 0 0 1 0) fmt(3)) p75(pattern(0 0 0 0 0 1) fmt(3))") noobs  ///
-prehead("\begin{table}\begin{center}\caption{Summary Statistics of Weather-Related Characteristics}\label{tab: summ_stats_weather}\tabcolsep=0.1cm\scalebox{0.65}{\begin{tabular}{lcccccc}\toprule")  ///
-nonumbers replace booktabs collabels(none) mtitles("N" "Mean" "Std. Dev." "Bottom 25\%" "Median" "Top 25\%") ///
-posthead("\midrule \textbf{Panel A: Weather Station-Year Level}\\") ///
-postfoot("\midrule")
+title(Summary Statistics of Weather-Related Characteristics) ///
+nonumbers append collabels(none) mtitles("N" "Mean" "Std. Dev." "Bottom 25%" "Median" "Top 25%") ///
+refcat(temp "Panel A: Weather Station-Year Level", nolabel)
 restore
 
 * Summary statistics of weather variables at the firm-year level (Panel B)
@@ -401,11 +400,11 @@ eststo Median: estpost summarize $summ_vars_weather
 ereturn list 
 
 * .tex
-esttab obs Mean std p25 p50 p75 using "$output\summ_stats_weather.tex", fragment  ///
+esttab obs Mean std p25 p50 p75 using "$output\Word_Results.rtf", ///
 label cells("count(pattern(1 0 0 0 0 0)) mean(pattern(0 1 0 0 0 0) fmt(3)) sd(pattern(0 0 1 0 0 0) fmt(3)) p25(pattern(0 0 0 1 0 0) fmt(3)) p50(pattern(0 0 0 0 1 0) fmt(3)) p75(pattern(0 0 0 0 0 1) fmt(3))") noobs  ///
-nonumbers append booktabs collabels(none) mtitles("N" "Mean" "Std. Dev." "Bottom 25\%" "Median" "Top 25\%") ///
-posthead("\midrule \textbf{Panel B: Firm-Year Level} \\") ///
-postfoot("\bottomrule\end{tabular}}\end{center}\footnotesize{Notes: This table presents the descriptive statistics for the various weather variables used in our analyses. See Appendix B for detailed variable descriptions.}\end{table}") 
+nonumbers append collabels(none) mtitles("N" "Mean" "Std. Dev." "Bottom 25%" "Median" "Top 25%") ///
+refcat( temp "Panel B: Firm-Year Level", nolabel) ///
+note(Notes: This table presents the descriptive statistics for the various weather variables used in our analyses. See Appendix B for detailed variable descriptions.) 
 
 **# Table 4
 global summ_vars dacck dac rank_dac rem rank_rem d_cfo_neg rank_d_cfo_neg d_prod rank_d_prod ///
@@ -425,11 +424,10 @@ eststo unpolluted_sample: estpost summarize $summ_vars if polluted == 0
 gen unpolluted = -polluted
 eststo difference:  estpost ttest $summ_vars, by(unpolluted)
 
-esttab allsample polluted_sample unpolluted_sample difference using "$output\ttest.tex", ///
-replace cells("mean(pattern(1 1 1 0)  fmt(3)) b(star pattern(0 0 0 1) fmt(3)) ") ///
-label mtitles("All" "Polluted" "Unpolluted" "Polluted-Unpolluted") collabels(none) nonumbers booktabs ///
-prehead("\begin{table}\begin{center}\caption{Univariate Test}\label{tab: ttest}\tabcolsep=0.1cm\begin{tabular}{lcccc}\toprule")  ///
-posthead("\midrule") postfoot("\bottomrule\end{tabular}\end{center}\footnotesize{Notes: This table presents the univariate test results about the difference of various firm characteristics between the firms located in high vs. low air pollution areas. We test the significance of the difference using the t-test. See Appendix A for detailed variable definitions. ***, **, and * indicate statistical significance at the 1\%, 5\%, and 10\% levels, respectively.}\end{table}") 
+esttab allsample polluted_sample unpolluted_sample difference using "$output\Word_Results.rtf", ///
+append cells("mean(pattern(1 1 1 0)  fmt(3)) b(star pattern(0 0 0 1) fmt(3)) ") ///
+label mtitles("All" "Polluted" "Unpolluted" "Polluted-Unpolluted") collabels(none) nonumbers ///
+title(Univariate Test) note(Notes: This table presents the univariate test results about the difference of various firm characteristics between the firms located in high vs. low air pollution areas. We test the significance of the difference using the t-test. See Appendix A for detailed variable definitions. ***, **, and * indicate statistical significance at the 1\%, 5\%, and 10\% levels, respectively.) 
 
 **# Table 5
 label var dac "AEM"
@@ -470,12 +468,12 @@ estadd scalar ymean = r(mean)
 estadd local yearfe "Yes", replace
 estadd local indfe "Yes", replace
 
-esttab regression1 regression2 regression3 regression4 regression5 using "$output\table4.tex", replace ///
-mgroups("Accrual Earnings Management" "Real Earnings Management", pattern(1 0 0 1 0) prefix(\multicolumn{@span}{c}{) suffix(}) span erepeat(\cmidrule(lr){@span})) ///
-mtitles("\makecell{AEM \\ (performance-adj.)}" "\makecell{AEM \\ (modified Jones)}" "\makecell{AEM \\ Rank}" "REM" "\makecell{REM \\ Rank}") collabels(none) booktabs label scalar(ymean) ///
+esttab regression1 regression2 regression3 regression4 regression5 using "$output\Word_Results.rtf", append ///
+mgroups("Accrual Earnings Management" "Real Earnings Management", pattern(1 0 0 1 0)) ///
+mtitles("AEM (performance-adj.)" "AEM (modified Jones)" "AEM Rank" "REM" "REM Rank") collabels(none) label scalar(ymean) ///
 stats(yearfe indfe N ar2, fmt(0 0 0 2 2) labels("Year FE" "Industry FE" "N" "Adjusted R-sq")) ///
-prehead("\begin{table}\begin{center}\caption{The Effect of Visibility on Earnings Management}\label{tab: table4}\tabcolsep=0.1cm\scalebox{0.6}{\begin{tabular}{lccccc}\toprule")  ///
-posthead("\midrule") postfoot("\bottomrule\end{tabular}}\end{center}\footnotesize{Notes: This table presents the main regression results to test our hypotheses on the effect of $Visibility$ on AEM and REM. See Appendix A for detailed variable definitions. Numbers in parentheses represent t-statistics calculated based on standard errors clustered at the industry-year level. ***, **, and * indicate statistical significance at the 1\%, 5\%, and 10\% levels, respectively.}\end{table}") 
+title(The Effect of Visibility on Earnings Management)  ///
+note(Notes: This table presents the main regression results to test our hypotheses on the effect of Visibility on AEM and REM. See Appendix A for detailed variable definitions. Numbers in parentheses represent t-statistics calculated based on standard errors clustered at the industry-year level. ***, **, and * indicate statistical significance at the 1%, 5%, and 10% levels, respectively.) 
 
 **# Table 6
 *======================= Decomposition of REM ========================
@@ -521,11 +519,11 @@ estadd scalar ymean = r(mean)
 estadd local yearfe "Yes", replace
 estadd local indfe "Yes", replace
 
-esttab sales1 sales2 overprod1 overprod2 expenditure1 expenditure2 using "$output\table5.tex", replace ///
-depvars collabels(none) booktabs label scalar(ymean) ///
+esttab sales1 sales2 overprod1 overprod2 expenditure1 expenditure2 using "$output\Word_Results.rtf", append ///
+depvars collabels(none) label scalar(ymean) ///
 stats(yearfe indfe N ar2, fmt(0 0 0 2 2) labels("Year FE" "Industry FE" "N" "Adjusted R-sq")) ///
-prehead("\begin{table}\begin{center}\caption{The Effect of Visibility on Individual REM Measures}\label{tab: table5}\tabcolsep=0.1cm\scalebox{0.62}{\begin{tabular}{lcccccc}\toprule")  ///
-posthead("\midrule") postfoot("\bottomrule\end{tabular}}\end{center}\footnotesize{Notes: This table presents the regression results to test the effect of $Visibility$ on REM using three individual REM measures and their ranks. See Appendix A for detailed variable definitions. Numbers in parentheses represent t-statistics calculated based on standard errors clustered at the industry-year level. ***, **, and * indicate statistical significance at the 1\%, 5\%, and 10\% levels, respectively.}\end{table}") 
+title(The Effect of Visibility on Individual REM Measures)  ///
+note(Notes: This table presents the regression results to test the effect of Visibility on REM using three individual REM measures and their ranks. See Appendix A for detailed variable definitions. Numbers in parentheses represent t-statistics calculated based on standard errors clustered at the industry-year level. ***, **, and * indicate statistical significance at the 1%, 5%, and 10% levels, respectively.) 
 
 global control_variables_aem_t78 size bm roa lev firm_age rank au_years oa_scale /*xrd_int*/
 global control_variables_rem_t78 size bm roa lev firm_age rank au_years hhi_sale /*xrd_int*/
@@ -574,12 +572,12 @@ estadd local yearfe "Yes", replace
 estadd local indfe "Yes", replace
 estadd local firmcont "Yes", replace
 
-esttab regression1 regression2 regression3 regression4 regression5 using "$output\table8.tex", replace ///
-mgroups("Accrual Earnings Management" "Real Earnings Management", pattern(1 0 0 1 0) prefix(\multicolumn{@span}{c}{) suffix(}) span erepeat(\cmidrule(lr){@span})) drop($control_variables_rem_t78 $control_variables_aem_t78) ///
-mtitles("\makecell{AEM \\ (performance-adj.)}" "\makecell{AEM \\ (modified Jones)}" "\makecell{AEM \\ Rank}" "REM" "\makecell{REM \\ Rank}") collabels(none) fragment booktabs label scalar(ymean) order(visib cover c.visib#c.cover) starlevels(* 0.2 ** 0.1 *** 0.02) ///
+esttab regression1 regression2 regression3 regression4 regression5 using "$output\Word_Results.rtf", replace ///
+mgroups("Accrual Earnings Management" "Real Earnings Management", pattern(1 0 0 1 0)) drop($control_variables_rem_t78 $control_variables_aem_t78) ///
+mtitles("AEM (performance-adj.)" "AEM (modified Jones)" "AEM Rank" "REM" "REM Rank") collabels(none) label scalar(ymean) order(visib cover c.visib#c.cover) starlevels(* 0.2 ** 0.1 *** 0.02) ///
 stats(firmcont yearfe indfe N ar2, fmt(0 0 0 0 2 2) labels("Baseline Controls" "Year FE" "Industry FE" "N" "Adjusted R-sq")) ///
-prehead("\begin{table}\begin{center}\caption{The Moderating Effect of External Monitoring on the Relation between Visibility and Earnings Management}\label{tab: table8}\tabcolsep=0.1cm\scalebox{0.82}{\begin{tabular}{lccccc}\toprule")  ///
-posthead("\midrule &\multicolumn{5}{c}{\textbf{Panel A: Number of Analysts Following}}\\") 
+title(The Moderating Effect of External Monitoring on the Relation between Visibility and Earnings Management)  ///
+refcat(visib "Panel A: Number of Analysts Following", nolabel) 
 
 ** Credit Rating
 	eststo clear
@@ -623,10 +621,10 @@ estadd local yearfe "Yes", replace
 estadd local indfe "Yes", replace
 estadd local firmcont "Yes", replace
 
-esttab regression1 regression2 regression3 regression4 regression5 using "$output\table8.tex", append ///
+esttab regression1 regression2 regression3 regression4 regression5 using "$output\Word_Results.rtf", append ///
 drop($control_variables_rem_t78 $control_variables_aem_t78) ///
-fragment nonumbers nomtitles collabels(none) booktabs label scalar(ymean) order(visib withCreditRating c.visib#c.withCreditRating) starlevels(* 0.2 ** 0.1 *** 0.02) ///
-stats(firmcont yearfe indfe N ar2, fmt(0 0 0 0 2 2) labels("Baseline Controls" "Year FE" "Industry FE" "N" "Adjusted R-sq")) posthead("\midrule &\multicolumn{5}{c}{\textbf{Panel B: Credit Rating}}\\") 
+nonumbers nomtitles collabels(none) label scalar(ymean) order(visib withCreditRating c.visib#c.withCreditRating) starlevels(* 0.2 ** 0.1 *** 0.02) ///
+stats(firmcont yearfe indfe N ar2, fmt(0 0 0 0 2 2) labels("Baseline Controls" "Year FE" "Industry FE" "N" "Adjusted R-sq")) refcat({visib "Panel B: Credit Rating", nolabel) 
 
 ** Institutional Ownership
 	eststo clear
@@ -670,10 +668,10 @@ estadd local yearfe "Yes", replace
 estadd local indfe "Yes", replace
 estadd local firmcont "Yes", replace
 
-esttab regression1 regression2 regression3 regression4 regression5 using "$output\table8.tex", append ///
+esttab regression1 regression2 regression3 regression4 regression5 using "$output\Word_Results.rtf", append ///
 drop($control_variables_rem_t78 $control_variables_aem_t78) ///
-fragment nonumbers nomtitles collabels(none) booktabs label scalar(ymean) order(visib InstOwn_Perc c.visib#c.InstOwn_Perc) starlevels(* 0.2 ** 0.1 *** 0.02) ///
-stats(firmcont yearfe indfe N ar2, fmt(0 0 0 0 2 2) labels("Baseline Controls" "Year FE" "Industry FE" "N" "Adjusted R-sq")) posthead("\midrule &\multicolumn{5}{c}{\textbf{Panel C: Institutional Ownership}}\\") postfoot("\bottomrule\end{tabular}}\end{center}\footnotesize{Notes: This table presents the regression results to test the moderating effect of the degree of external monitoring on the relation between Visibility and AEM/REM. See Appendix A for detailed variable definitions. The measures for external monitoring in Panel A-C are: the number of analysts following, an indicator for whether a firm has a credit rating, and percentage of institutional ownership, respectively. Numbers in parentheses represent t-statistics calculated based on standard errors clustered at the industry-year level. ***, **, and * indicate statistical significance at the 1\%, 5\%, and 10\% levels, respectively.}\end{table}") 
+nonumbers nomtitles collabels(none) label scalar(ymean) order(visib InstOwn_Perc c.visib#c.InstOwn_Perc) starlevels(* 0.2 ** 0.1 *** 0.02) ///
+stats(firmcont yearfe indfe N ar2, fmt(0 0 0 0 2 2) labels("Baseline Controls" "Year FE" "Industry FE" "N" "Adjusted R-sq")) refcat(visib "Panel C: Institutional Ownership", nolabel) note(Notes: This table presents the regression results to test the moderating effect of the degree of external monitoring on the relation between Visibility and AEM/REM. See Appendix A for detailed variable definitions. The measures for external monitoring in Panel A-C are: the number of analysts following, an indicator for whether a firm has a credit rating, and percentage of institutional ownership, respectively. Numbers in parentheses represent t-statistics calculated based on standard errors clustered at the industry-year level. ***, **, and * indicate statistical significance at the 1%, 5%, and 10% levels, respectively.) 
 
 **# Table 8
 global control_variables_aem fog size bm roa lev firm_age rank au_years loss salesgrowth lit InstOwn_Perc stockreturn sale_sd oa_scale rem
@@ -736,13 +734,13 @@ estadd local yearfe "Yes", replace
 estadd local indfe "Yes", replace
 estadd local firmcont "Yes", replace
 
-esttab regression1 regression2 regression3 regression4 regression5 regression6 using "$output\table15_panelAB.tex", replace fragment ///
-mgroups("Accrual Earnings Management" "Real Earnings Management", pattern(1 0 0 0 1 0) prefix(\multicolumn{@span}{c}{) suffix(}) span erepeat(\cmidrule(lr){@span})) drop($control_variables_rem_t78 $control_variables_aem_t78) mtitles("\makecell{AEM \\ (performance-adj.)}" "\makecell{AEM \\ (performance-adj.)}" "\makecell{AEM \\ (modified Jones)}" "\makecell{AEM \\ (modified Jones)}" "REM" "REM") collabels(none) booktabs label scalar(ymean) order(visib CGOV_str_num c.visib#c.CGOV_str_num CGOV_con_num c.visib#c.CGOV_con_num) starlevels(* 0.2 ** 0.1 *** 0.02) ///
+esttab regression1 regression2 regression3 regression4 regression5 regression6 using "$output\Word_Results.rtf", replace ///
+mgroups("Accrual Earnings Management" "Real Earnings Management", pattern(1 0 0 0 1 0)) drop($control_variables_rem_t78 $control_variables_aem_t78) mtitles("AEM (performance-adj.)" "AEM (performance-adj.)" "AEM (modified Jones)" "AEM (modified Jones)" "REM" "REM") collabels(none) label scalar(ymean) order(visib CGOV_str_num c.visib#c.CGOV_str_num CGOV_con_num c.visib#c.CGOV_con_num) starlevels(* 0.2 ** 0.1 *** 0.02) ///
 stats(firmcont yearfe indfe N ar2, fmt(0 0 0 0 2 2) labels("Baseline Controls" "Year FE" "Industry FE" "N" "Adjusted R-sq")) ///
-prehead("\begin{table}\begin{center}\caption{The Moderating Effect of Corporate Governance on the Relation between Visibility and Earnings Management}\label{tab: table15}\tabcolsep=0.1cm\scalebox{0.65}{\begin{tabular}{lcccccc}\toprule") posthead("\midrule&\multicolumn{6}{c}{\textbf{Panel A: CG =  CG Strengths and Concerns}}\\")
+title(The Moderating Effect of Corporate Governance on the Relation between Visibility and Earnings Management) refcat(visib "Panel A: CG =  CG Strengths and Concerns", nolabel)
 
 * Panel B
-label var boarddiversity "Female Board\%"
+label var boarddiversity "Female Board%"
 label var Boardindependence "Board Ind."
 	eststo clear
 eststo regression1: reghdfe dacck visib Boardindependence c.visib#c.Boardindependence $control_variables_aem, absorb(fyear ff_48) vce(cluster i.lpermno#i.fyear) 
@@ -793,11 +791,11 @@ estadd local yearfe "Yes", replace
 estadd local indfe "Yes", replace
 estadd local firmcont "Yes", replace
 
-esttab regression1 regression2 regression3 regression4 regression5 regression6 using "$output\table15_panelAB.tex", append fragment ///
+esttab regression1 regression2 regression3 regression4 regression5 regression6 using "$output\Word_Results.rtf", append ///
 drop($control_variables_rem $control_variables_aem) ///
-nomtitles nonumbers collabels(none) booktabs label order(visib Boardindependence c.visib#c.Boardindependence boarddiversity c.visib#c.boarddiversity) starlevels(* 0.2 ** 0.1 *** 0.02) ///
+nomtitles nonumbers collabels(none) label order(visib Boardindependence c.visib#c.Boardindependence boarddiversity c.visib#c.boarddiversity) starlevels(* 0.2 ** 0.1 *** 0.02) ///
 stats(firmcont yearfe indfe N ar2, fmt(0 0 0 0 2 2) labels("Baseline Controls" "Year FE" "Industry FE" "N" "Adjusted R-sq")) ///
-posthead("\midrule&\multicolumn{6}{c}{\textbf{Panel B: CG = Board Independence or Female Board\%}}\\") postfoot("\bottomrule\end{tabular}}\end{center}\end{table}") 
+refcat(visib "Panel B: CG = Board Independence or Female Board%", nolabel)
 
 
 * Panel C
@@ -859,8 +857,8 @@ estadd local yearfe "Yes", replace
 estadd local indfe "Yes", replace
 estadd local firmcont "Yes", replace
 
-esttab regression1 regression2 regression3 regression4 regression5 regression6 using "$output\table15_panelCD.tex", replace fragment ///
-mgroups("Accrual Earnings Management" "Real Earnings Management", pattern(1 0 0 0 1 0) prefix(\multicolumn{@span}{c}{) suffix(}) span erepeat(\cmidrule(lr){@span})) drop($control_variables_rem_t78 $control_variables_aem_t78) mtitles("\makecell{AEM \\ (performance-adj.)}" "\makecell{AEM \\ (performance-adj.)}" "\makecell{AEM \\ (modified Jones)}" "\makecell{AEM \\ (modified Jones)}" "REM" "REM")  collabels(none) booktabs label stats(firmcont yearfe indfe N ar2, fmt(0 0 0 0 2 2) labels("Baseline Controls" "Year FE" "Industry FE" "N" "Adjusted R-sq")) order(visib gparachute c.visib#c.gparachute ppill c.visib#c.ppill) prehead("\begin{table}\begin{center}\scalebox{0.6}{\begin{tabular}{lcccccc}\toprule") posthead("\midrule&\multicolumn{6}{c}{\textbf{Panel C: CG = Golden Parachute or Poison Pill}}\\") /*starlevels(* 0.2 ** 0.1 *** 0.02)*/
+esttab regression1 regression2 regression3 regression4 regression5 regression6 using "$output\Word_Results.rtf", replace ///
+mgroups("Accrual Earnings Management" "Real Earnings Management", pattern(1 0 0 0 1 0)) drop($control_variables_rem_t78 $control_variables_aem_t78) mtitles("AEM (performance-adj.)" "AEM (performance-adj.)" "AEM (modified Jones)" "AEM (modified Jones)" "REM" "REM")  collabels(none) label stats(firmcont yearfe indfe N ar2, fmt(0 0 0 0 2 2) labels("Baseline Controls" "Year FE" "Industry FE" "N" "Adjusted R-sq")) order(visib gparachute c.visib#c.gparachute ppill c.visib#c.ppill) refcat(visib "Panel C: CG = Golden Parachute or Poison Pill", nolabel) 
 
 * Panel D
 	capture drop _merge
@@ -921,11 +919,11 @@ estadd local yearfe "Yes", replace
 estadd local indfe "Yes", replace
 estadd local firmcont "Yes", replace
 
-esttab regression1 regression2 regression3 regression4 regression5 regression6 using "$output\table15_panelCD.tex", append fragment ///
+esttab regression1 regression2 regression3 regression4 regression5 regression6 using "$output\Word_Results.rtf", append ///
 drop($control_variables_rem $control_variables_aem) ///
-mtitles("Duality 1" "Duality 2" "Duality 1" "Duality 2" "Duality 1" "Duality 2") nonumbers collabels(none) booktabs label order(visib CEOduality c.visib#c.CEOduality dual_max c.visib#c.dual_max) ///
+mtitles("Duality 1" "Duality 2" "Duality 1" "Duality 2" "Duality 1" "Duality 2") nonumbers collabels(none) label order(visib CEOduality c.visib#c.CEOduality dual_max c.visib#c.dual_max) ///
 stats(firmcont yearfe indfe N ar2, fmt(0 0 0 0 2 2) labels("Baseline Controls" "Year FE" "Industry FE" "N" "Adjusted R-sq")) starlevels(* 0.2 ** 0.1 *** 0.02) ///
-posthead("\midrule&\multicolumn{6}{c}{\textbf{Panel D: CG = CEO-Chairman Duality}}\\") postfoot("\bottomrule\end{tabular}}\end{center}\footnotesize{Notes: This table presents the regression results to test the moderating effect of corporate governance on the relation between Visibility and AEM/REM. We use CG Strengths and CG Concerns in Panel A, Board Independence and Female Ratio on Boards in Panel B, Golden Parachute and Poison Pill in Panel C, and CEO-Chairman Duality in Panel D, respectively, as the proxy for corporate governance. See Appendix A for detailed variable definitions. Numbers in parentheses represent t-statistics calculated based on standard errors clustered at the industry-year level. ***, **, and * indicate statistical significance at the 1\%, 5\%, and 10\% levels, respectively.}\end{table}") 
+refcat(visib "Panel D: CG = CEO-Chairman Duality", nolabel) note(Notes: This table presents the regression results to test the moderating effect of corporate governance on the relation between Visibility and AEM/REM. We use CG Strengths and CG Concerns in Panel A, Board Independence and Female Ratio on Boards in Panel B, Golden Parachute and Poison Pill in Panel C, and CEO-Chairman Duality in Panel D, respectively, as the proxy for corporate governance. See Appendix A for detailed variable definitions. Numbers in parentheses represent t-statistics calculated based on standard errors clustered at the industry-year level. ***, **, and * indicate statistical significance at the 1%, 5%, and 10% levels, respectively.) 
 
 **# Table 9
 	capture drop _merge
@@ -978,11 +976,11 @@ estadd local yearfe "Yes", replace
 estadd local indfe "Yes", replace
 estadd local firmcont "Yes", replace
 
-esttab regression1 regression2 regression3 regression4 regression5 using "$output\table9_panelAB.tex", replace fragment keep(visib) ///
-mgroups("Accrual Earnings Management" "Real Earnings Management", pattern(1 0 0 1 0) prefix(\multicolumn{@span}{c}{) suffix(}) span erepeat(\cmidrule(lr){@span})) ///
-mtitles("\makecell{AEM \\ (performance-adj.)}" "\makecell{AEM \\ (modified Jones)}" "\makecell{AEM \\ Rank}" "REM" "\makecell{REM \\ Rank}") collabels(none) booktabs label ///
+esttab regression1 regression2 regression3 regression4 regression5 using "$output\Word_Results.rtf", append keep(visib) ///
+mgroups("Accrual Earnings Management" "Real Earnings Management", pattern(1 0 0 1 0)) ///
+mtitles("AEM (performance-adj.)" "AEM (modified Jones)" "AEM Rank" "REM" "REM Rank") collabels(none) booktabs label ///
 stats(firmcon yearfe indfe N ar2, fmt(0 0 0 0 2 2) labels("Baseline Controls" "Year FE" "Industry FE" "N" "Adjusted R-sq")) ///
-prehead("\begin{table}\begin{center}\caption{The Effect of Visibility on Earnings Management: Knowledge-Intensive vs. Labor-Intensive Industries}\label{tab: table9}\tabcolsep=0.1cm\scalebox{0.9}{\begin{tabular}{lccccc}\toprule") posthead("\midrule & \multicolumn{5}{c}{\textbf{Panel A: Knowledge-Intensive Industries Subsample}}\\") 
+title(The Effect of Visibility on Earnings Management: Knowledge-Intensive vs. Labor-Intensive Industries) refcat(visib "Panel A: Knowledge-Intensive Industries Subsample", nolabel) 
 restore
 
 preserve
@@ -1028,10 +1026,9 @@ estadd local yearfe "Yes", replace
 estadd local indfe "Yes", replace
 estadd local firmcont "Yes", replace
 
-esttab regression1 regression2 regression3 regression4 regression5 using "$output\table9_panelAB.tex", append fragment keep(visib) ///
+esttab regression1 regression2 regression3 regression4 regression5 using "$output\Word_Results.rtf", append keep(visib) ///
 nomtitles nonumbers collabels(none) booktabs label ///
-stats(firmcon yearfe indfe N ar2, fmt(0 0 0 0 2 2) labels("Baseline Controls" "Year FE" "Industry FE" "N" "Adjusted R-sq")) posthead("\midrule& \multicolumn{5}{c}{\textbf{Panel B: Non-Knowledge-Intensive Industries Subsample}}\\") ///
-postfoot("\bottomrule\end{tabular}}\end{center}\end{table}") 
+stats(firmcon yearfe indfe N ar2, fmt(0 0 0 0 2 2) labels("Baseline Controls" "Year FE" "Industry FE" "N" "Adjusted R-sq")) refcat(visib "Panel B: Non-Knowledge-Intensive Industries Subsample", nolabel) 
 restore
 
 gen labor_intensive = ((sic >= 100 & sic <= 999) | (sic >= 1500 & sic <= 1799) | (sic >= 2200 & sic <= 2399) | (sic >= 5200 & sic <= 5999) | (sic >= 8000 & sic <= 8399) | (sic >= 7000 & sic <= 7099) | (sic >= 7500 & sic <= 7599) | (sic >= 5800 & sic <= 5899)) if !mi(sic)
@@ -1084,11 +1081,11 @@ estadd local yearfe "Yes", replace
 estadd local indfe "Yes", replace
 estadd local firmcont "Yes", replace
 
-esttab regression1 regression2 regression3 regression4 regression5 using "$output\table9_panelCD.tex", replace fragment keep(visib) /// 
-mgroups("Accrual Earnings Management" "Real Earnings Management", pattern(1 0 0 1 0) prefix(\multicolumn{@span}{c}{) suffix(}) span erepeat(\cmidrule(lr){@span})) ///
-mtitles("\makecell{AEM \\ (performance-adj.)}" "\makecell{AEM \\ (modified Jones)}" "\makecell{AEM \\ Rank}" "REM" "\makecell{REM \\ Rank}") collabels(none) booktabs label ///
+esttab regression1 regression2 regression3 regression4 regression5 using "$output\Word_Results.rtf", append keep(visib) /// 
+mgroups("Accrual Earnings Management" "Real Earnings Management", pattern(1 0 0 1 0)) ///
+mtitles("AEM (performance-adj.)" "AEM (modified Jones)" "AEM Rank" "REM" "REM Rank") collabels(none) label ///
 stats(firmcon yearfe indfe N ar2, fmt(0 0 0 0 2 2) labels("Baseline Controls" "Year FE" "Industry FE" "N" "Adjusted R-sq")) ///
-prehead("\begin{table}\begin{center}\tabcolsep=0.1cm\scalebox{0.9}{\begin{tabular}{lccccc}\toprule") posthead("\midrule& \multicolumn{5}{c}{\textbf{Panel C: Labor-Intensive Industries Subsample}}\\") 
+refcat(visib "Panel C: Labor-Intensive Industries Subsample", nolabel) 
 restore
 
 preserve
@@ -1134,10 +1131,9 @@ estadd local yearfe "Yes", replace
 estadd local indfe "Yes", replace
 estadd local firmcont "Yes", replace
 
-esttab regression1 regression2 regression3 regression4 regression5 using "$output\table9_panelCD.tex", append fragment keep(visib) ///
-nomtitles nonumbers collabels(none) booktabs label ///
-stats(firmcon yearfe indfe N ar2, fmt(0 0 0 0 2 2) labels("Baseline Controls" "Year FE" "Industry FE" "N" "Adjusted R-sq")) posthead("\midrule& \multicolumn{5}{c}{\textbf{Panel D: Non-Labor-Intensive Industries Subsample}}\\") ///
-postfoot("\bottomrule\end{tabular}}\end{center}\end{table}") 
+esttab regression1 regression2 regression3 regression4 regression5 using "$output\Word_Results.rtf", append keep(visib) ///
+nomtitles nonumbers collabels(none) label ///
+stats(firmcon yearfe indfe N ar2, fmt(0 0 0 0 2 2) labels("Baseline Controls" "Year FE" "Industry FE" "N" "Adjusted R-sq")) refcat(visib "Panel D: Non-Labor-Intensive Industries Subsample", nolabel) 
 restore
 
 *Operating Income
@@ -1193,10 +1189,10 @@ estadd local yearfe "Yes", replace
 estadd local indfe "Yes", replace
 estadd local firmcont "Yes", replace
 
-esttab regression3 using "$output\table9_panelE.tex", replace fragment ///
-nomtitles collabels(none) booktabs label ///
+esttab regression3 using "$output\Word_Results.rtf", replace ///
+nomtitles collabels(none) label ///
 stats(yearfe indfe N ar2, fmt(0 0 0 0 2) labels("Year FE" "Industry FE" "N" "Adjusted R-sq")) ///
-prehead("\begin{table}\begin{center}\tabcolsep=0.1cm\scalebox{0.9}{\begin{tabular}{lccc}\toprule") starlevels(* 0.2 ** 0.1 *** 0.02) compress style(tab) posthead("\midrule &\multicolumn{1}{c}{\textbf{Panel E: The Effect of Visibility on Managers' Productivity}}\\") postfoot("\bottomrule\end{tabular}}\end{center}\footnotesize{Notes: Panels A to D of this table present the regression results to test the effect of $Visibility$ on AEM and REM using subsamples. Our sample is divided into two subsamples based on knowledge-intensive vs. non-knowledge-intensive industries in Panels A and B, and based on labor-intensive vs. non-labor-intensive industries in Panels C and D. Panel E presents the regression results to test the effect of $Visibility$ on Total Factor Productivity. See Appendix A for detailed variable definitions. Numbers in parentheses represent t-statistics calculated based on standard errors clustered at the industry-year level. ***, **, and * indicate statistical significance at the 1\%, 5\%, and 10\% levels, respectively.}\end{table}") 
+refcat(visib "Panel E: The Effect of Visibility on Managers' Productivity", nolabel) note(Notes: Panels A to D of this table present the regression results to test the effect of Visibility on AEM and REM using subsamples. Our sample is divided into two subsamples based on knowledge-intensive vs. non-knowledge-intensive industries in Panels A and B, and based on labor-intensive vs. non-labor-intensive industries in Panels C and D. Panel E presents the regression results to test the effect of Visibility on Total Factor Productivity. See Appendix A for detailed variable definitions. Numbers in parentheses represent t-statistics calculated based on standard errors clustered at the industry-year level. ***, **, and * indicate statistical significance at the 1%, 5%, and 10% levels, respectively.) 
 
 **# Table 11
 preserve
@@ -1317,12 +1313,12 @@ estadd local yearfe "Yes", replace
 estadd local indfe "Yes", replace
 estadd local blcontrols "Yes", replace
 		
-esttab regression1 regression2 regression3 regression4 regression5 regression6 using "$output\table22.tex", replace ///
-mgroups("Real Earnings Management" "Rank of Real Earnings Management", pattern(1 0 0 1 0 0) prefix(\multicolumn{@span}{c}{) suffix(}) span erepeat(\cmidrule(lr){@span})) ///
-nomtitles collabels(none) booktabs label scalar(ymean) drop($control_variables_rem) ///
+esttab regression1 regression2 regression3 regression4 regression5 regression6 using "$output\Word_Results.rtf", append ///
+mgroups("Real Earnings Management" "Rank of Real Earnings Management", pattern(1 0 0 1 0 0)) ///
+nomtitles collabels(none) label scalar(ymean) drop($control_variables_rem) ///
 stats(blcontrols yearfe indfe N ar2, fmt(0 0 0 0 2 2) labels("Baseline Controls" "Year FE" "Industry FE" "N" "Adjusted R-sq")) ///
-prehead("\begin{table}\begin{center}\caption{The Effect of Visibility on Earnings Management: Coastal vs. Inland Regions}\label{tab: table22}\tabcolsep=0.1cm\scalebox{0.8}{\begin{tabular}{lcccccc}\toprule")  ///
-posthead("\midrule") postfoot("\bottomrule\end{tabular}}\end{center}\footnotesize{Notes: This table presents the regression results to test the difference between coastal and inland areas in the effect of $Visibility$ on REM. See Appendix A for detailed variable definitions. Numbers in parentheses represent t-statistics calculated based on standard errors clustered at the industry-year level. ***, **, and * indicate statistical significance at the 1\%, 5\%, and 10\% levels, respectively.}\end{table}") 
+title(The Effect of Visibility on Earnings Management: Coastal vs. Inland Regions)  ///
+note(Notes: This table presents the regression results to test the difference between coastal and inland areas in the effect of Visibility on REM. See Appendix A for detailed variable definitions. Numbers in parentheses represent t-statistics calculated based on standard errors clustered at the industry-year level. ***, **, and * indicate statistical significance at the 1\%, 5\%, and 10\% levels, respectively.) 
 
 **# Table 12
 	capture drop _merge
@@ -1386,12 +1382,12 @@ estadd local yearfe "Yes", replace
 estadd local indfe "Yes", replace
 estadd local firmcont "Yes", replace
 
-esttab regression1 regression2 regression3 regression4 regression5 using "$output\table12.tex", replace fragment ///
-mgroups("Accrual Earnings Management" "Real Earnings Management", pattern(1 0 0 1 0) prefix(\multicolumn{@span}{c}{) suffix(}) span erepeat(\cmidrule(lr){@span})) ///
-mtitles("\makecell{AEM \\ (performance \\ -adj.)}" "\makecell{AEM \\ (modified \\ Jones)}" "\makecell{AEM \\ Rank}" "REM" "\makecell{REM \\ Rank}") nonumbers collabels(none) nolines booktabs label keep(visib_PM2_5) postfoot("\midrule") ///
+esttab regression1 regression2 regression3 regression4 regression5 using "$output\Word_Results.rtf", replace ///
+mgroups("Accrual Earnings Management" "Real Earnings Management", pattern(1 0 0 1 0)) ///
+mtitles("AEM (performance-adj.)" "AEM (modified Jones)" "AEM Rank" "REM" "REM Rank") nonumbers collabels(none) label keep(visib_PM2_5) ///
 stats(firmcont yearfe indfe N ar2, fmt(0 0 0 0 2 2) labels("Baseline Controls" "Year FE" "Industry FE" "N" "Adjusted R-sq")) ///
-prehead("\begin{table}\begin{center}\caption{The Effect of Visibility on Earnings Management: Using Actual Air Pollution Measures}\label{tab: table12}\tabcolsep=0.3cm\scalebox{0.8}{\begin{tabular}{lccccc}\toprule")  ///
-posthead("\midrule &\multicolumn{5}{c}{\textbf{Panel A: Using Visibility Explained by PM 2.5 and Residual}} \\")
+title(The Effect of Visibility on Earnings Management: Using Actual Air Pollution Measures)  ///
+refcat( visib "Panel A: Using Visibility Explained by PM 2.5 and Residual")
 
 gen visib_res_aem = visib - visib_PM2_5_aem
 gen visib_res_rem = visib - visib_PM2_5_rem
@@ -1441,8 +1437,8 @@ estadd local firmcon "Yes", replace
 
 global first_stage size bm roa lev firm_age rank au_years oa_scale hhi_sale /*xrd_int*/
 
-esttab regression1 regression2 regression3 regression4 regression5 using "$output\table12.tex", append  ///
-booktabs label scalar(ymean) nomtitles nonumbers fragment nolines keep(visib_res) posthead("\midrule") postfoot("\midrule") ///
+esttab regression1 regression2 regression3 regression4 regression5 using "$output\Word_Results.rtf", append  ///
+label scalar(ymean) nomtitles nonumbers keep(visib_res) ///
 stats(firmcon yearfe indfe N ar2, fmt(0 0 0 0 2 2) labels("Baseline Controls" "Year FE" "Industry FE" "N" "Adjusted R-sq")) 
 
 	eststo clear
@@ -1486,11 +1482,11 @@ estadd local yearfe "Yes", replace
 estadd local indfe "Yes", replace
 estadd local firmcon "Yes", replace
 
-esttab regression1 regression2 regression3 regression4 regression5 using "$output\table12.tex", append fragment ///
-nomtitles nonumbers collabels(none) booktabs label ///
+esttab regression1 regression2 regression3 regression4 regression5 using "$output\Word_Results.rtf", append ///
+nomtitles nonumbers collabels(none) label ///
 stats(firmcon yearfe indfe N ar2, fmt(0 0 0 0 2 2) labels("Baseline Controls" "Year FE" "Industry FE" "N" "Adjusted R-sq")) keep(pollutant_value) ///
-posthead("&\multicolumn{5}{c}{\textbf{Panel B: Using PM 2.5 Instead of Visibility}} \\") ///
-postfoot("\bottomrule\end{tabular}}\end{center}\footnotesize{Notes: This table presents the regression results to test the effect of unpleasant air quality on AEM and REM using actual air pollution measures. We use the fitted value of $Visibility$ and the residual from the regression of $Visibility$ on PM 2.5 in Panel A, and use PM 2.5 in Panel B, respectively, as the main test variable. See Appendix A for detailed variable definitions. Numbers in parentheses represent t-statistics calculated based on standard errors clustered at the industry-year level. ***, **, and * indicate statistical significance at the 1\%, 5\%, and 10\% levels, respectively.}\end{table}") 
+refcat(visib "Panel B: Using PM 2.5 Instead of Visibility") ///
+note(Notes: This table presents the regression results to test the effect of unpleasant air quality on AEM and REM using actual air pollution measures. We use the fitted value of Visibility and the residual from the regression of Visibility on PM 2.5 in Panel A, and use PM 2.5 in Panel B, respectively, as the main test variable. See Appendix A for detailed variable definitions. Numbers in parentheses represent t-statistics calculated based on standard errors clustered at the industry-year level. ***, **, and * indicate statistical significance at the 1%, 5%, and 10% levels, respectively.) 
 
 **# Table D1
 *======== Correlation Table ==============================
@@ -1632,10 +1628,10 @@ estadd local yearfe "Yes", replace
 estadd local indfe "Yes", replace
 estadd local firmcont "Yes", replace
 
-esttab regression1 regression2 regression3 regression4  regression5 regression6 regression7 regression8 regression9 using "$output\table7.tex", replace  drop($control_variables_rem) ///
-nomtitles collabels(none) booktabs label scalar(ymean) stats(firmcont yearfe indfe N ar2, fmt(0 0 0 0 2 2) labels("Baseline Controls"  "Year FE" "Industry FE" "N" "Adjusted R-sq")) ///
-prehead("\begin{table}\begin{center}\caption{Controlling for Additional Measures of Unpleasant Weather}\label{tab: table7}\tabcolsep=0.1cm\scalebox{0.65}{\begin{tabular}{lcccccccccc}\toprule") starlevels(* 0.2 ** 0.1 *** 0.02)  ///
-posthead("\midrule") postfoot("\bottomrule\end{tabular}}\end{center}\footnotesize{Notes: This table presents the regression results to test the effect of $Visibility$ on REM after controlling for various weather variables. See Appendices A and B for detailed variable definitions and descriptions. Numbers in parentheses represent t-statistics calculated based on standard errors clustered at the industry-year level. ***, **, and * indicate statistical significance at the 1\%, 5\%, and 10\% levels, respectively.}\end{table}")
+esttab regression1 regression2 regression3 regression4  regression5 regression6 regression7 regression8 regression9 using "$output\Word_Results.rtf", append drop($control_variables_rem) ///
+nomtitles collabels(none) label scalar(ymean) stats(firmcont yearfe indfe N ar2, fmt(0 0 0 0 2 2) labels("Baseline Controls"  "Year FE" "Industry FE" "N" "Adjusted R-sq")) ///
+title(Controlling for Additional Measures of Unpleasant Weather) starlevels(* 0.2 ** 0.1 *** 0.02)  ///
+note(Notes: This table presents the regression results to test the effect of Visibility on REM after controlling for various weather variables. See Appendices A and B for detailed variable definitions and descriptions. Numbers in parentheses represent t-statistics calculated based on standard errors clustered at the industry-year level. ***, **, and * indicate statistical significance at the 1%, 5%, and 10% levels, respectively.)
 
 **# Table 10: PSM (last)
 use "$output\final_data_47662", replace
@@ -1704,13 +1700,12 @@ eststo treatpsm: estpost sum $control_variables_psm if visib < visib_median & _s
 eststo controlpsm: estpost sum $control_variables_psm if visib >= visib_median  & _support == 1
 eststo diffpsm: estpost ttest $control_variables_psm if _support == 1, by(visib_binary_neg) 
 
-esttab treatall controlall diffall treatpsm controlpsm diffpsm using "$output\ttest_psm1.tex", ///
+esttab treatall controlall diffall treatpsm controlpsm diffpsm using "$output\Word_Results.rtf", ///
 replace cells("mean(pattern(1 1 0 1 1 0)  fmt(3)) b(star pattern(0 0 1 0 0 1) fmt(3)) ") ///
-mgroups("Pooled Sample" "PSM Sample", pattern(1 0 0 1 0 0) prefix(\multicolumn{@span}{c}{) suffix(}) span erepeat(\cmidrule(lr){@span})) ///
-label mtitles("More Polluted" "Less Polluted" "Difference" "More Polluted" "Less Polluted" "Difference") collabels(none) nonumbers booktabs ///
-prehead("\begin{table}\begin{center}\caption{Using Propensity Score Matched Sample}\label{tab: ttestpsm}\tabcolsep=0.1cm\scalebox{0.47}{\begin{tabular}{lcccccc}\toprule") starlevels(* 0.2 ** 0.1 *** 0.02) ///
-posthead("\midrule \multicolumn{7}{c}{\textbf{Panel A: Descriptive Statistics for the Sample before and after PSM}}\\") ///
-postfoot("\end{tabular}}") 
+mgroups("Pooled Sample" "PSM Sample", pattern(1 0 0 1 0 0)) ///
+label mtitles("More Polluted" "Less Polluted" "Difference" "More Polluted" "Less Polluted" "Difference") collabels(none) nonumbers ///
+title(Using Propensity Score Matched Sample) starlevels(* 0.2 ** 0.1 *** 0.02) ///
+refcat(size "Panel A: Descriptive Statistics for the Sample before and after PSM") 
 
 sum _support
 keep if _support == 1 //10846
@@ -1753,12 +1748,11 @@ estadd scalar ymean = r(mean)
 estadd local yearfe "Yes", replace
 estadd local indfe "Yes", replace
 
-esttab regression1 regression2 regression3 regression4 regression5 using "$output\ttest_psm2.tex", replace ///
-mgroups("Accrual Earnings Management" "Real Earnings Management", pattern(1 0 0 1 0) prefix(\multicolumn{@span}{c}{) suffix(}) span erepeat(\cmidrule(lr){@span})) ///
-mtitles("\makecell{AEM \\ (performance-adj.)}" "\makecell{AEM \\ (modified Jones)}" "AEM Rank" "REM" "REM Rank") collabels(none) booktabs label scalar(ymean) starlevels(* 0.2 ** 0.1 *** 0.02) ///
+esttab regression1 regression2 regression3 regression4 regression5 using "$output\Word_Results.rtf", append ///
+mgroups("Accrual Earnings Management" "Real Earnings Management", pattern(1 0 0 1 0)) ///
+mtitles("AEM (performance-adj.)" "AEM (modified Jones)" "AEM Rank" "REM" "REM Rank") collabels(none) label scalar(ymean) starlevels(* 0.2 ** 0.1 *** 0.02) ///
 stats(yearfe indfe N ar2, fmt(0 0 0 2 2) labels("Year FE" "Industry FE" "N" "Adjusted R-sq")) ///
-prehead("\begin{table}\begin{center}\caption{Propensity Score Matching Sample}\label{tab: ttestpsm}\tabcolsep=0.1cm\scalebox{0.6}{\begin{tabular}{lcccccc}\toprule") posthead("\midrule") ///
-postfoot("\bottomrule\end{tabular}}\end{center}\footnotesize{Notes: This table presents the main regression results to test our hypotheses on the effect of Visibility on AEM and REM using the Propensity Score Matched sample. See Appendix A for detailed variable definitions. Numbers in parentheses represent t-statistics calculated based on standard errors clustered at the industry-year level. ***, **, and * indicate statistical significance at the 1\%, 5\%, and 10\% levels, respectively.}\end{table}") 
+title(Propensity Score Matching Sample) note(Notes: This table presents the main regression results to test our hypotheses on the effect of Visibility on AEM and REM using the Propensity Score Matched sample. See Appendix A for detailed variable definitions. Numbers in parentheses represent t-statistics calculated based on standard errors clustered at the industry-year level. ***, **, and * indicate statistical significance at the 1%, 5%, and 10% levels, respectively.) 
 
 **# Table OA2-OA4
 global summ_vars dacck dac rank_dac rem rank_rem d_cfo_neg rank_d_cfo_neg d_prod rank_d_prod ///
@@ -1895,28 +1889,28 @@ label var visib "Visibility"
 label var cover "ANAL"
 
 * sales  
-label var rank_d_cfo "Rank($REM_{CFO}$)"
-label var d_cfo "$REM_{CFO}$"
+label var rank_d_cfo "Rank(REM_CFO)"
+label var d_cfo "REM_CFO"
 
 gen d_cfo_neg = - d_cfo
 gen rank_d_cfo_neg = 9- rank_d_cfo
 
-label var d_cfo_neg "$REM_{CFO}$"
-label var rank_d_cfo_neg " Rank($REM_{CFO}$)"
+label var d_cfo_neg "REM_CFO"
+label var rank_d_cfo_neg " Rank(REM_CFO)"
 
 * over-production
- label var d_prod "$REM_{PROD}$"
- label var rank_d_prod "Rank($REM_{PROD}$)"
+ label var d_prod "REM_PROD"
+ label var rank_d_prod "Rank(REM_PROD)"
 
 * expenditure
- label var d_discexp "$REM_{DISX}$"
- label var rank_d_discexp " Rank($REM_{DISX}$)"
+ label var d_discexp "REM_DISX"
+ label var rank_d_discexp " Rank(REM_DISX)"
 
 gen d_discexp_neg = -d_discexp
 gen rank_d_discexp_neg = 9-rank_d_discexp
 
- label var d_discexp_neg "$REM_{DISX}$"
- label var rank_d_discexp_neg "Rank($REM_{DISX}$)"
+ label var d_discexp_neg "REM_DISX"
+ label var rank_d_discexp_neg "Rank(REM_DISX)"
 
 * 1) Table OA2: Firm characteristics using actual period end date and three-month exposure
 
@@ -1951,11 +1945,11 @@ eststo Median: estpost summarize $summ_vars
 ereturn list 
 
 * .tex
-esttab obs Mean std p25 p50 p75 using "$output\summ_stats_firm_8294.tex", fragment  ///
+esttab obs Mean std p25 p50 p75 using "$output\Word_Results.rtf",  ///
 label cells("count(pattern(1 0 0 0 0 0)) mean(pattern(0 1 0 0 0 0) fmt(3)) sd(pattern(0 0 1 0 0 0) fmt(3)) p25(pattern(0 0 0 1 0 0) fmt(3)) p50(pattern(0 0 0 0 1 0) fmt(3)) p75(pattern(0 0 0 0 0 1) fmt(3))") noobs  ///
-nonumbers replace booktabs collabels(none) mtitles("N" "Mean" "Std. Dev." "Bottom 25\%" "Median" "Top 25\%") ///
-prehead("\begin{table}\begin{center}\caption{Summary Statistics of Firm Characteristics (three months after fiscal year-end)}\label{tab: summstats18294}\tabcolsep=0.1cm\scalebox{0.67}{\begin{tabular}{lcccccc}\toprule")  ///
-postfoot("\bottomrule\end{tabular}}\end{center}\footnotesize{Notes: This table presents the descriptive statistics for the firm-level variables used in the analyses where Visibility is measured for three months after the fiscal year-end. See Appendix A for detailed variable definitions and measurement.}\end{table}")  
+nonumbers replace collabels(none) mtitles("N" "Mean" "Std. Dev." "Bottom 25%" "Median" "Top 25%") ///
+title(Summary Statistics of Firm Characteristics (three months after fiscal year-end))  ///
+note(Notes: This table presents the descriptive statistics for the firm-level variables used in the analyses where Visibility is measured for three months after the fiscal year-end. See Appendix A for detailed variable definitions and measurement.)  
 
 * 2) Table OA3: Weather characteristics using actual period end date and three-month exposure
 label var temp "Temp."
@@ -2013,11 +2007,11 @@ eststo Median: estpost summarize $summ_vars_weather
 ereturn list 
 
 * .tex
-esttab obs Mean std p25 p50 p75 using "$output\summ_stats_weather_8294.tex", fragment  ///
+esttab obs Mean std p25 p50 p75 using "$output\Word_Results.rtf", ///
 label cells("count(pattern(1 0 0 0 0 0)) mean(pattern(0 1 0 0 0 0) fmt(3)) sd(pattern(0 0 1 0 0 0) fmt(3)) p25(pattern(0 0 0 1 0 0) fmt(3)) p50(pattern(0 0 0 0 1 0) fmt(3)) p75(pattern(0 0 0 0 0 1) fmt(3))") noobs  ///
-nonumbers replace booktabs collabels(none) mtitles("N" "Mean" "Std. Dev." "Bottom 25\%" "Median" "Top 25\%") ///
-prehead("\begin{table}\begin{center}\caption{Summary Statistics of Weather-Related Characteristics (three months after fiscal year-end)}\label{tab: summstats28294}\tabcolsep=0.1cm\scalebox{0.67}{\begin{tabular}{lcccccc}\toprule")  ///
-postfoot("\bottomrule\end{tabular}}\end{center}\footnotesize{Notes: This table presents the descriptive statistics for the various weather variables used in the analyses where Visibility is measured for three months after the fiscal year-end. See Appendix B for detailed variable descriptions.}\end{table}") 
+nonumbers append collabels(none) mtitles("N" "Mean" "Std. Dev." "Bottom 25%" "Median" "Top 25%") ///
+title(Summary Statistics of Weather-Related Characteristics (three months after fiscal year-end))  ///
+note(Notes: This table presents the descriptive statistics for the various weather variables used in the analyses where Visibility is measured for three months after the fiscal year-end. See Appendix B for detailed variable descriptions.) 
 
 * 3) Table OA4: The Effect of Visibility on Earnings Management (actual period end date and three-month exposure)
 label var visib "Visibility_{AfterFY3}"
@@ -2043,10 +2037,10 @@ estadd scalar ymean = r(mean)
 estadd local yearfe "Yes", replace
 estadd local indfe "Yes", replace
 
-esttab regression1 regression2 regression3 using "$output\table4_8294.tex", replace ///
-mtitles("\makecell{AEM \\ (performance-adj.)}" "\makecell{AEM \\ (modified Jones)}" "\makecell{AEM \\ Rank}") collabels(none) booktabs label scalar(ymean) ///
+esttab regression1 regression2 regression3 using "$output\Word_Results.rtf", append ///
+mtitles("AEM (performance-adj.)" "AEM (modified Jones)" "AEM Rank") collabels(none) label scalar(ymean) ///
 stats(yearfe indfe N ar2, fmt(0 0 0 2 2) labels("Year FE" "Industry FE" "N" "Adjusted R-sq")) ///
-prehead("\begin{table}\begin{center}\caption{The Effect of Visibility on AEM (three months after fiscal year-end)}\label{tab: table48294}\tabcolsep=0.1cm\scalebox{0.6}{\begin{tabular}{lccc}\toprule")  ///
+title(The Effect of Visibility on AEM (three months after fiscal year-end))  ///
 posthead("\midrule") postfoot("\bottomrule\end{tabular}}\end{center}\footnotesize{Notes: This table presents the regression results to test the effect of $Visibility$ on AEM when $Visibility$ is measured for three months after the fiscal year-end. See Appendix A for detailed variable definitions. Numbers in parentheses represent t-statistics calculated based on standard errors clustered at the industry-year level. ***, **, and * indicate statistical significance at the 1\%, 5\%, and 10\% levels, respectively.}\end{table}") 
 
 **# Table OA5-OA7
@@ -2147,11 +2141,11 @@ eststo Median: estpost summarize $summ_vars
 ereturn list 
 
 * .tex
-esttab obs Mean std p25 p50 p75 using "$output\summ_stats_firm_11283.tex", fragment  ///
+esttab obs Mean std p25 p50 p75 using "$output\Word_Results.rtf", ///
 label cells("count(pattern(1 0 0 0 0 0)) mean(pattern(0 1 0 0 0 0) fmt(3)) sd(pattern(0 0 1 0 0 0) fmt(3)) p25(pattern(0 0 0 1 0 0) fmt(3)) p50(pattern(0 0 0 0 1 0) fmt(3)) p75(pattern(0 0 0 0 0 1) fmt(3))") noobs  ///
-nonumbers replace booktabs collabels(none) mtitles("N" "Mean" "Std. Dev." "Bottom 25\%" "Median" "Top 25\%") ///
-prehead("\begin{table}\begin{center}\caption{Summary Statistics of Firm Characteristics (one year before actual end date)}\label{tab: summstats111283}\tabcolsep=0.1cm\scalebox{0.67}{\begin{tabular}{lcccccc}\toprule")  ///
-postfoot("\bottomrule\end{tabular}}\end{center}\footnotesize{Notes: This table presents the descriptive statistics for the firm-level variables used in the analyses where $Visibility$ is measured for one year before the actual fiscal year end date. See Appendix A for detailed variable definitions and measurement.}\end{table}") 
+nonumbers replace collabels(none) mtitles("N" "Mean" "Std. Dev." "Bottom 25%" "Median" "Top 25%") ///
+title(Summary Statistics of Firm Characteristics (one year before actual end date))  ///
+note(Notes: This table presents the descriptive statistics for the firm-level variables used in the analyses where Visibility is measured for one year before the actual fiscal year end date. See Appendix A for detailed variable definitions and measurement.) 
 
 * 5) Table OA6: Weather characteristics using actual period end date and one-year exposure
 label var temp "Temp."
@@ -2209,11 +2203,11 @@ eststo Median: estpost summarize $summ_vars_weather
 ereturn list 
 
 * .tex
-esttab obs Mean std p25 p50 p75 using "$output\summ_stats_weather_11283.tex", fragment  ///
+esttab obs Mean std p25 p50 p75 using "$output\Word_Results.rtf", ///
 label cells("count(pattern(1 0 0 0 0 0)) mean(pattern(0 1 0 0 0 0) fmt(3)) sd(pattern(0 0 1 0 0 0) fmt(3)) p25(pattern(0 0 0 1 0 0) fmt(3)) p50(pattern(0 0 0 0 1 0) fmt(3)) p75(pattern(0 0 0 0 0 1) fmt(3))") noobs  ///
-nonumbers replace booktabs collabels(none) mtitles("N" "Mean" "Std. Dev." "Bottom 25\%" "Median" "Top 25\%") ///
-prehead("\begin{table}\begin{center}\caption{Summary Statistics of Weather-Related Characteristics (one year before actual end date)}\label{tab: summstats211283}\tabcolsep=0.1cm\scalebox{0.67}{\begin{tabular}{lcccccc}\toprule")  ///
-postfoot("\bottomrule\end{tabular}}\end{center}\footnotesize{Notes: This table presents the descriptive statistics for the various weather variables used in the analyses where Visibility is measured for one year before the actual fiscal year end date. See Appendix B for detailed variable descriptions.}\end{table}") 
+nonumbers append collabels(none) mtitles("N" "Mean" "Std. Dev." "Bottom 25%" "Median" "Top 25%") ///
+title(Summary Statistics of Weather-Related Characteristics (one year before actual end date))  ///
+note(Notes: This table presents the descriptive statistics for the various weather variables used in the analyses where Visibility is measured for one year before the actual fiscal year end date. See Appendix B for detailed variable descriptions.) 
 
 * 6) Table OA7: The Effect of Visibility on Earnings Management (actual period end date and one-year exposure)
 	eststo clear
@@ -2252,12 +2246,12 @@ estadd scalar ymean = r(mean)
 estadd local yearfe "Yes", replace
 estadd local indfe "Yes", replace
 
-esttab regression1 regression2 regression3 regression4 regression5 using "$output\table4_11283.tex", replace ///
-mgroups("Accrual Earnings Management" "Real Earnings Management", pattern(1 0 0 1 0) prefix(\multicolumn{@span}{c}{) suffix(}) span erepeat(\cmidrule(lr){@span})) ///
-mtitles("\makecell{AEM \\ (performance-adj.)}" "\makecell{AEM \\ (modified Jones)}" "\makecell{AEM \\ Rank}" "REM" "\makecell{REM \\ Rank}") collabels(none) booktabs label ///
+esttab regression1 regression2 regression3 regression4 regression5 using "$output\Word_Results.rtf", append ///
+mgroups("Accrual Earnings Management" "Real Earnings Management", pattern(1 0 0 1 0)) ///
+mtitles("AEM (performance-adj.)" "AEM (modified Jones)" "AEM Rank" "REM" "REM Rank") collabels(none) label ///
 stats(yearfe indfe N ar2, fmt(0 0 0 2 2) labels("Year FE" "Industry FE" "N" "Adjusted R-sq")) ///
-prehead("\begin{table}\begin{center}\caption{The Effect of Visibility on Earnings Management (one year before actual end date)}\label{tab: table411283}\tabcolsep=0.1cm\scalebox{0.57}{\begin{tabular}{lccccc}\toprule")  ///
-posthead("\midrule") postfoot("\bottomrule\end{tabular}}\end{center}\footnotesize{Notes: This table presents the regression results to test the effect of $Visibility$ on AEM and REM when $Visibility$ is measured for one year before the actual fiscal year end date. See Appendix A for detailed variable definitions. Numbers in parentheses represent t-statistics calculated based on standard errors clustered at the industry-year level. ***, **, and * indicate statistical significance at the 1\%, 5\%, and 10\% levels, respectively.}\end{table}") 
+title(The Effect of Visibility on Earnings Management (one year before actual end date))  ///
+note(Notes: This table presents the regression results to test the effect of Visibility on AEM and REM when Visibility is measured for one year before the actual fiscal year end date. See Appendix A for detailed variable definitions. Numbers in parentheses represent t-statistics calculated based on standard errors clustered at the industry-year level. ***, **, and * indicate statistical significance at the 1%, 5%, and 10% levels, respectively.) 
 
 **# Table OA8-OA10
 * Three months prior to each firm's fiscal year end
@@ -2366,11 +2360,11 @@ eststo Median: estpost summarize $summ_vars
 ereturn list 
 
 * .tex
-esttab obs Mean std p25 p50 p75 using "$output\summ_stats_firm_10883.tex", fragment  ///
+esttab obs Mean std p25 p50 p75 using "$output\Word_Results.rtf", ///
 label cells("count(pattern(1 0 0 0 0 0)) mean(pattern(0 1 0 0 0 0) fmt(3)) sd(pattern(0 0 1 0 0 0) fmt(3)) p25(pattern(0 0 0 1 0 0) fmt(3)) p50(pattern(0 0 0 0 1 0) fmt(3)) p75(pattern(0 0 0 0 0 1) fmt(3))") noobs  ///
-nonumbers replace booktabs collabels(none) mtitles("N" "Mean" "Std. Dev." "Bottom 25\%" "Median" "Top 25\%") ///
-prehead("\begin{table}\begin{center}\caption{Summary Statistics of Firm Characteristics (three months before actual period end date)}\label{tab: summstats110883}\tabcolsep=0.1cm\scalebox{0.67}{\begin{tabular}{lcccccc}\toprule")  ///
-postfoot("\bottomrule\end{tabular}}\end{center}\footnotesize{Notes: This table presents the descriptive statistics for the firm-level variables used in the analyses where Visibility is measured for three months before the actual period year end date. See Appendix A for detailed variable definitions and measurement.}\end{table}")  
+nonumbers append collabels(none) mtitles("N" "Mean" "Std. Dev." "Bottom 25%" "Median" "Top 25%") ///
+title(Summary Statistics of Firm Characteristics (three months before actual period end date))  ///
+note(Notes: This table presents the descriptive statistics for the firm-level variables used in the analyses where Visibility is measured for three months before the actual period year end date. See Appendix A for detailed variable definitions and measurement.)  
 
 * 2) Table OA9: Weather characteristics using actual period end date and three-month exposure
 label var temp "Temp."
@@ -2428,11 +2422,11 @@ eststo Median: estpost summarize $summ_vars_weather
 ereturn list 
 
 * .tex
-esttab obs Mean std p25 p50 p75 using "$output\summ_stats_weather_10883.tex", fragment  ///
+esttab obs Mean std p25 p50 p75 using "$output\Word_Results.rtf", ///
 label cells("count(pattern(1 0 0 0 0 0)) mean(pattern(0 1 0 0 0 0) fmt(3)) sd(pattern(0 0 1 0 0 0) fmt(3)) p25(pattern(0 0 0 1 0 0) fmt(3)) p50(pattern(0 0 0 0 1 0) fmt(3)) p75(pattern(0 0 0 0 0 1) fmt(3))") noobs  ///
-nonumbers replace booktabs collabels(none) mtitles("N" "Mean" "Std. Dev." "Bottom 25\%" "Median" "Top 25\%") ///
-prehead("\begin{table}\begin{center}\caption{Summary Statistics of Weather-Related Characteristics (three months before actual period end date)}\label{tab: summstats210883}\tabcolsep=0.1cm\scalebox{0.67}{\begin{tabular}{lcccccc}\toprule")  ///
-postfoot("\bottomrule\end{tabular}}\end{center}\footnotesize{Notes: This table presents the descriptive statistics for the various weather variables used in the analyses where Visibility is measured for three months before the actual fiscal year end date. See Appendix B for detailed variable descriptions.}\end{table}") 
+nonumbers append collabels(none) mtitles("N" "Mean" "Std. Dev." "Bottom 25%" "Median" "Top 25%") ///
+title(Summary Statistics of Weather-Related Characteristics (three months before actual period end date))  ///
+note(Notes: This table presents the descriptive statistics for the various weather variables used in the analyses where Visibility is measured for three months before the actual fiscal year end date. See Appendix B for detailed variable descriptions.) 
 
 * 3) Table OA10: The Effect of Visibility on Earnings Management (actual period end date and three-month exposure)
 	eststo clear
@@ -2471,9 +2465,9 @@ estadd scalar ymean = r(mean)
 estadd local yearfe "Yes", replace
 estadd local indfe "Yes", replace
 
-esttab regression1 regression2 regression3 regression4 regression5 using "$output\table4_10883.tex", replace ///
-mgroups("Accrual Earnings Management" "Real Earnings Management", pattern(1 0 0 1 0) prefix(\multicolumn{@span}{c}{) suffix(}) span erepeat(\cmidrule(lr){@span})) ///
-mtitles("\makecell{AEM \\ (performance-adj.)}" "\makecell{AEM \\ (modified Jones)}" "\makecell{AEM \\ Rank}" "REM" "\makecell{REM \\ Rank}") collabels(none) booktabs label  ///
+esttab regression1 regression2 regression3 regression4 regression5 using "$output\Word_Results.rtf", append ///
+mgroups("Accrual Earnings Management" "Real Earnings Management", pattern(1 0 0 1 0)) ///
+mtitles("AEM (performance-adj.)" "AEM (modified Jones)" "AEM Rank" "REM" "REM Rank") collabels(none) label  ///
 stats(yearfe indfe N ar2, fmt(0 0 0 2 2) labels("Year FE" "Industry FE" "N" "Adjusted R-sq")) ///
-prehead("\begin{table}\begin{center}\caption{The Effect of Visibility on Earnings Management (three months before actual period end date)}\label{tab: table410883}\tabcolsep=0.1cm\scalebox{0.57}{\begin{tabular}{lccccc}\toprule")  ///
-posthead("\midrule") postfoot("\bottomrule\end{tabular}}\end{center}\footnotesize{This table presents the regression results to test the effect of $Visibility$ on AEM and REM when $Visibility$ is measured for three months before the actual fiscal year end date. See Appendix A for detailed variable definitions. Numbers in parentheses represent t-statistics calculated based on standard errors clustered at the industry-year level. ***, **, and * indicate statistical significance at the 1\%, 5\%, and 10\% levels, respectively.}\end{table}") 
+title(The Effect of Visibility on Earnings Management (three months before actual period end date))  ///
+note(This table presents the regression results to test the effect of Visibility on AEM and REM when Visibility is measured for three months before the actual fiscal year end date. See Appendix A for detailed variable definitions. Numbers in parentheses represent t-statistics calculated based on standard errors clustered at the industry-year level. ***, **, and * indicate statistical significance at the 1\%, 5\%, and 10\% levels, respectively.) 
