@@ -976,9 +976,9 @@ estadd local yearfe "Yes", replace
 estadd local indfe "Yes", replace
 estadd local firmcont "Yes", replace
 
-esttab regression1 regression2 regression3 regression4 regression5 using "$output\Word_Results.rtf", append keep(visib) ///
+esttab regression1 regression2 regression3 regression4 regression5 using "$output\Word_Results.rtf", replace keep(visib) ///
 mgroups("Accrual Earnings Management" "Real Earnings Management", pattern(1 0 0 1 0)) ///
-mtitles("AEM (performance-adj.)" "AEM (modified Jones)" "AEM Rank" "REM" "REM Rank") collabels(none) booktabs label ///
+mtitles("AEM (performance-adj.)" "AEM (modified Jones)" "AEM Rank" "REM" "REM Rank") collabels(none) label ///
 stats(firmcon yearfe indfe N ar2, fmt(0 0 0 0 2 2) labels("Baseline Controls" "Year FE" "Industry FE" "N" "Adjusted R-sq")) ///
 title(The Effect of Visibility on Earnings Management: Knowledge-Intensive vs. Labor-Intensive Industries) refcat(visib "Panel A: Knowledge-Intensive Industries Subsample", nolabel) 
 restore
@@ -1027,7 +1027,7 @@ estadd local indfe "Yes", replace
 estadd local firmcont "Yes", replace
 
 esttab regression1 regression2 regression3 regression4 regression5 using "$output\Word_Results.rtf", append keep(visib) ///
-nomtitles nonumbers collabels(none) booktabs label ///
+nomtitles nonumbers collabels(none) label ///
 stats(firmcon yearfe indfe N ar2, fmt(0 0 0 0 2 2) labels("Baseline Controls" "Year FE" "Industry FE" "N" "Adjusted R-sq")) refcat(visib "Panel B: Non-Knowledge-Intensive Industries Subsample", nolabel) 
 restore
 
