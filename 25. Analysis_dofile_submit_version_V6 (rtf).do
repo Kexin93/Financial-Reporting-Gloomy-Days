@@ -572,7 +572,7 @@ estadd local yearfe "Yes", replace
 estadd local indfe "Yes", replace
 estadd local firmcont "Yes", replace
 
-esttab regression1 regression2 regression3 regression4 regression5 using "$output\Word_Results.rtf", replace ///
+esttab regression1 regression2 regression3 regression4 regression5 using "$output\Word_Results.rtf", append ///
 mgroups("Accrual Earnings Management" "Real Earnings Management", pattern(1 0 0 1 0)) drop($control_variables_rem_t78 $control_variables_aem_t78) ///
 mtitles("AEM (performance-adj.)" "AEM (modified Jones)" "AEM Rank" "REM" "REM Rank") collabels(none) label scalar(ymean) order(visib cover c.visib#c.cover) starlevels(* 0.2 ** 0.1 *** 0.02) ///
 stats(firmcont yearfe indfe N ar2, fmt(0 0 0 0 2 2) labels("Baseline Controls" "Year FE" "Industry FE" "N" "Adjusted R-sq")) ///
@@ -734,7 +734,7 @@ estadd local yearfe "Yes", replace
 estadd local indfe "Yes", replace
 estadd local firmcont "Yes", replace
 
-esttab regression1 regression2 regression3 regression4 regression5 regression6 using "$output\Word_Results.rtf", replace ///
+esttab regression1 regression2 regression3 regression4 regression5 regression6 using "$output\Word_Results.rtf", append ///
 mgroups("Accrual Earnings Management" "Real Earnings Management", pattern(1 0 0 0 1 0)) drop($control_variables_rem_t78 $control_variables_aem_t78) mtitles("AEM (performance-adj.)" "AEM (performance-adj.)" "AEM (modified Jones)" "AEM (modified Jones)" "REM" "REM") collabels(none) label scalar(ymean) order(visib CGOV_str_num c.visib#c.CGOV_str_num CGOV_con_num c.visib#c.CGOV_con_num) starlevels(* 0.2 ** 0.1 *** 0.02) ///
 stats(firmcont yearfe indfe N ar2, fmt(0 0 0 0 2 2) labels("Baseline Controls" "Year FE" "Industry FE" "N" "Adjusted R-sq")) ///
 title(The Moderating Effect of Corporate Governance on the Relation between Visibility and Earnings Management) refcat(visib "Panel A: CG =  CG Strengths and Concerns", nolabel)
@@ -857,7 +857,7 @@ estadd local yearfe "Yes", replace
 estadd local indfe "Yes", replace
 estadd local firmcont "Yes", replace
 
-esttab regression1 regression2 regression3 regression4 regression5 regression6 using "$output\Word_Results.rtf", replace ///
+esttab regression1 regression2 regression3 regression4 regression5 regression6 using "$output\Word_Results.rtf", append ///
 mgroups("Accrual Earnings Management" "Real Earnings Management", pattern(1 0 0 0 1 0)) drop($control_variables_rem_t78 $control_variables_aem_t78) mtitles("AEM (performance-adj.)" "AEM (performance-adj.)" "AEM (modified Jones)" "AEM (modified Jones)" "REM" "REM")  collabels(none) label stats(firmcont yearfe indfe N ar2, fmt(0 0 0 0 2 2) labels("Baseline Controls" "Year FE" "Industry FE" "N" "Adjusted R-sq")) order(visib gparachute c.visib#c.gparachute ppill c.visib#c.ppill) refcat(visib "Panel C: CG = Golden Parachute or Poison Pill", nolabel) 
 
 * Panel D
@@ -1189,7 +1189,7 @@ estadd local yearfe "Yes", replace
 estadd local indfe "Yes", replace
 estadd local firmcont "Yes", replace
 
-esttab regression3 using "$output\Word_Results.rtf", replace ///
+esttab regression3 using "$output\Word_Results.rtf", append ///
 nomtitles collabels(none) label ///
 stats(yearfe indfe N ar2, fmt(0 0 0 0 2) labels("Year FE" "Industry FE" "N" "Adjusted R-sq")) ///
 refcat(visib "Panel E: The Effect of Visibility on Managers' Productivity", nolabel) note(Notes: Panels A to D of this table present the regression results to test the effect of Visibility on AEM and REM using subsamples. Our sample is divided into two subsamples based on knowledge-intensive vs. non-knowledge-intensive industries in Panels A and B, and based on labor-intensive vs. non-labor-intensive industries in Panels C and D. Panel E presents the regression results to test the effect of Visibility on Total Factor Productivity. See Appendix A for detailed variable definitions. Numbers in parentheses represent t-statistics calculated based on standard errors clustered at the industry-year level. ***, **, and * indicate statistical significance at the 1%, 5%, and 10% levels, respectively.) 
@@ -1382,7 +1382,7 @@ estadd local yearfe "Yes", replace
 estadd local indfe "Yes", replace
 estadd local firmcont "Yes", replace
 
-esttab regression1 regression2 regression3 regression4 regression5 using "$output\Word_Results.rtf", replace ///
+esttab regression1 regression2 regression3 regression4 regression5 using "$output\Word_Results.rtf", append ///
 mgroups("Accrual Earnings Management" "Real Earnings Management", pattern(1 0 0 1 0)) ///
 mtitles("AEM (performance-adj.)" "AEM (modified Jones)" "AEM Rank" "REM" "REM Rank") nonumbers collabels(none) label keep(visib_PM2_5) ///
 stats(firmcont yearfe indfe N ar2, fmt(0 0 0 0 2 2) labels("Baseline Controls" "Year FE" "Industry FE" "N" "Adjusted R-sq")) ///
@@ -1701,7 +1701,7 @@ eststo controlpsm: estpost sum $control_variables_psm if visib >= visib_median  
 eststo diffpsm: estpost ttest $control_variables_psm if _support == 1, by(visib_binary_neg) 
 
 esttab treatall controlall diffall treatpsm controlpsm diffpsm using "$output\Word_Results.rtf", ///
-replace cells("mean(pattern(1 1 0 1 1 0)  fmt(3)) b(star pattern(0 0 1 0 0 1) fmt(3)) ") ///
+append cells("mean(pattern(1 1 0 1 1 0)  fmt(3)) b(star pattern(0 0 1 0 0 1) fmt(3)) ") ///
 mgroups("Pooled Sample" "PSM Sample", pattern(1 0 0 1 0 0)) ///
 label mtitles("More Polluted" "Less Polluted" "Difference" "More Polluted" "Less Polluted" "Difference") collabels(none) nonumbers ///
 title(Using Propensity Score Matched Sample) starlevels(* 0.2 ** 0.1 *** 0.02) ///
@@ -1947,7 +1947,7 @@ ereturn list
 * .tex
 esttab obs Mean std p25 p50 p75 using "$output\Word_Results.rtf",  ///
 label cells("count(pattern(1 0 0 0 0 0)) mean(pattern(0 1 0 0 0 0) fmt(3)) sd(pattern(0 0 1 0 0 0) fmt(3)) p25(pattern(0 0 0 1 0 0) fmt(3)) p50(pattern(0 0 0 0 1 0) fmt(3)) p75(pattern(0 0 0 0 0 1) fmt(3))") noobs  ///
-nonumbers replace collabels(none) mtitles("N" "Mean" "Std. Dev." "Bottom 25%" "Median" "Top 25%") ///
+nonumbers append collabels(none) mtitles("N" "Mean" "Std. Dev." "Bottom 25%" "Median" "Top 25%") ///
 title(Summary Statistics of Firm Characteristics (three months after fiscal year-end))  ///
 note(Notes: This table presents the descriptive statistics for the firm-level variables used in the analyses where Visibility is measured for three months after the fiscal year-end. See Appendix A for detailed variable definitions and measurement.)  
 
@@ -2143,7 +2143,7 @@ ereturn list
 * .tex
 esttab obs Mean std p25 p50 p75 using "$output\Word_Results.rtf", ///
 label cells("count(pattern(1 0 0 0 0 0)) mean(pattern(0 1 0 0 0 0) fmt(3)) sd(pattern(0 0 1 0 0 0) fmt(3)) p25(pattern(0 0 0 1 0 0) fmt(3)) p50(pattern(0 0 0 0 1 0) fmt(3)) p75(pattern(0 0 0 0 0 1) fmt(3))") noobs  ///
-nonumbers replace collabels(none) mtitles("N" "Mean" "Std. Dev." "Bottom 25%" "Median" "Top 25%") ///
+nonumbers append collabels(none) mtitles("N" "Mean" "Std. Dev." "Bottom 25%" "Median" "Top 25%") ///
 title(Summary Statistics of Firm Characteristics (one year before actual end date))  ///
 note(Notes: This table presents the descriptive statistics for the firm-level variables used in the analyses where Visibility is measured for one year before the actual fiscal year end date. See Appendix A for detailed variable definitions and measurement.) 
 
