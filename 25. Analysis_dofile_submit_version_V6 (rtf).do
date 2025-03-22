@@ -925,6 +925,7 @@ mtitles("Duality 1" "Duality 2" "Duality 1" "Duality 2" "Duality 1" "Duality 2")
 stats(firmcont yearfe indfe N ar2, fmt(0 0 0 0 2 2) labels("Baseline Controls" "Year FE" "Industry FE" "N" "Adjusted R-sq")) starlevels(* 0.2 ** 0.1 *** 0.02) ///
 refcat(visib "Panel D: CG = CEO-Chairman Duality", nolabel) note(Notes: This table presents the regression results to test the moderating effect of corporate governance on the relation between Visibility and AEM/REM. We use CG Strengths and CG Concerns in Panel A, Board Independence and Female Ratio on Boards in Panel B, Golden Parachute and Poison Pill in Panel C, and CEO-Chairman Duality in Panel D, respectively, as the proxy for corporate governance. See Appendix A for detailed variable definitions. Numbers in parentheses represent t-statistics calculated based on standard errors clustered at the industry-year level. ***, **, and * indicate statistical significance at the 1%, 5%, and 10% levels, respectively.) 
 
+exit
 **# Table 9
 	capture drop _merge
 merge m:1 sic using "$output\knowledge_intensive_industry.dta"
@@ -1191,7 +1192,7 @@ estadd local firmcont "Yes", replace
 
 esttab regression3 using "$output\Word_Results.rtf", append ///
 nomtitles collabels(none) label ///
-stats(yearfe indfe N ar2, fmt(0 0 0 0 2) labels("Year FE" "Industry FE" "N" "Adjusted R-sq")) ///
+stats(yearfe indfe N ar2, fmt(0 0 0 0 2) labels("Year FE" "Industry FE" "N" "Adjusted R-sq")) starlevels(* 0.2 ** 0.1 *** 0.02) ///
 refcat(visib "Panel E: The Effect of Visibility on Managers' Productivity", nolabel) note(Notes: Panels A to D of this table present the regression results to test the effect of Visibility on AEM and REM using subsamples. Our sample is divided into two subsamples based on knowledge-intensive vs. non-knowledge-intensive industries in Panels A and B, and based on labor-intensive vs. non-labor-intensive industries in Panels C and D. Panel E presents the regression results to test the effect of Visibility on Total Factor Productivity. See Appendix A for detailed variable definitions. Numbers in parentheses represent t-statistics calculated based on standard errors clustered at the industry-year level. ***, **, and * indicate statistical significance at the 1%, 5%, and 10% levels, respectively.) 
 
 **# Table 11
@@ -1495,6 +1496,11 @@ global summ_vars dacck dac rem size bm roa lev firm_age rank au_years loss sales
 
 *ssc install corrtex
 corrtex $summ_vars, file(CorrTable) replace land sig /*dig(4) star(0.05)*/
+
+asdoc corr $summ_vars, means
+
+ssc install logout
+logout, save("$output\correlation") excel replace: pwcorr $summ_vars, sig star(.05)
 
 
 **# Table OA1
